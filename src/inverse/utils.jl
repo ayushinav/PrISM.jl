@@ -67,9 +67,3 @@ function wrapper_DI!(
     end
     nothing
 end
-
-do_verbose(iter::Int, verbose::Bool) = verbose
-do_verbose(verbose::Bool) = verbose
-do_verbose(iter::Int, verbose::Int) = (iter % verbose == 0)
-
-# linear_utils and inverse_utils are used only in occam, so we do not touch them for now
