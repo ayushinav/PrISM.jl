@@ -1,4 +1,4 @@
-@testitem "types" tags=[:types] begin
+@testitem "types" tags = [:types] begin
     m = MTModel([100.0, 100.0], [100.0])
     @test typeof(m) <: AbstractGeophyModel
     @test typeof(zero(m)) <: AbstractGeophyModel

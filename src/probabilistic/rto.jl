@@ -1,3 +1,5 @@
+import SubsurfaceCore: stochastic_inverse
+
 """
     rto_cache(m₀, μgrid, alg, max_iters, n_samples, χ2, response_fields, L, verbose)
 
@@ -59,7 +61,7 @@ end
   - `model_trans_utils`: A named tuple containing `transform_utils` for the fields of model that need to be scaled/modified. If not provided for any `model` field, the field won't be modified
   - `response_trans_utils`: for scaling the response parameters
 """
-function stochastic_inverse(r_obs::resp1,
+function SubsurfaceCore.stochastic_inverse(r_obs::resp1,
         err_resp::resp2,
         vars,
         alg_cache::rto_cache;

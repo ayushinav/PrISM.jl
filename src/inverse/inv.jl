@@ -63,7 +63,7 @@ ret_code = inverse!(m_occam, r_obs, ω, Occam(; μgrid=[1e-2, 1e6]);
 11: Works golden section search: μ= 0.45988622588032063, χ²= 1.4623667912514455
 12: Works golden section search: μ= 0.3163949884082966, χ²= 1.1347540808692684
 13: Works golden section search: μ= 0.22874422627086552, χ²= 0.8828031760948966
-MT.return_code{MTModel{Vector{Float64}, Vector{Float64}}}(true, (μ = 0.22874422627086552,), , 1.0, 0.8828031760948966)
+return_code{MTModel{Vector{Float64}, Vector{Float64}}}(true, (μ = 0.22874422627086552,), , 1.0, 0.8828031760948966)
 ```
 """
 function inverse!(mₖ::model1,
@@ -132,7 +132,7 @@ function inverse!(mₖ::model1,
     end
 
     μ_last = 0.0
-    resp_cache = zero(robs)
+    resp_cache = copy(robs)
 
     rvec = zero(lin_utils.Fₖ)
 
@@ -149,7 +149,7 @@ function inverse!(mₖ::model1,
 
     while itr <= max_iters
         do_verbose(itr, verbose) && (print("$itr: "))
-        # @time MT.jacobian!(jc, mₖ, vars, model_fields, response_fields)
+        # @time jacobian!(jc, mₖ, vars, model_fields, response_fields)
         # jc.j .= first(Enzyme.jacobian(set_runtime_activity(Reverse), f_temp, mₖ.m))
 
         DifferentiationInterface.jacobian!(

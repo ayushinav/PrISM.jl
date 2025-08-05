@@ -1,9 +1,9 @@
-@testitem "RTO" tags=[:rto] begin
+@testitem "RTO" tags = [:rto] begin
     using MT
     using Distributions, Turing, LinearAlgebra
 
     m_test = MTModel(log10.([100.0, 10.0, 1000.0]), [1e3, 1e3])
-    f = 10 .^ range(-2; stop=2, length=57)
+    f = 10 .^ range(-2; stop = 2, length = 57)
     ω = vec(2π .* f)
 
     r_obs = forward(m_test, ω)
@@ -17,12 +17,12 @@
 
     respD = MTResponseDistribution(normal_dist, normal_dist)
 
-    z = collect(range(0, 5e3; length=50))
+    z = collect(range(0, 5e3; length = 50))
     h = diff(z)
 
     modelD = MTModelDistribution(
         product_distribution([Uniform(-1.0, 5.0) for i in eachindex(z)]),
-        vec(h)
+        vec(h),
     )
 
     n_samples = 10
@@ -34,13 +34,13 @@
         err_resp,
         ω,
         r_cache;
-        model_trans_utils=(; m=MT.lin_tf),
-        progress_bar=true
+        model_trans_utils = (; m = MT.lin_tf),
+        progress_bar = true,
     )
 
     mt_chain = Turing.Chains(
         (rto_chain.value.data[:, 1:length(z), :]),
-        [Symbol("ρ[$i]") for i in 1:length(z)]
+        [Symbol("ρ[$i]") for i = 1:length(z)],
     )
 
     model_list = get_model_list(mt_chain, modelD)
@@ -52,11 +52,11 @@
 
     err = sqrt(
         norm(
-        inv(2 * length(ω)) *
-        ([resp_model.ρₐ..., resp_model.ϕ...] .- [r_obs.ρₐ..., r_obs.ϕ...]) ./
-        [err_resp.ρₐ..., err_resp.ϕ...],
-        2
-    ),
+            inv(2 * length(ω)) *
+            ([resp_model.ρₐ..., resp_model.ϕ...] .- [r_obs.ρₐ..., r_obs.ϕ...]) ./
+            [err_resp.ρₐ..., err_resp.ϕ...],
+            2,
+        ),
     )
 
     @test err <= 2.0
