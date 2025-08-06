@@ -17,11 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         version: ["1.11"]
-        group:
-          - "forward"
-          - "occam"
-          - "mcmc"
-          - "rto"
+
     steps:
       - uses: actions/checkout@v4
 

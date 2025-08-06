@@ -11,4 +11,5 @@ function Base.show(
     end
     m_ = round(m.m[end]; digits=3)
     println("$(length(m.m)) \t $m_ \t ∞")
+    nothing
 end
