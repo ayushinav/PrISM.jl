@@ -1,5 +1,17 @@
 const global μ = 4π * 1.0f-7; # Float32 will promote to Float64 without a problem
 
+# the following are defined on scalars, there in-place variants don't make sense
+
+"""
+`get_phase(Z)`: returns the phase for impedance
+"""
+get_phase(Z) = 180 / π * atan(imag(Z) / real(Z));
+
+"""
+`get_appres(Z, ω)`: returns the ρₐ for impedance
+"""
+get_appres(Z, ω) = abs(Z)^2 / (eltype(ω))(μ) / ω;
+
 """
 `get_Z(ρ,h,ω)`:
 
@@ -8,7 +20,7 @@ returns a tuple of ρₐ and ϕ, given arrays of resistivity `ρ` and thickness 
 
 const default_mt_tf_fns = (ρₐ=lin_tf, ϕ=lin_tf)
 
-function get_Z(ρ::T1, h::T2, ω::T) where {T1, T2, T}
+function get_Z(ρ::T1, h::T2, ω::T) where {T1 <: AbstractVector, T2 <: AbstractVector, T}
     broadcast!(exp10, ρ, ρ)
     k = sqrt(im * ω * μ / ρ[end])
     Z = ω * μ / k
@@ -31,8 +43,10 @@ end
 
 returns a  `response` for the given model `m` at the frequencies  `ω`
 """
-function SubsurfaceCore.forward(m::Tm, ω::T3,
-        response_trans_utils::T=default_mt_tf_fns) where {Tm <: MTModel, T, T3}
+function SubsurfaceCore.forward(m::Tm,
+        ω::T3,
+        response_trans_utils::T=default_mt_tf_fns) where {
+        Tm <: MTModel{<:AbstractVector, <:AbstractVector}, T, T3}
     if !(length(m.h) == length(m.m) - 1)
         error("number of model layers should be 1 less than the number of model parameters")
     end
@@ -76,15 +90,3 @@ function forward!(r::Tr,
     broadcast!(f2, r.ϕ, r.ϕ)
     nothing
 end
-
-# the following are defined on scalars, there in-place variants don't make sense
-
-"""
-`get_phase(Z)`: returns the phase for impedance
-"""
-get_phase(Z) = 180 / π * atan(imag(Z) / real(Z));
-
-"""
-`get_appres(Z, ω)`: returns the ρₐ for impedance
-"""
-get_appres(Z, ω) = abs(Z)^2 / (eltype(ω))(μ) / ω;
