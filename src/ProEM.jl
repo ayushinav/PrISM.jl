@@ -14,7 +14,7 @@ using Distributions
 using Turing
 import Base: show
 
-import SubsurfaceCore: forward, forward_helper
+import SubsurfaceCore: forward, forward_helper, get_scale, get_labels
 
 include("models/mt/types.jl")
 include("models/mt/forward.jl")
@@ -29,6 +29,7 @@ include("inverse/opt_inv.jl")
 include("probabilistic/models/mt.jl")
 include("probabilistic/utils.jl")
 include("probabilistic/rto.jl")
+include("plots/utils.jl")
 
 # geophysics
 export MTModel, MTResponse

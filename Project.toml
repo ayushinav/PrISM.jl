@@ -1,7 +1,7 @@
 name = "ProEM"
 uuid = "fde4c310-c20a-4a4a-8ff2-565b2b89066a"
 authors = ["Abhinav Pratap Singh <abhinavps0905@gmail.com>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 DifferentiationInterface = "a0c0ee7d-e4b9-4e03-894e-1c5f64a51d63"
@@ -13,6 +13,7 @@ LinearSolve = "7ed4a6bd-45f5-4d41-b270-4a48e9bafcae"
 NonlinearSolve = "8913a72c-1f9b-4ce2-8d82-65094dcecaec"
 Optimization = "7f7a1694-90dd-40f0-9382-eb1efda571ba"
 OptimizationOptimJL = "36348300-93cb-4f02-beb5-3c3902f8871e"
+Pigeons = "0eb8d820-af6a-4919-95ae-11206f830c31"
 ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 SubsurfaceCore = "3a78539b-9dce-42c5-be8d-f3fa4153f7a3"
