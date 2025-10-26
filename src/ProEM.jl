@@ -18,6 +18,11 @@ import SubsurfaceCore: forward, forward_helper, get_scale, get_labels
 
 include("models/mt/types.jl")
 include("models/mt/forward.jl")
+
+include("models/surface_waves/types.jl")
+include("models/surface_waves/utils.jl")
+include("models/surface_waves/forward.jl")
+
 include("models/pretty_printing.jl")
 
 include("utils.jl")
@@ -27,13 +32,14 @@ include("inverse/inv.jl")
 include("inverse/nl_inv.jl")
 include("inverse/opt_inv.jl")
 include("probabilistic/models/mt.jl")
+include("probabilistic/models/surface_waves.jl")
 include("probabilistic/utils.jl")
 include("probabilistic/rto.jl")
 include("plots/utils.jl")
 
 # geophysics
 export MTModel, MTResponse
-
+export RWModel, LWModel, SurfaceWaveResponse
 # forward
 export get_Z, get_appres, get_phase, forward!, forward
 
