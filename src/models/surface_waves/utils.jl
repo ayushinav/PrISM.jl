@@ -48,8 +48,61 @@ function dnka!(C, wvno2, gam, gammk, rho, a0, cpcq, cpy, cpz, cqw, cqx, xy, xz, 
 
 end
 
+
+function dnka2!(C, wvno2, gam, gammk, rho, a0, cpcq, cpy, cpz, cqw, cqx, xy, xz, wy, wz)
+    # constants
+    gamm1 = gam - 1
+    twgm1 = gam + gamm1
+    gmgmk = gam * gammk
+    gmgm1 = gam * gamm1
+    gm1sq = gamm1 * gamm1
+
+    a0pq = a0 -cpcq
+    t = -2*wvno2
+
+    C[1][1] = cpcq - 2 * gmgm1 * a0pq - gmgmk * xz - wvno2 * gm1sq * wy
+    C[1][2] = (wvno2 * cpy - cqx) / rho
+    C[1][3] = -(twgm1 * a0pq + gammk * xz + wvno2 * gamm1 * wy) / rho
+    C[1][4] = (cpz - wvno2 * cqw) / rho
+    C[1][5] = -(2 * wvno2 * a0pq + xz + wvno2 * wvno2 * wy) / (rho*rho)
+
+    C[2][1] = (gmgmk * cpz - gm1sq * cqw) * rho
+    C[2][2] = cpcq
+    C[2][3] = gammk * cpz - gamm1 * cqw
+    C[2][4] = -wz
+    C[2][5] = C[1][4]
+
+    C[4][1] = (gm1sq * cpy - gmgmk * cqx) * rho
+    C[4][2] = -xy
+    C[4][3] = gamm1 * cpy - gammk * cqx
+    C[4][4] = C[2][2]
+    C[4][5] = C[1][2]
+
+    C[5][1] = (
+        -(2 * gmgmk * gm1sq * a0pq + gmgmk * gmgmk * xz + gm1sq * gm1sq * wy) * (rho*rho)
+    )
+    C[5][2] = C[4][1]
+    C[5][3] = (
+        -(gammk * gamm1 * twgm1 * a0pq + gam * gammk * gammk * xz + gamm1 * gm1sq * wy)
+        * rho
+    )
+    C[5][4] = C[2][1]
+    C[5][5] = C[1][1]
+
+    C[3][1] = t * C[5][3]
+    C[3][2] = t * C[4][3]
+    C[3][3] = a0 + 2 * (cpcq - C[1][1])
+    C[3][4] = t * C[2][3]
+    C[3][5] = t * C[1][3]
+
+    return nothing;
+
+end
+
 function var(p, q, ra, rb, wvno, xka, xkb, dpth)
     pex = zero(p) # TODO
+    cosp = zero(p)
+    sinp = zero(p)
     if(wvno < xka)
         sinp = sin(p)
         w = sinp / ra
@@ -62,8 +115,8 @@ function var(p, q, ra, rb, wvno, xka, xkb, dpth)
     elseif(wvno > xka)
         pex = p
         fac = exp(-2p) #ifelse(p < 16, exp(-2p), 0)
-        cosp = (1 + fac) * 0.5f0
-        sinp = (1 - fac) * 0.5f0
+        cosp = (1 + fac) * oftype(fac, 0.5)
+        sinp = (1 - fac) * oftype(fac, 0.5)
         w = sinp / ra
         x = ra * sinp
     end
@@ -83,8 +136,8 @@ function var(p, q, ra, rb, wvno, xka, xkb, dpth)
     elseif(wvno > xkb)
         sex = q
         fac = exp(-2q) #ifelse(q < 16, exp(-2q), 0)
-        cosq = (1 + fac) * 0.5f0
-        sinq = (1 - fac) * 0.5f0
+        cosq = (1 + fac) * oftype(fac, 0.5)
+        sinq = (1 - fac) * oftype(fac, 0.5)
         y = sinq / rb
         z = rb * sinq
     end
@@ -111,7 +164,7 @@ function var(p, q, ra, rb, wvno, xka, xkb, dpth)
     return w, cosp, a0, cpcq, cpy, cpz, cqw, cqx, xy, xz, wy, wz
 end
 
-function dltar(c, ω, model::LWModel)
+function dltar(c, ω, model::LWModel, e, ee, C)
     vs = model.m
     h = model.h
     ρ = model.ρ
@@ -158,23 +211,18 @@ function dltar(c, ω, model::LWModel)
     return e1
 end
 
-
-function dltar(k, ω, model::RWModel)
+function dltar(k, ω, model::RWModel, e, ee, C)
     vp = model.vp
     vs = model.m
     ρ = model.ρ
     h = model.h
 
-    e = zeros(1,5) # can be preallocated
-    ee = zeros(1,5) # can be preallocated
-    C = zeros(5,5) # can be preallocated
-
     (ω < 1f-4) && (ω = 1f-4 + zero(ω))
 
     xka = ω / vp[end]
     xkb = ω / vs[end]
-    ra = sqrt((k + xka) * abs(k - xka))
-    rb = sqrt((k + xkb) * abs(k - xkb))
+    ra = sqrt(abs(k^2 - xka^2))
+    rb = sqrt(abs(k^2 - xkb^2))
     
     # t_ = vs[end] / ω
 
@@ -197,8 +245,8 @@ function dltar(k, ω, model::RWModel)
         # t = vs[m] / ω
         gammk = 2 * (vs[m] / ω)^2
         gam = gammk * k*k
-        ra = sqrt((k + xka) * abs(k - xka))
-        rb = sqrt((k + xkb) * abs(k - xkb))
+        ra = sqrt(abs(k^2 - xka^2))
+        rb = sqrt(abs(k^2 - xkb^2))
 
         dpth = h[m] # should change later on
         p = ra * dpth
@@ -215,53 +263,45 @@ function dltar(k, ω, model::RWModel)
         )
 
         mul!(ee, e, C);
+        # for i in 1:5
+        #     ee[i] = zero(ee[i])
+        #     for j in 1:5
+        #         ee[i] += e[j] * C[j][i]
+        #     end
+        # end
         norm_fac = maximum(abs.(ee))
         e .= ee./norm_fac
-
-
     end
-
-    # xka = ω / vp[1]
-    # ra = sqrt((c + xka) * abs(c - xka))
-    # dpth = h[1]
-    # p = ra * dpth
-
-    # rb = sqrt((c + xkb) * abs(c - xkb))
-    # q = rb * dpth
-    # w, cosp, _, _, _, _, _, _, _, _, _, _ = var(
-    #     p, q, ra, 1f-5, c, xka, xkb, dpth
-    # )
-    
     return e[1]
-
 end
 
-function get_c(t, m, mode, dc)
+function get_c!(resp_, t, m, mode, dc)
 
-    c = zero(t)
-    c = zero(t)
+    c_low_global = first(extrema(m.m))
+    c_high = 10 # should not really go this far
+    c_low = c_low_global .* 0.8
 
-    b_range = extrema(m.m)
-    c_high = 10 # should not go this far really
-    c_low = b_range[1] .* 0.8
+    e = MMatrix{1,5}(zeros(eltype(m.m), 1, 5)) # can be preallocated
+    ee = MMatrix{1,5}(zeros(eltype(m.m), 1, 5)) # can be preallocated
+    C = MMatrix{5,5}(zeros(eltype(m.m), 5, 5)) # can be preallocated
+    # C = SVector{5}([MMatrix{5,1}(zeros(5,1)) for _ in 1:5])
     
-    resp_ = zero(t)
-    
-    err_fn(c, omega) = dltar(omega / c, omega, m)
+    # resp_ = zero(t)
+
+    f(c, p) = dltar(p/c, p, m, e, ee, C)
+    prob_init = IntervalNonlinearProblem(f, (c_low - 2dc ,c_high), 2π*inv(first(t)))
 
     for i in eachindex(t) # this can be parallelized
         
         ω = 2π/t[i]
-        f(c, p) = dltar(ω/c, ω, m) #err_fn(c, 2π/t[i])
         
-        c_low = b_range[1] .* 0.8
+        c_low = c_low_global * 0.8
         c_high_each = c_low
 
         for im in 1:mode+1
-
-            f_low = f(c_low, [])
+            f_low = f(c_low, ω)
             while c_high_each <= c_high
-                f_high_each = f(c_high_each, [])
+                f_high_each = f(c_high_each, ω)
                 if sign(f_high_each) * sign(f_low) < 0
                     break
                 else
@@ -269,14 +309,12 @@ function get_c(t, m, mode, dc)
                 end
 
                 if c_high_each> c_high
-                    @warn "search space exceeded! t = $(t[i])"
+                    # @warn "search space exceeded! t = $(t[i])"
                     break;
                 end
             end
 
-            prob_init = IntervalNonlinearProblem(f, (c_high_each - 2dc, c_high_each), [])
-            sol = solve(prob_init)
-            c = sol.u
+            c = find_c(prob_init, c_high_each - 2dc, c_high_each, ω)
             
             c_low  = c + dc
             resp_[i] = c
@@ -284,6 +322,12 @@ function get_c(t, m, mode, dc)
         end
         
     end
-    return resp_
+    return nothing
 
+end
+
+function find_c(prob, c1, c2, ω)
+    prob_new = remake(prob; tspan = (c1, c2), p = ω)
+    sol = solve(prob_new)
+    return sol.u
 end

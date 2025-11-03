@@ -2,6 +2,7 @@ module ProEM
 using Reexport
 @reexport using SubsurfaceCore
 using LinearAlgebra
+using StaticArrays
 using LinearSolve
 using NonlinearSolve
 using Optimization, OptimizationOptimJL

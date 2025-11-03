@@ -31,6 +31,13 @@ end
 function zero_abstract(m::mtresponse) where {mtresponse <: MTResponse{
         <:AbstractVector{<:Any}, <:AbstractVector{<:Any}}}
     MTResponse{AbstractVector, AbstractVector}(zero(m.ρₐ), zero(m.ϕ))
+
+end
+
+
+function zero_abstract(m::swresponse) where {swresponse <: SurfaceWaveResponse{
+        <:AbstractVector{<:Any}}}
+    SurfaceWaveResponse{AbstractVector}(zero(m.c))
 end
 
 # function inverse(t::mtresponse; abstract=false) where {mtresponse <: MTResponse}

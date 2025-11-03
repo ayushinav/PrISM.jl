@@ -40,4 +40,4 @@ end
 # make pretty tables to print these models
 
 SubsurfaceCore.default_params(::Type{T}) where {T <: AbstractGeophyModel} = (;)
-default_params_mt = default_params(MTModel)
+const default_params_mt = default_params(MTModel)

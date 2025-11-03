@@ -1,10 +1,10 @@
 """
-    mutable struct modelDistribution{T1<: Union{Distribution, AbstractArray}, T2<: Union{Distribution, AbstractArray}} # where T1,T2 
+    mutable struct MTModelDistribution{T1<: Union{Distribution, AbstractArray}, T2<: Union{Distribution, AbstractArray}}
         m::T1
         h::T2
     end
 
-create a placeholder to store the `Distributions.jl` sampler for a priori
+creates a placeholder to store the `Distributions.jl` samplers for a priori
 """
 mutable struct MTModelDistribution{
     T1 <: Union{Distribution, AbstractArray}, T2 <: Union{Distribution, AbstractArray}} <:
@@ -14,7 +14,7 @@ mutable struct MTModelDistribution{
 end
 
 """
-    struct responseDistribution{T1<: Union{Function, Nothing}, T2<: Union{Function, Nothing}} # where T1,T2
+    struct MTResponseDistribution{T1<: Union{Function, Nothing}, T2<: Union{Function, Nothing}}
         ρₐ::T1
         ϕ::T2
     end
