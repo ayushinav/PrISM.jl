@@ -78,7 +78,7 @@ function inverse!(mₖ::model1,
         model_trans_utils::trans_utils_T=sigmoid_tf,
         response_trans_utils::resp_utils_T=default_mt_tf_fns,
         mᵣ=nothing,
-        ad_backend = AutoEnzyme(; mode=set_runtime_activity(Enzyme.Reverse)),
+        ad_backend=AutoEnzyme(; mode=set_runtime_activity(Enzyme.Reverse)),
         reg_term=nothing,
         verbose::Union{Bool, Int}=true) where {model1 <: AbstractGeophyModel,
         response <: AbstractGeophyResponse, trans_utils_T, resp_utils_T}
@@ -118,7 +118,7 @@ function inverse!(mₖ::model1,
         assumptions=LinearSolve.OperatorAssumptions(
             true; condition=LinearSolve.OperatorCondition.WellConditioned))
 
-    forward!(respₖ, mₖ, vars, response_trans_utils = response_trans_utils) # for the first iteration
+    forward!(respₖ, mₖ, vars; response_trans_utils=response_trans_utils) # for the first iteration
     itr = 1
     chi2 = prec(1e6)
 
@@ -136,22 +136,20 @@ function inverse!(mₖ::model1,
     resp_cache = copy(robs)
 
     rvec = zero(lin_utils.Fₖ)
-    
+
     model_type = typeof(mₖ).name.wrapper
 
     const_fields = [f for f in fieldnames(model_type) if !(f in [:m])]
     const_vals = [getfield(mₖ, k) for k in const_fields]
     const_nt = (; zip(const_fields, const_vals)...)
 
+    prep_j = prepare_jacobian(wrapper_DI!, rvec, ad_backend, mₖ.m, Constant(const_nt),
+        Constant(vars), Cache(resp_cache), Constant(response_fields),
+        Constant(response_trans_utils), Constant(model_type))
 
-    prep_j = prepare_jacobian(
-        wrapper_DI!, rvec, ad_backend,
-        mₖ.m, Constant(const_nt), Constant(vars), Cache(resp_cache),
-        Constant(response_fields), Constant(response_trans_utils), Constant(model_type))
-
-    DifferentiationInterface.jacobian!(wrapper_DI!, rvec, jc, prep_j,
-        ad_backend, mₖ.m,
-        Constant(const_nt), Constant(vars), Cache(resp_cache), Constant(response_fields),
+    DifferentiationInterface.jacobian!(
+        wrapper_DI!, rvec, jc, prep_j, ad_backend, mₖ.m, Constant(const_nt),
+        Constant(vars), Cache(resp_cache), Constant(response_fields),
         Constant(response_trans_utils), Constant(model_type))
 
     while itr <= max_iters
@@ -160,9 +158,8 @@ function inverse!(mₖ::model1,
         # jc.j .= first(Enzyme.jacobian(set_runtime_activity(Reverse), f_temp, mₖ.m))
 
         DifferentiationInterface.jacobian!(
-            wrapper_DI!, rvec, jc, ad_backend,
-            mₖ.m, Constant(const_nt), Constant(vars),
-            Cache(resp_cache), Constant(response_fields),
+            wrapper_DI!, rvec, jc, ad_backend, mₖ.m, Constant(const_nt),
+            Constant(vars), Cache(resp_cache), Constant(response_fields),
             Constant(response_trans_utils), Constant(model_type))
 
         for k in model_fields # to computational domain
@@ -184,7 +181,7 @@ function inverse!(mₖ::model1,
 
         mₖ.m .= mₖ₊₁.m
 
-        forward!(respₖ, mₖ, vars, response_trans_utils = response_trans_utils)
+        forward!(respₖ, mₖ, vars; response_trans_utils=response_trans_utils)
         chi2 = χ²(reduce(vcat, [getfield(respₖ, k) for k in response_fields]),
             inv_utils.dobs; W=inv_utils.W)
         if chi2 < χ2
