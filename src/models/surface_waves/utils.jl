@@ -278,9 +278,10 @@ function get_c!(resp_, t, m, mode, dc)
     # resp_ = zero(t)
 
     f(c, p) = dltar(p / c, p, m, e, ee, C)
-    prob_init = IntervalNonlinearProblem(f, (c_start - 2dc, c_high), 2π * inv(first(t)))
+    prob_init = IntervalNonlinearProblem{false}(f, (c_start - 2dc, c_high), 2π * inv(first(t)))
 
     for i in eachindex(t) # this can be parallelized
+        flag = true # soln exists
         ω = 2π / t[i]
 
         c_low = copy(c_start)
@@ -297,12 +298,15 @@ function get_c!(resp_, t, m, mode, dc)
                 end
 
                 if c_high_each > c_high
-                    # @warn "search space exceeded! t = $(t[i])"
+                    flag = false # soln doesn't exist
                     break
                 end
             end
 
-            c = find_c(prob_init, c_high_each - 2dc, c_high_each, ω)
+            c = ifelse(flag, 
+                find_c(prob_init, c_high_each - 2dc, c_high_each, ω), 
+                c_high_each
+            )
 
             c_low = c + dc
             resp_[i] = c

@@ -31,7 +31,7 @@ end
 
 returns a  `response` for the given model `m` at the frequencies  `ω`
 """
-function SubsurfaceCore.forward(m::Tm, ω::T3; response_trans_utils::T=default_mt_tf_fns,
+function SubsurfaceCore.forward(m::Tm, ω::T3, response_trans_utils::T=default_mt_tf_fns,
         params=default_params_mt) where {Tm <: MTModel, T, T3}
     if !(length(m.h) == length(m.m) - 1)
         error("number of model layers should be 1 less than the number of model parameters")
@@ -56,7 +56,7 @@ end
 
     updates response `r` type for the given model `m` at the frequencies  `ω`
 """
-function forward!(r::Tr, m::Tm, ω::T3; response_trans_utils::T=default_mt_tf_fns,
+function forward!(r::Tr, m::Tm, ω::T3, response_trans_utils::T=default_mt_tf_fns,
         params=default_params_mt) where {Tr <: MTResponse, Tm <: MTModel, T, T3}
     if !(length(m.h) == length(m.m) - 1)
         error("number of model layers should be 1 less than the number of model parameters")
