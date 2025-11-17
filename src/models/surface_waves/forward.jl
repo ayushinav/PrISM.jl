@@ -9,15 +9,16 @@ function surf96!(c, t, m, mode, dc, dt, ::Val{:phase})
 end
 
 function surf96!(c, t, m, mode, dc, dt, ::Val{:group}) # TODO
+    rmul!(m.h, inv(eltype(m.h)(1000)))
     @. t = t * inv(1 + dt)
-    c_plus = get_c(t, m, mode, dc)
+    c_plus = zero(c)
+    get_c!(c_plus, t, m, mode, dc)
 
     @. t = t * inv(1 - dt)
-    c1_minus = get_c(t, m, mode, dc)
+    get_c!(c, t, m, mode, dc) # c_minus 
 
-    c = zeros(typeof(t[1] * m.m[1]), length(t))
-
-    @. c = 2dt * inv(t) * ((1 + dt) * inv(t * c_plus) - (1 - dt) * inv(t * c_minus))
+    @. c = 2dt * inv(t) * ((1 + dt) * inv(t * c_plus) - (1 - dt) * inv(t * c))
+    rmul!(m.h, eltype(m.h)(1000))
     return nothing
 end
 
