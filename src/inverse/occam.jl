@@ -141,7 +141,7 @@ function occam_step!(mₖ₊₁::model1, # to store the next update, which will 
         getfield(mₖ₊₁, k) .= model_trans_utils.tf.(getfield(mₖ₊₁, k))
     end
 
-    forward!(respₖ₊₁, mₖ₊₁, vars; response_trans_utils=response_trans_utils)
+    forward!(respₖ₊₁, mₖ₊₁, vars, response_trans_utils)
 
     do_verbose(verbose) && (print("Works golden section search: μ= $μ, χ²= ",
         χ²(reduce(vcat, [copy(getfield(respₖ₊₁, k)) for k in response_fields]),
@@ -162,7 +162,7 @@ function find_x(x::T1, mₖ₊₁::model, respₖ₊₁::response, vars, inv_uti
         (inv_utils.dobs + lin_utils.Jₖ * lin_utils.mₖ - lin_utils.Fₖ) .+ reg_term)
 
     broadcast!(model_trans_utils.tf, mₖ₊₁.m, mₖ₊₁.m)
-    forward!(respₖ₊₁, mₖ₊₁, vars; response_trans_utils=response_trans_utils)
+    forward!(respₖ₊₁, mₖ₊₁, vars, response_trans_utils)
 
     return χ²(reduce(vcat, [getfield(respₖ₊₁, k) for k in response_fields]),
         inv_utils.dobs; W=inv_utils.W)
@@ -181,7 +181,7 @@ function find_x(x::T1, mₖ₊₁::model, respₖ₊₁::response, vars, inv_uti
         μ .* inv_utils.D' * inv_utils.D * mᵣ.m .+ reg_term)
 
     broadcast!(model_trans_utils.tf, mₖ₊₁.m, mₖ₊₁.m)
-    forward!(respₖ₊₁, mₖ₊₁, vars; response_trans_utils=response_trans_utils)
+    forward!(respₖ₊₁, mₖ₊₁, vars, response_trans_utils)
 
     return χ²(reduce(vcat, [getfield(respₖ₊₁, k) for k in response_fields]),
         inv_utils.dobs; W=inv_utils.W)

@@ -54,5 +54,7 @@ export rto_cache
 
 ## geophysics
 export MTModelDistribution, MTResponseDistribution
+export RWModelDistribution, SurfaceWaveResponseDistribution
+export LWModelDistribution
 
 end

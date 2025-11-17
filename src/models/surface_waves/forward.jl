@@ -2,8 +2,10 @@
 const default_surf_tf_fns = (; c=lin_tf)
 
 function surf96!(c, t, m, mode, dc, dt, ::Val{:phase})
-    return get_c!(c, t, m, mode, dc)
-    nothing
+    rmul!(m.h, inv(eltype(m.h)(1000)))
+    get_c!(c, t, m, mode, dc)
+    rmul!(m.h, eltype(m.h)(1000))
+    return nothing
 end
 
 function surf96!(c, t, m, mode, dc, dt, ::Val{:group}) # TODO
@@ -20,10 +22,11 @@ function surf96!(c, t, m, mode, dc, dt, ::Val{:group}) # TODO
 end
 
 function SubsurfaceCore.forward(m::Tm, t::T3, response_trans_utils::T=default_surf_tf_fns,
-        params::T=default_params_surface_waves) where {Tm <: LWModel, T, T3}
+        params=default_params_surface_waves) where {Tm <: LWModel, T, T3}
     c = zeros(eltype(m.m), length(t))
     surf96!(c, t, m, params.mode, params.dc, params.dt, Val(params.type))
-    SurfaceWaveResponse(response_trans_utils.c.tf.(c))
+    f1 = response_trans_utils.c.tf
+    SurfaceWaveResponse{typeof(c)}(f1.(c))
 end
 
 function SubsurfaceCore.forward(m::Tm, t::T3, response_trans_utils::T=default_surf_tf_fns,

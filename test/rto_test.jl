@@ -1,5 +1,4 @@
 @testitem "RTO" tags = [:rto] begin
-    using MT
     using Distributions, Turing, LinearAlgebra
 
     m_test = MTModel(log10.([100.0, 10.0, 1000.0]), [1e3, 1e3])
@@ -34,7 +33,7 @@
         err_resp,
         ω,
         r_cache;
-        model_trans_utils = (; m = MT.lin_tf),
+        model_trans_utils = (; m = lin_tf),
         progress_bar = true,
     )
 
