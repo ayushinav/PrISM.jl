@@ -54,8 +54,8 @@ mutable struct return_code{T1 <: AbstractModel}
 end
 
 function wrapper_DI!(
-        r_vec, m, h, vars, resp_cache, resp_fields, response_trans_utils, model_type)
-    model_ = model_type(m, h)
+        r_vec, m, const_nt, vars, resp_cache, resp_fields, response_trans_utils, model_type)
+    model_ = from_nt(model_type, (; const_nt..., m=m))
     forward!(resp_cache, model_, vars, response_trans_utils)
 
     n_resp_start = 1

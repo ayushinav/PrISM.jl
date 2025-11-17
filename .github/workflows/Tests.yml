@@ -22,6 +22,7 @@ jobs:
           - "occam"
           - "mcmc"
           - "rto"
+          - "inference"
     steps:
       - uses: actions/checkout@v4
 

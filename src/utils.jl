@@ -1,36 +1,41 @@
-# utils to help bump for Abstract types
+# helper functions
 
-# import LinearAlgebra: zero
+import LinearAlgebra: zero
 
-# function zero(x::resp) where {resp <: AbstractResponse}
-#     typeof(x)([zero(getfield(x, k)) for k in fieldnames(resp)]...)
-# end
-# function zero(x::model) where {model <: AbstractModel}
-#     typeof(x)([zero(getfield(x, k)) for k in fieldnames(model)]...)
-# end
+function zero(x::resp) where {resp <: AbstractGeophyResponse}
+    typeof(x)([zero(getfield(x, k)) for k in fieldnames(resp)]...)
+end
+function zero(x::model) where {model <: AbstractGeophyModel}
+    typeof(x)([zero(getfield(x, k)) for k in fieldnames(model)]...)
+end
 
-# import Base: copy
-# function copy(x::resp) where {resp <: AbstractResponse}
-#     typeof(x)([copy(getfield(x, k)) for k in fieldnames(resp)]...)
-# end
-# function copy(x::model) where {model <: AbstractModel}
-#     typeof(x)([copy(getfield(x, k)) for k in fieldnames(model)]...)
-# end
+import Base: copy
+function copy(x::resp) where {resp <: AbstractGeophyResponse}
+    typeof(x)([copy(getfield(x, k)) for k in fieldnames(resp)]...)
+end
+function copy(x::model) where {model <: AbstractGeophyModel}
+    typeof(x)([copy(getfield(x, k)) for k in fieldnames(model)]...)
+end
 
 # forward manipulation
 
-function SubsurfaceCore.forward_helper(
-        m::Type{T}, m0, vars, response_trans_utils, params) where {T <: AbstractGeophyModel}
-    model = from_nt(m, m0)
-    resp_nt = to_resp_nt(forward(model, vars, response_trans_utils))
-    return resp_nt
-end
+# function SubsurfaceCore.forward_helper(
+#         m::Type{T}, m0, vars, response_trans_utils, params) where {T <: AbstractGeophyModel}
+#     model = from_nt(m, m0)
+#     resp_nt = to_resp_nt(forward(model, vars, response_trans_utils))
+#     return resp_nt
+# end
 
 # Only occam uses the following
 
 function zero_abstract(m::mtresponse) where {mtresponse <: MTResponse{
         <:AbstractVector{<:Any}, <:AbstractVector{<:Any}}}
     MTResponse{AbstractVector, AbstractVector}(zero(m.ρₐ), zero(m.ϕ))
+end
+
+function zero_abstract(m::swresponse) where {swresponse <:
+                                             SurfaceWaveResponse{<:AbstractVector{<:Any}}}
+    SurfaceWaveResponse{AbstractVector}(zero(m.c))
 end
 
 # function inverse(t::mtresponse; abstract=false) where {mtresponse <: MTResponse}

@@ -1,7 +1,7 @@
 name = "ProEM"
 uuid = "fde4c310-c20a-4a4a-8ff2-565b2b89066a"
 authors = ["Abhinav Pratap Singh <abhinavps0905@gmail.com>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 DifferentiationInterface = "a0c0ee7d-e4b9-4e03-894e-1c5f64a51d63"
@@ -13,8 +13,10 @@ LinearSolve = "7ed4a6bd-45f5-4d41-b270-4a48e9bafcae"
 NonlinearSolve = "8913a72c-1f9b-4ce2-8d82-65094dcecaec"
 Optimization = "7f7a1694-90dd-40f0-9382-eb1efda571ba"
 OptimizationOptimJL = "36348300-93cb-4f02-beb5-3c3902f8871e"
+Pigeons = "0eb8d820-af6a-4919-95ae-11206f830c31"
 ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 SubsurfaceCore = "3a78539b-9dce-42c5-be8d-f3fa4153f7a3"
 Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
 UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
@@ -42,4 +44,4 @@ Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["BenchmarkTools", "Test", "ReTestItems", "JET", "Hwloc", "InteractiveUtils"]
+test = ["BenchmarkTools", "Test", "ReTestItems", "JET", "Hwloc"]

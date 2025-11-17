@@ -15,13 +15,13 @@ const RETESTITEMS_NWORKER_THREADS = parse(
     ),
 )
 
-using MT, LinearAlgebra
+using ProEM, LinearAlgebra
 
 @info "Running tests with $(RETESTITEMS_NWORKERS) workers and \
        $(RETESTITEMS_NWORKER_THREADS) threads for group $(GROUP)"
 
 ReTestItems.runtests(
-    MT;
+    ProEM;
     tags = (GROUP == "all" ? nothing : [Symbol(GROUP)]),
     nworkers = RETESTITEMS_NWORKERS,
     nworker_threads = RETESTITEMS_NWORKER_THREADS,

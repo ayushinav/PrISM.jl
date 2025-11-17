@@ -16,18 +16,18 @@ that can be used to calculate forward response for 1d MT
 
 ```jldoctest
 m = [4.0, 2.0, 3.0]
-h = [1000.0, 100.0]
+h = [1000.0, 1000.0]
 model = MTModel(m, h)
 print(model)
 
 # output
 
 1D MTModel : 
-Layer \t log(ρ)  h
+Layer    h       log(ρ)
 ____________________________
-1 \t 4.0 \t 1000.0
-2 \t 2.0 \t 100.0
-3 \t 3.0 \t ∞
+1        1000.0          4.0
+2        1000.0          2.0
+3        ∞               3.0
 ```
 """
 mutable struct MTModel{T1 <: AbstractArray{<:Any}, T2 <: AbstractArray{<:Any}} <:
@@ -40,3 +40,4 @@ end
 # make pretty tables to print these models
 
 SubsurfaceCore.default_params(::Type{T}) where {T <: AbstractGeophyModel} = (;)
+const default_params_mt = default_params(MTModel)
