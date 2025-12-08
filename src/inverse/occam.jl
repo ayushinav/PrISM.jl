@@ -242,6 +242,11 @@ function smoothing_step_fn(
         end
 
         (exp_steps) && (μ2 = μ2 * 3)
+        if exp_steps && (μ2 > μgrid[end])
+            μ2 = μ2 / 3
+            exp_steps = false
+            lin_steps = true
+        end
         (lin_steps) && (μ2 = μ2 * 1.05)
 
         f2 = f(μ2, mᵣ)

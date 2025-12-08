@@ -191,9 +191,6 @@ function inverse!(mₖ::model1,
             getfield(mᵣ, k) .= model_trans_utils.tf.((getfield(mᵣ, k)))
         end
     end
-
-    # @show norm(mₖ.m), norm(mₖ₊₁.m)
-    @show norm(jc)
     
     # smoothing steps
 
@@ -207,9 +204,6 @@ function inverse!(mₖ::model1,
         #     mₖ.m, Constant(mₖ.h), Constant(vars), Constant(model_trans_utils),
         #     Cache(resp_cache), Constant(response_fields),
         #     Constant(response_trans_utils), Constant(model_type))
-
-        # @show norm(mₖ.m), norm(mₖ₊₁.m)
-        # @show norm(jc)
 
         # for k in model_fields # to model domain
         #     getfield(mₖ, k) .= model_trans_utils.tf.(getfield(mₖ, k))
@@ -231,14 +225,13 @@ function inverse!(mₖ::model1,
                 mᵣ=mᵣ, verbose=verbose, reg_term=reg_term)
 
         # forward!(respₖ₊₁, mₖ₊₁, vars, response_trans_utils)
-        # @show norm(mₖ.m), norm(mₖ₊₁.m)
 
-        # chi2 = χ²(reduce(vcat, [getfield(respₖ₊₁, k) for k in response_fields]),
+        #  χ²(reduce(vcat, [getfield(respₖ₊₁, k) for k in response_fields]),
         #     inv_utils.dobs; W=inv_utils.W)
 
-        # @show norm(mₖ₊₁.m)
-
     end
+
+    mₖ.m .= mₖ₊₁.m
 
     return return_code(chi2 <= χ2, (μ=μ_smooth_last,), mₖ₊₁, χ2, chi2)
 end
