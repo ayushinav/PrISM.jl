@@ -77,7 +77,7 @@ function inverse!(mₖ::model1,
         response_fields::Vector{Symbol}=[k for k in fieldnames(typeof(robs))],
         model_trans_utils::trans_utils_T=sigmoid_tf,
         response_trans_utils::resp_utils_T=default_mt_tf_fns,
-        smoothing_step = false,
+        smoothing_step=false,
         mᵣ=nothing,
         reg_term=nothing,
         verbose::Union{Bool, Int}=true) where {model1 <: AbstractGeophyModel,
@@ -139,13 +139,14 @@ function inverse!(mₖ::model1,
 
     model_type = typeof(mₖ).name.wrapper
     prep_j = prepare_jacobian(
-        wrapper_DI!, rvec, AutoEnzyme(; mode=set_runtime_activity(Enzyme.Reverse)),
-        mₖ.m, Constant(mₖ.h), Constant(vars), Constant(model_trans_utils), Cache(resp_cache),
+        wrapper_DI!, rvec, AutoEnzyme(; mode=set_runtime_activity(Enzyme.Reverse)), mₖ.m,
+        Constant(mₖ.h), Constant(vars), Constant(model_trans_utils), Cache(resp_cache),
         Constant(response_fields), Constant(response_trans_utils), Constant(model_type))
 
     DifferentiationInterface.jacobian!(wrapper_DI!, rvec, jc, prep_j,
         AutoEnzyme(; mode=set_runtime_activity(Enzyme.Reverse)), mₖ.m,
-        Constant(mₖ.h), Constant(vars), Constant(model_trans_utils), Cache(resp_cache), Constant(response_fields),
+        Constant(mₖ.h), Constant(vars), Constant(model_trans_utils),
+        Cache(resp_cache), Constant(response_fields),
         Constant(response_trans_utils), Constant(model_type))
 
     while itr <= max_iters
@@ -175,14 +176,14 @@ function inverse!(mₖ::model1,
             model_trans_utils, # to  transform to and from the computational domain
             response_trans_utils, linsolve_prob; # for faster inverse operations
             model_fields=model_fields, response_fields=response_fields,
-            mᵣ=mᵣ, verbose=verbose, reg_term=reg_term)        
-        
+            mᵣ=mᵣ, verbose=verbose, reg_term=reg_term)
+
         if chi2 < χ2
             break
         end
-        
+
         mₖ.m .= mₖ₊₁.m # this will update mₖ for all iterations except last (smoothing step)
-        
+
         itr += 1
     end
 
@@ -191,7 +192,7 @@ function inverse!(mₖ::model1,
             getfield(mᵣ, k) .= model_trans_utils.tf.((getfield(mᵣ, k)))
         end
     end
-    
+
     # smoothing steps
 
     # mₖ₊₁.m .= mₖ.m
@@ -210,19 +211,17 @@ function inverse!(mₖ::model1,
         # end
         # forward!(respₖ, mₖ, vars, response_trans_utils)
 
-        μ_smooth_last, chi2 = smoothing_step_fn(
-                mₖ₊₁, # to store the next update, which will eventually be copied to mₖ
-                respₖ₊₁, # to store the response for mₖ₊₁, for error calculation and anything
-                vars, # to compute the forward model
-                χ2, # threshold chi-squared error that needs to be met
-                μ_last,
-                alg_cache.μgrid, # for gridsearch of μ for Occam
-                lin_utils, # contains the mₖ, Jₖ, Fₖ associate with the current iteration
-                inv_utils, # contains D= ∂(n), W and dobs
-                model_trans_utils, # to  transform to and from the computational domain
-                response_trans_utils, linsolve_prob; # for faster inverse operations
-                model_fields=model_fields, response_fields=response_fields,
-                mᵣ=mᵣ, verbose=verbose, reg_term=reg_term)
+        μ_smooth_last, chi2 = smoothing_step_fn(mₖ₊₁, # to store the next update, which will eventually be copied to mₖ
+            respₖ₊₁, # to store the response for mₖ₊₁, for error calculation and anything
+            vars, # to compute the forward model
+            χ2, # threshold chi-squared error that needs to be met
+            μ_last, alg_cache.μgrid, # for gridsearch of μ for Occam
+            lin_utils, # contains the mₖ, Jₖ, Fₖ associate with the current iteration
+            inv_utils, # contains D= ∂(n), W and dobs
+            model_trans_utils, # to  transform to and from the computational domain
+            response_trans_utils, linsolve_prob; # for faster inverse operations
+            model_fields=model_fields, response_fields=response_fields,
+            mᵣ=mᵣ, verbose=verbose, reg_term=reg_term)
 
         # forward!(respₖ₊₁, mₖ₊₁, vars, response_trans_utils)
 

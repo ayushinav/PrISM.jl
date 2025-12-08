@@ -144,10 +144,9 @@ function occam_step!(mₖ₊₁::model1, # to store the next update, which will 
     forward!(respₖ₊₁, mₖ₊₁, vars, response_trans_utils)
 
     chi2 = χ²(reduce(vcat, [copy(getfield(respₖ₊₁, k)) for k in response_fields]),
-            inv_utils.dobs; W=inv_utils.W)
+        inv_utils.dobs; W=inv_utils.W)
 
-    do_verbose(verbose) && (print("Works golden section search: μ= $μ, χ²= ", chi2,
-        "\n"))
+    do_verbose(verbose) && (print("Works golden section search: μ= $μ, χ²= ", chi2, "\n"))
     return μ, chi2
 end
 
@@ -188,8 +187,7 @@ function find_x(x::T1, mₖ₊₁::model, respₖ₊₁::response, vars, inv_uti
         inv_utils.dobs; W=inv_utils.W)
 end
 
-function smoothing_step_fn(
-        mₖ₊₁::model1, # already in computational domain
+function smoothing_step_fn(mₖ₊₁::model1, # already in computational domain
         respₖ₊₁::response, # to store the response for mₖ₊₁, for error calculation and anything
         vars::Union{AbstractVector{Float32}, AbstractVector{Float64}}, # to compute the forward model
         χ2::Union{Float64, Float32}, # threshold chi-squared error that needs to be met
@@ -215,11 +213,11 @@ function smoothing_step_fn(
     exp_steps = true
     lin_steps = false
 
-    do_verbose(verbose) && (print("smoothing : μ= $μ_fit, χ²= ", f(μ_fit, mᵣ), "\n");)
+    do_verbose(verbose) && (print("smoothing : μ= $μ_fit, χ²= ", f(μ_fit, mᵣ), "\n"))
 
     μ2 = μ_fit * 3
     if μ2 > μgrid[end]
-        μ2 = μ2 * 1.05/3
+        μ2 = μ2 * 1.05 / 3
         exp_steps = false
         lin_steps = true
     end
@@ -280,7 +278,7 @@ function smoothing_step_fn(
     forward!(respₖ₊₁, mₖ₊₁, vars, response_trans_utils)
 
     chi2 = χ²(reduce(vcat, [copy(getfield(respₖ₊₁, k)) for k in response_fields]),
-            inv_utils.dobs; W=inv_utils.W)
-    do_verbose(verbose) && (print("Smoothing : μ= $μ, χ²= ",chi2, "\n"))
+        inv_utils.dobs; W=inv_utils.W)
+    do_verbose(verbose) && (print("Smoothing : μ= $μ, χ²= ", chi2, "\n"))
     return μ, chi2
 end

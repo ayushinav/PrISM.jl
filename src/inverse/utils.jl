@@ -53,8 +53,8 @@ mutable struct return_code{T1 <: AbstractModel}
     misfit_achieved::AbstractFloat
 end
 
-function wrapper_DI!(
-        r_vec, m, h, vars, model_trans_utils, resp_cache, resp_fields, response_trans_utils, model_type)
+function wrapper_DI!(r_vec, m, h, vars, model_trans_utils, resp_cache,
+        resp_fields, response_trans_utils, model_type)
     model_ = model_type(model_trans_utils.tf.(m), h)
     forward!(resp_cache, model_, vars, response_trans_utils)
 
