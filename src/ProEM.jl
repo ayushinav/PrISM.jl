@@ -15,7 +15,7 @@ using Distributions
 using Turing
 import Base: show
 
-import SubsurfaceCore: forward, forward_helper, get_scale, get_labels
+import SubsurfaceCore: forward, forward_helper, get_scales, get_labels
 
 include("models/mt/types.jl")
 include("models/mt/forward.jl")

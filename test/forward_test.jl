@@ -99,7 +99,7 @@ end
     vp_ = (vmodel[:, 2])
     vs_ = (vmodel[:, 3])
     density_ = vmodel[:, 4]
-    m_rw = RWModel(vs_, h_[1:end-1], density_, vp_)
+    m_rw = RWModel(vs_, h_[1:(end-1)], density_, vp_)
 
     t = exp10.(range(0, 3, length = 100))
 
@@ -235,7 +235,7 @@ end
     h_ = vmodel[:, 1] .* 1e3
     vs_ = (vmodel[:, 3])
     density_ = vmodel[:, 4]
-    m_lw = LWModel(vs_, h_[1:end-1], density_)
+    m_lw = LWModel(vs_, h_[1:(end-1)], density_)
 
     t = exp10.(range(0, 3, length = 100))
 

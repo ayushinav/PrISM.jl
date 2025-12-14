@@ -95,9 +95,9 @@ function SubsurfaceCore.stochastic_inverse(r_obs::resp1,
 
         # perturbed response
         for k in fieldnames(typeof(r_obs))
-            getfield(pert_resp, k) .= getfield(r_obs, k) .+
-                                      randn(size(getfield(err_resp, k))) .*
-                                      getfield(err_resp, k)
+            getfield(pert_resp,
+                k) .= getfield(r_obs, k) .+
+                      randn(size(getfield(err_resp, k))) .* getfield(err_resp, k)
         end
 
         # perturbed model : the one we regularize against
@@ -137,9 +137,9 @@ function SubsurfaceCore.stochastic_inverse(r_obs::resp1,
 
         # perturbed response
         for k in fieldnames(typeof(r_obs))
-            getfield(pert_resp, k) .= getfield(r_obs, k) .+
-                                      randn(size(getfield(err_resp, k))) .*
-                                      getfield(err_resp, k)
+            getfield(pert_resp,
+                k) .= getfield(r_obs, k) .+
+                      randn(size(getfield(err_resp, k))) .* getfield(err_resp, k)
         end
 
         # broadcast!((x) -> (model_trans_utils[:m].itf(x)), alg_cache.m₀.m, alg_cache.m₀.m) # to computational domain
@@ -212,8 +212,8 @@ function SubsurfaceCore.stochastic_inverse(r_obs::resp1,
     idcs = broadcast(!isnan, view(m_chains, 1, :))
     @show sum(idcs)
 
-    return Turing.Chains(
-        vcat(m_chains[:, idcs], μ_chains[:, idcs])', [Symbol("m[$i]") for i in 1:(n + 1)])
+    return Turing.Chains(vcat(m_chains[:, idcs], μ_chains[:, idcs])', [Symbol("m[$i]")
+                                                                       for i in 1:(n + 1)])
 end
 
 # mutable struct RTO_MTModel <: AbstractGeophyModel

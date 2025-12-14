@@ -1,5 +1,5 @@
-function Base.show(
-        io::IO, m::model) where {model <: MTModel{<:AbstractVector, <:AbstractVector}}
+function Base.show(io::IO, m::model) where {model <:
+                                            MTModel{<:AbstractVector, <:AbstractVector}}
     println("1D ", typeof(m).name.name, " : ")
     println("Layer \t h \t log(ρ)")
     println("____________________________")

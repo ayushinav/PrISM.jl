@@ -245,8 +245,8 @@ function dltar(k, ω, model::RWModel, e, ee, C)
         q = rb * dpth
 
         # Evaluate cosP, cosQ...
-        _, _, a0, cpcq, cpy, cpz, cqw, cqx, xy, xz, wy, wz = var(
-            p, q, ra, rb, k, xka, xkb, dpth)
+        _, _, a0, cpcq, cpy, cpz, cqw, cqx, xy, xz,
+        wy, wz = var(p, q, ra, rb, k, xka, xkb, dpth)
 
         # Evaluate Dunkin's matrix
         dnka!(C, k * k, gam, gammk, ρ[m], a0, cpcq, cpy, cpz, cqw, cqx, xy, xz, wy, wz)
@@ -278,8 +278,8 @@ function get_c!(resp_, t, m, mode, dc)
     # resp_ = zero(t)
 
     f(c, p) = dltar(p / c, p, m, e, ee, C)
-    prob_init = IntervalNonlinearProblem{false}(
-        f, (c_start - 2dc, c_high), 2π * inv(first(t)))
+    prob_init = IntervalNonlinearProblem{false}(f, (c_start - 2dc, c_high), 2π *
+                                                                            inv(first(t)))
 
     for i in eachindex(t) # this can be parallelized
         flag = true # soln exists
@@ -304,8 +304,7 @@ function get_c!(resp_, t, m, mode, dc)
                 end
             end
 
-            c = ifelse(
-                flag, find_c(prob_init, c_high_each - 2dc, c_high_each, ω), c_high_each)
+            c = ifelse(flag, find_c(prob_init, c_high_each - 2dc, c_high_each, ω), c_high_each)
 
             c_low = c + dc
             resp_[i] = c

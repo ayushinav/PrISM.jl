@@ -143,8 +143,8 @@ function occam_step!(mₖ₊₁::model1, # to store the next update, which will 
 
     forward!(respₖ₊₁, mₖ₊₁, vars, response_trans_utils)
 
-    chi2 = χ²(reduce(vcat, [copy(getfield(respₖ₊₁, k)) for k in response_fields]),
-        inv_utils.dobs; W=inv_utils.W)
+    chi2 = χ²(
+        reduce(vcat, [copy(getfield(respₖ₊₁, k)) for k in response_fields]), inv_utils.dobs; W=inv_utils.W)
 
     do_verbose(verbose) && (print("Works golden section search: μ= $μ, χ²= ", chi2, "\n"))
     return μ, chi2
@@ -164,8 +164,7 @@ function find_x(x::T1, mₖ₊₁::model, respₖ₊₁::response, vars, inv_uti
     broadcast!(model_trans_utils.tf, mₖ₊₁.m, mₖ₊₁.m)
     forward!(respₖ₊₁, mₖ₊₁, vars, response_trans_utils)
 
-    return χ²(reduce(vcat, [getfield(respₖ₊₁, k) for k in response_fields]),
-        inv_utils.dobs; W=inv_utils.W)
+    return χ²(reduce(vcat, [getfield(respₖ₊₁, k) for k in response_fields]), inv_utils.dobs; W=inv_utils.W)
 end
 
 function find_x(x::T1, mₖ₊₁::model, respₖ₊₁::response, vars, inv_utils::inverse_utils,
@@ -183,8 +182,7 @@ function find_x(x::T1, mₖ₊₁::model, respₖ₊₁::response, vars, inv_uti
     broadcast!(model_trans_utils.tf, mₖ₊₁.m, mₖ₊₁.m)
     forward!(respₖ₊₁, mₖ₊₁, vars, response_trans_utils)
 
-    return χ²(reduce(vcat, [getfield(respₖ₊₁, k) for k in response_fields]),
-        inv_utils.dobs; W=inv_utils.W)
+    return χ²(reduce(vcat, [getfield(respₖ₊₁, k) for k in response_fields]), inv_utils.dobs; W=inv_utils.W)
 end
 
 function smoothing_step_fn(mₖ₊₁::model1, # already in computational domain
@@ -277,8 +275,8 @@ function smoothing_step_fn(mₖ₊₁::model1, # already in computational domain
 
     forward!(respₖ₊₁, mₖ₊₁, vars, response_trans_utils)
 
-    chi2 = χ²(reduce(vcat, [copy(getfield(respₖ₊₁, k)) for k in response_fields]),
-        inv_utils.dobs; W=inv_utils.W)
+    chi2 = χ²(
+        reduce(vcat, [copy(getfield(respₖ₊₁, k)) for k in response_fields]), inv_utils.dobs; W=inv_utils.W)
     do_verbose(verbose) && (print("Smoothing : μ= $μ, χ²= ", chi2, "\n"))
     return μ, chi2
 end

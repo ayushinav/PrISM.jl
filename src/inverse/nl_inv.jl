@@ -81,7 +81,8 @@ end
 # focussing on just geophysical models for now
 # Not performant at the moment
 function construct_cost_function_for_nl_inv(m, p)
-    @unpack model_type, h, model_trans_utils, response_trans_utils, vars, response_fields, W, μ, r_obs, L, mᵣ = p
+    @unpack model_type, h, model_trans_utils, response_trans_utils,
+    vars, response_fields, W, μ, r_obs, L, mᵣ = p
     # model = model_type(model_trans_utils.tf.(m), h)
     model = model_type(broadcast(model_trans_utils.tf, m), h)
     resp_ = forward(model, vars, response_trans_utils)

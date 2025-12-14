@@ -106,8 +106,8 @@ function inverse!(mₖ::model1,
         setfield!(respₖ, k, view(lin_utils.Fₖ, ((i - 1) * n_vars + 1):(i * n_vars)))
     end
 
-    inv_utils = inverse_utils(
-        L, W, reduce(vcat, [copy(getfield(robs, k)) for k in response_fields]))
+    inv_utils = inverse_utils(L, W, reduce(vcat, [copy(getfield(robs, k))
+                                                  for k in response_fields]))
 
     mₖ₊₁ = copy(mₖ)
     respₖ₊₁ = copy(respₖ)
@@ -166,7 +166,8 @@ function inverse!(mₖ::model1,
             Cache(resp_cache), Constant(response_fields),
             Constant(response_trans_utils), Constant(model_type))
 
-        μ_last, chi2 = occam_step!(mₖ₊₁, # to store the next update, which will eventually be copied to mₖ
+        μ_last,
+        chi2 = occam_step!(mₖ₊₁, # to store the next update, which will eventually be copied to mₖ
             respₖ₊₁, # to store the response for mₖ₊₁, for error calculation and anything
             vars, # to compute the forward model
             χ2, # threshold chi-squared error that needs to be met
@@ -211,7 +212,8 @@ function inverse!(mₖ::model1,
         # end
         # forward!(respₖ, mₖ, vars, response_trans_utils)
 
-        μ_smooth_last, chi2 = smoothing_step_fn(mₖ₊₁, # to store the next update, which will eventually be copied to mₖ
+        μ_smooth_last,
+        chi2 = smoothing_step_fn(mₖ₊₁, # to store the next update, which will eventually be copied to mₖ
             respₖ₊₁, # to store the response for mₖ₊₁, for error calculation and anything
             vars, # to compute the forward model
             χ2, # threshold chi-squared error that needs to be met
