@@ -30,7 +30,7 @@ function inverse!(mₖ::model1,
         χ2=1.0,
         response_fields::Vector{Symbol}=[k for k in fieldnames(typeof(robs))],
         model_trans_utils::transform_utils=sigmoid_tf,
-        response_trans_utils::NamedTuple=(; ρₐ=lin_tf, ϕ=lin_tf),
+        response_trans_utils::NamedTuple=(; ρₐ=no_tf, ϕ=no_tf),
         mᵣ=nothing,
         reg_term=nothing,
         verbose::Union{Bool, Int}=true) where {
