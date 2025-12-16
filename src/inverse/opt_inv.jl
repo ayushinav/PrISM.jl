@@ -30,7 +30,7 @@ function inverse!(mₖ::model1,
         χ2=1.0,
         response_fields::Vector{Symbol}=[k for k in fieldnames(typeof(robs))],
         model_trans_utils::transform_utils=sigmoid_tf,
-        response_trans_utils::NamedTuple=(; ρₐ=lin_tf, ϕ=lin_tf),
+        response_trans_utils::NamedTuple=(; ρₐ=no_tf, ϕ=no_tf),
         mᵣ=nothing,
         reg_term=nothing,
         verbose::Union{Bool, Int}=true) where {
@@ -51,8 +51,7 @@ function inverse!(mₖ::model1,
         response_trans_utils=response_trans_utils, vars=vars,
         response_fields=response_fields, W=W, μ=alg_cache.μ, r_obs=robs, L=L, mᵣ=mᵣ)
 
-    optfn = OptimizationFunction(
-        construct_cost_function_for_opt, Optimization.AutoForwardDiff())
+    optfn = OptimizationFunction(construct_cost_function_for_opt, Optimization.AutoForwardDiff())
     prob = OptimizationProblem(optfn, model_trans_utils.itf.(mₖ.m), p)
 
     cb(state, l) = cb_(state, l, verbose, L, alg_cache.μ, model_trans_utils, χ2)
@@ -75,7 +74,8 @@ function cb_(state, l, verbose, L, μ, model_trans_utils, χ2)
 end
 
 function construct_cost_function_for_opt(m, p)
-    @unpack model_type, h, model_trans_utils, response_trans_utils, vars, response_fields, W, μ, r_obs, L, mᵣ = p
+    @unpack model_type, h, model_trans_utils, response_trans_utils,
+    vars, response_fields, W, μ, r_obs, L, mᵣ = p
     # model = model_type(model_trans_utils.tf.(m), h)
     model = model_type(broadcast(model_trans_utils.tf, m), h)
     resp_ = forward(model, vars, response_trans_utils)

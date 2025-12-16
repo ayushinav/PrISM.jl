@@ -1,5 +1,4 @@
-
-const default_surf_tf_fns = (; c=lin_tf)
+const default_surf_tf_fns = (; c=no_tf)
 
 function surf96!(c, t, m, mode, dc, dt, ::Val{:phase})
     rmul!(m.h, inv(eltype(m.h)(1000)))

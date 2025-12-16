@@ -1,5 +1,5 @@
 @testitem "type inference tests : MT" tags = [:inference] begin
-    using BenchmarkTools
+    using BenchmarkTools, JET
     h = [100.0, 1000.0] # m
     ρ = log10.([100.0, 10.0, 1000.0]) # Ωm
     m = MTModel(ρ, h)
@@ -8,6 +8,8 @@
     nω = length(T)
     @inferred MTModel(ρ, h)
     @inferred forward(m, ω)
+    @test_opt forward(m, ω)
+    @test_call forward(m, ω)
 end
 
 
@@ -31,11 +33,11 @@ end
     vp_ = (vmodel[:, 2]) #.+ 4.5 * 1.72
     vs_ = (vmodel[:, 3]) #.+ 4.5
     density_ = vmodel[:, 4]
-    m_rw = RWModel(vs_, h_[1:end-1], density_, vp_)
+    m_rw = RWModel(vs_, h_[1:(end-1)], density_, vp_)
 
     t = exp10.(range(0, 3, length = 100))
 
-    @inferred m_rw = RWModel(vs_, h_[1:end-1], density_, vp_)
+    @inferred m_rw = RWModel(vs_, h_[1:(end-1)], density_, vp_)
     @inferred forward(m_rw, t)
 
     # Performance test

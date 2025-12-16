@@ -77,8 +77,8 @@ function inverse!(mₖ::model1,
         response_fields::Vector{Symbol}=[k for k in fieldnames(typeof(robs))],
         model_trans_utils::trans_utils_T=sigmoid_tf,
         response_trans_utils::resp_utils_T=default_mt_tf_fns,
+        smoothing_step=false,
         mᵣ=nothing,
-        ad_backend=AutoEnzyme(; mode=set_runtime_activity(Enzyme.Reverse)),
         reg_term=nothing,
         verbose::Union{Bool, Int}=true) where {model1 <: AbstractGeophyModel,
         response <: AbstractGeophyResponse, trans_utils_T, resp_utils_T}
@@ -106,8 +106,8 @@ function inverse!(mₖ::model1,
         setfield!(respₖ, k, view(lin_utils.Fₖ, ((i - 1) * n_vars + 1):(i * n_vars)))
     end
 
-    inv_utils = inverse_utils(
-        L, W, reduce(vcat, [copy(getfield(robs, k)) for k in response_fields]))
+    inv_utils = inverse_utils(L, W, reduce(vcat, [copy(getfield(robs, k))
+                                                  for k in response_fields]))
 
     mₖ₊₁ = copy(mₖ)
     respₖ₊₁ = copy(respₖ)
@@ -138,18 +138,15 @@ function inverse!(mₖ::model1,
     rvec = zero(lin_utils.Fₖ)
 
     model_type = typeof(mₖ).name.wrapper
+    prep_j = prepare_jacobian(
+        wrapper_DI!, rvec, AutoEnzyme(; mode=set_runtime_activity(Enzyme.Reverse)), mₖ.m,
+        Constant(mₖ.h), Constant(vars), Constant(model_trans_utils), Cache(resp_cache),
+        Constant(response_fields), Constant(response_trans_utils), Constant(model_type))
 
-    const_fields = [f for f in fieldnames(model_type) if !(f in [:m])]
-    const_vals = [getfield(mₖ, k) for k in const_fields]
-    const_nt = (; zip(const_fields, const_vals)...)
-
-    prep_j = prepare_jacobian(wrapper_DI!, rvec, ad_backend, mₖ.m, Constant(const_nt),
-        Constant(vars), Cache(resp_cache), Constant(response_fields),
-        Constant(response_trans_utils), Constant(model_type))
-
-    DifferentiationInterface.jacobian!(
-        wrapper_DI!, rvec, jc, prep_j, ad_backend, mₖ.m, Constant(const_nt),
-        Constant(vars), Cache(resp_cache), Constant(response_fields),
+    DifferentiationInterface.jacobian!(wrapper_DI!, rvec, jc, prep_j,
+        AutoEnzyme(; mode=set_runtime_activity(Enzyme.Reverse)), mₖ.m,
+        Constant(mₖ.h), Constant(vars), Constant(model_trans_utils),
+        Cache(resp_cache), Constant(response_fields),
         Constant(response_trans_utils), Constant(model_type))
 
     while itr <= max_iters
@@ -157,17 +154,20 @@ function inverse!(mₖ::model1,
         # @time jacobian!(jc, mₖ, vars, model_fields, response_fields)
         # jc.j .= first(Enzyme.jacobian(set_runtime_activity(Reverse), f_temp, mₖ.m))
 
-        DifferentiationInterface.jacobian!(
-            wrapper_DI!, rvec, jc, ad_backend, mₖ.m, Constant(const_nt),
-            Constant(vars), Cache(resp_cache), Constant(response_fields),
-            Constant(response_trans_utils), Constant(model_type))
+        forward!(respₖ, mₖ, vars, response_trans_utils)
 
         for k in model_fields # to computational domain
-            @show getfield(mₖ, k)
             getfield(mₖ, k) .= model_trans_utils.itf.(getfield(mₖ, k))
         end
 
-        μ_last = occam_step!(mₖ₊₁, # to store the next update, which will eventually be copied to mₖ
+        DifferentiationInterface.jacobian!(
+            wrapper_DI!, rvec, jc, AutoEnzyme(; mode=set_runtime_activity(Enzyme.Reverse)),
+            mₖ.m, Constant(mₖ.h), Constant(vars), Constant(model_trans_utils),
+            Cache(resp_cache), Constant(response_fields),
+            Constant(response_trans_utils), Constant(model_type))
+
+        μ_last,
+        chi2 = occam_step!(mₖ₊₁, # to store the next update, which will eventually be copied to mₖ
             respₖ₊₁, # to store the response for mₖ₊₁, for error calculation and anything
             vars, # to compute the forward model
             χ2, # threshold chi-squared error that needs to be met
@@ -179,14 +179,12 @@ function inverse!(mₖ::model1,
             model_fields=model_fields, response_fields=response_fields,
             mᵣ=mᵣ, verbose=verbose, reg_term=reg_term)
 
-        mₖ.m .= mₖ₊₁.m
-
-        forward!(respₖ, mₖ, vars, response_trans_utils)
-        chi2 = χ²(reduce(vcat, [getfield(respₖ, k) for k in response_fields]),
-            inv_utils.dobs; W=inv_utils.W)
         if chi2 < χ2
             break
         end
+
+        mₖ.m .= mₖ₊₁.m # this will update mₖ for all iterations except last (smoothing step)
+
         itr += 1
     end
 
@@ -196,5 +194,45 @@ function inverse!(mₖ::model1,
         end
     end
 
-    return return_code(chi2 <= χ2, (μ=μ_last,), mₖ, χ2, chi2)
+    # smoothing steps
+
+    # mₖ₊₁.m .= mₖ.m
+
+    μ_smooth_last = μ_last
+    if smoothing_step
+
+        # DifferentiationInterface.jacobian!(
+        #     wrapper_DI!, rvec, jc, AutoEnzyme(; mode=set_runtime_activity(Enzyme.Reverse)),
+        #     mₖ.m, Constant(mₖ.h), Constant(vars), Constant(model_trans_utils),
+        #     Cache(resp_cache), Constant(response_fields),
+        #     Constant(response_trans_utils), Constant(model_type))
+
+        # for k in model_fields # to model domain
+        #     getfield(mₖ, k) .= model_trans_utils.tf.(getfield(mₖ, k))
+        # end
+        # forward!(respₖ, mₖ, vars, response_trans_utils)
+
+        μ_smooth_last,
+        chi2 = smoothing_step_fn(mₖ₊₁, # to store the next update, which will eventually be copied to mₖ
+            respₖ₊₁, # to store the response for mₖ₊₁, for error calculation and anything
+            vars, # to compute the forward model
+            χ2, # threshold chi-squared error that needs to be met
+            μ_last, alg_cache.μgrid, # for gridsearch of μ for Occam
+            lin_utils, # contains the mₖ, Jₖ, Fₖ associate with the current iteration
+            inv_utils, # contains D= ∂(n), W and dobs
+            model_trans_utils, # to  transform to and from the computational domain
+            response_trans_utils, linsolve_prob; # for faster inverse operations
+            model_fields=model_fields, response_fields=response_fields,
+            mᵣ=mᵣ, verbose=verbose, reg_term=reg_term)
+
+        # forward!(respₖ₊₁, mₖ₊₁, vars, response_trans_utils)
+
+        #  χ²(reduce(vcat, [getfield(respₖ₊₁, k) for k in response_fields]),
+        #     inv_utils.dobs; W=inv_utils.W)
+
+    end
+
+    mₖ.m .= mₖ₊₁.m
+
+    return return_code(chi2 <= χ2, (μ=μ_smooth_last,), mₖ₊₁, χ2, chi2)
 end

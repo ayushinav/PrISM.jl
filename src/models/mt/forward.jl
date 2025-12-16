@@ -6,7 +6,7 @@ const global μ = 4π * 1.0f-7; # Float32 will promote to Float64 without a prob
 returns a tuple of ρₐ and ϕ, given arrays of resistivity `ρ` and thickness `h` for the angular frequenciy `ω`.
 """
 
-const default_mt_tf_fns = (ρₐ=lin_tf, ϕ=lin_tf)
+const default_mt_tf_fns = (ρₐ=no_tf, ϕ=no_tf)
 
 function get_Z(ρ::T1, h::T2, ω::T) where {T1, T2, T}
     broadcast!(exp10, ρ, ρ)
@@ -33,6 +33,9 @@ returns a  `response` for the given model `m` at the frequencies  `ω`
 """
 function SubsurfaceCore.forward(m::Tm, ω::T3, response_trans_utils::T=default_mt_tf_fns,
         params=default_params_mt) where {Tm <: MTModel, T, T3}
+    f1 = response_trans_utils.ρₐ.tf
+    f2 = response_trans_utils.ϕ.tf
+
     if !(length(m.h) == length(m.m) - 1)
         error("number of model layers should be 1 less than the number of model parameters")
     end
@@ -44,9 +47,9 @@ function SubsurfaceCore.forward(m::Tm, ω::T3, response_trans_utils::T=default_m
         ρₐ[i], ϕ[i] = get_Z(m.m, m.h, ω[i])
         i += 1
     end
-    f1 = response_trans_utils.ρₐ.tf
-    f2 = response_trans_utils.ϕ.tf
-    MTResponse{typeof(ρₐ), typeof(ϕ)}((f1.(ρₐ)), f2.(ϕ))
+    broadcast!(f1, ρₐ, ρₐ)
+    broadcast!(f2, ϕ, ϕ)
+    MTResponse(ρₐ, ϕ)
 end
 
 # dispatch on forward! for 1d model

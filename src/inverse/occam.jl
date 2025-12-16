@@ -143,11 +143,11 @@ function occam_step!(mₖ₊₁::model1, # to store the next update, which will 
 
     forward!(respₖ₊₁, mₖ₊₁, vars, response_trans_utils)
 
-    do_verbose(verbose) && (print("Works golden section search: μ= $μ, χ²= ",
-        χ²(reduce(vcat, [copy(getfield(respₖ₊₁, k)) for k in response_fields]),
-            inv_utils.dobs; W=inv_utils.W),
-        "\n"))
-    return μ
+    chi2 = χ²(
+        reduce(vcat, [copy(getfield(respₖ₊₁, k)) for k in response_fields]), inv_utils.dobs; W=inv_utils.W)
+
+    do_verbose(verbose) && (print("Works golden section search: μ= $μ, χ²= ", chi2, "\n"))
+    return μ, chi2
 end
 
 function find_x(x::T1, mₖ₊₁::model, respₖ₊₁::response, vars, inv_utils::inverse_utils,
@@ -164,8 +164,7 @@ function find_x(x::T1, mₖ₊₁::model, respₖ₊₁::response, vars, inv_uti
     broadcast!(model_trans_utils.tf, mₖ₊₁.m, mₖ₊₁.m)
     forward!(respₖ₊₁, mₖ₊₁, vars, response_trans_utils)
 
-    return χ²(reduce(vcat, [getfield(respₖ₊₁, k) for k in response_fields]),
-        inv_utils.dobs; W=inv_utils.W)
+    return χ²(reduce(vcat, [getfield(respₖ₊₁, k) for k in response_fields]), inv_utils.dobs; W=inv_utils.W)
 end
 
 function find_x(x::T1, mₖ₊₁::model, respₖ₊₁::response, vars, inv_utils::inverse_utils,
@@ -178,11 +177,106 @@ function find_x(x::T1, mₖ₊₁::model, respₖ₊₁::response, vars, inv_uti
         lin_utils.Jₖ' *
         inv_utils.W *
         (inv_utils.dobs + lin_utils.Jₖ * lin_utils.mₖ - lin_utils.Fₖ) +
-        μ .* inv_utils.D' * inv_utils.D * mᵣ.m .+ reg_term)
+        x .* inv_utils.D' * inv_utils.D * mᵣ.m .+ reg_term)
 
     broadcast!(model_trans_utils.tf, mₖ₊₁.m, mₖ₊₁.m)
     forward!(respₖ₊₁, mₖ₊₁, vars, response_trans_utils)
 
-    return χ²(reduce(vcat, [getfield(respₖ₊₁, k) for k in response_fields]),
-        inv_utils.dobs; W=inv_utils.W)
+    return χ²(reduce(vcat, [getfield(respₖ₊₁, k) for k in response_fields]), inv_utils.dobs; W=inv_utils.W)
+end
+
+function smoothing_step_fn(mₖ₊₁::model1, # already in computational domain
+        respₖ₊₁::response, # to store the response for mₖ₊₁, for error calculation and anything
+        vars::Union{AbstractVector{Float32}, AbstractVector{Float64}}, # to compute the forward model
+        χ2::Union{Float64, Float32}, # threshold chi-squared error that needs to be met
+        μ_fit,
+        μgrid::Vector{Float64}, # contains end points of the bounds for the lagrange multiplier
+        lin_utils::linear_utils, # contains the mₖ, Jₖ, Fₖ associate with the current iteration
+        inv_utils::inverse_utils, # contains D= ∂(n), W and dobs
+        model_trans_utils::transform_utils, # to  transform to and from the computational domain
+        response_trans_utils::NamedTuple, #for scaling the response parameters,
+        linsolve_prob::LinearSolve.LinearCache; # for faster inverse operations
+        model_fields::Vector{Symbol}=[k for k in fieldnames(typeof(mₖ₊₁))],
+        response_fields::Vector{Symbol}=[k for k in fieldnames(typeof(respₖ₊₁))],
+        mᵣ::model2,
+        verbose::Bool=true,
+        reg_term::AbstractVector) where {
+        model1 <: AbstractGeophyModel, model2 <: Union{AbstractGeophyModel, Nothing},
+        response <: AbstractGeophyResponse}
+    function f(x, mᵣ)
+        find_x(x, mₖ₊₁, respₖ₊₁, vars, inv_utils, lin_utils, model_fields, response_fields,
+            model_trans_utils, response_trans_utils, linsolve_prob, reg_term, mᵣ)
+    end
+
+    exp_steps = true
+    lin_steps = false
+
+    do_verbose(verbose) && (print("smoothing : μ= $μ_fit, χ²= ", f(μ_fit, mᵣ), "\n"))
+
+    μ2 = μ_fit * 3
+    if μ2 > μgrid[end]
+        μ2 = μ2 * 1.05 / 3
+        exp_steps = false
+        lin_steps = true
+    end
+
+    f2 = f(μ2, mᵣ)
+
+    while μ2 <= μgrid[end]
+        do_verbose(verbose) && (print("smoothing : μ= $μ2, χ²= ", f2, "\n"))
+
+        if f2 > χ2
+            if exp_steps
+                exp_steps = false
+                lin_steps = true
+                μ2 = μ2 / 3
+            else
+                # find_flag = true (not true if the original misfit was greater than threshold)
+                μ2 = μ2 / 1.05
+                break
+            end
+        end
+
+        (exp_steps) && (μ2 = μ2 * 3)
+        if exp_steps && (μ2 > μgrid[end])
+            μ2 = μ2 / 3
+            exp_steps = false
+            lin_steps = true
+        end
+        (lin_steps) && (μ2 = μ2 * 1.05)
+
+        f2 = f(μ2, mᵣ)
+    end
+
+    # At the moment mₖ₊₁ contains the update for the last μ, we rewrite it with the largest μ found.
+
+    μ = μ2
+    if mᵣ === nothing
+        linsolve!(mₖ₊₁.m,
+            linsolve_prob,
+            μ .* inv_utils.D' * inv_utils.D .+ lin_utils.Jₖ' * inv_utils.W * lin_utils.Jₖ,
+            lin_utils.Jₖ' *
+            inv_utils.W *
+            (inv_utils.dobs + lin_utils.Jₖ * lin_utils.mₖ - lin_utils.Fₖ) + reg_term)
+    else
+        linsolve!(mₖ₊₁.m,
+            linsolve_prob,
+            μ .* inv_utils.D' * inv_utils.D .+ lin_utils.Jₖ' * inv_utils.W * lin_utils.Jₖ,
+            lin_utils.Jₖ' *
+            inv_utils.W *
+            (inv_utils.dobs + lin_utils.Jₖ * lin_utils.mₖ - lin_utils.Fₖ) +
+            μ .* inv_utils.D' * inv_utils.D * mᵣ.m +
+            reg_term)
+    end
+
+    for k in model_fields # to model domain
+        getfield(mₖ₊₁, k) .= model_trans_utils.tf.(getfield(mₖ₊₁, k))
+    end
+
+    forward!(respₖ₊₁, mₖ₊₁, vars, response_trans_utils)
+
+    chi2 = χ²(
+        reduce(vcat, [copy(getfield(respₖ₊₁, k)) for k in response_fields]), inv_utils.dobs; W=inv_utils.W)
+    do_verbose(verbose) && (print("Smoothing : μ= $μ, χ²= ", chi2, "\n"))
+    return μ, chi2
 end
