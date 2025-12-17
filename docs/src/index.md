@@ -1,36 +1,59 @@
-# `MT.jl`
+```@raw html
+---
+# https://vitepress.dev/reference/default-theme-home-page
+layout: home
 
-`MT.jl` is supposed to be a high performance code for doing forward and inverse modeling in geophysics using julia. We hope to write the code structure such that any other geophysical survey can also be used and we can tend towards a joint forward and inverse modeling library.
+hero:
+  name: ProEM.jl
+  text: Geophysical modeling and inversion in Julia
+  tagline: Automatic Differentiation enabled probabilistic inference of subsurface
+  image:
+    src: logo.png
+    alt: ProEM.jl
+  actions:
+    - theme: alt
+      text: View on Github
+      link: https://github.com/ayushinav/ProEM.jl
+    
+features:
+  - icon: 🔢
+    title: Modeling
+    details: Estimate geophysical observables using rock physics
+    link: intro/getting_started
 
-## Forward modeling
+  - icon: 📊
+    title: Probabilstic inference
+    details: Perform probabilistic inference of parameters
+    link: /tutorials/stochastic_inverse
 
-While forward modeling typically requires solving a PDE obtained using the quasi-static approximation, in 1D, we are fortunate to have the solution for surface impedance in a more analytical form. Currently, this is what is supported.
+  - icon: ∂
+    title: Differentiability
+    details: Get derivatives using automatic differntiation
+    link: /tutorials/ad
+---
+```
 
-Supported methods:
+`ProEM.jl` is supposed to be a high performance code for doing forward and inverse modeling in geophysics using julia. We hope to write the package such that any other geophysical survey can also be used and we can tend towards a joint forward and inverse modeling library.
 
-  - 1D Magnetotellurics (MT)
+## Installation
 
-## Inverse modeling
+You can install `ProEM.jl` on Julia by running:
 
-No surprises here that we are almost always trying to solve for an under-determined system.
+```julia
+using Pkg
+Pkg.add("ProEM.jl")
+```
 
-Deterministic schemes supported:
+## Available models
 
-  - Occam
-  - Nonlinear schemes using NonlinearSolve.jl
-  - Nonlinear schemes using Optimization.jl
+### Conductivity models
 
-Probabilistic schemes supported:
+  - Magnetotellurics (MT)
 
-  - MCMC with fixed grids
-  - MCMC with flexible grids
-  - RTO-TKO
+### Seismic models
 
-## Rock physics
+  - Rayleigh waves
+  - Love waves
 
-We support multiple rock physics models :
-
-  - Conductivity models
-  - Elasticity models
-  - Viscosity models
-  - Anelasticity models
+TODO : Links to the models?
+TODO : present probabilistic schemes here?

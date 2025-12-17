@@ -1,4 +1,4 @@
-# Probabilistic inversion
+# Stochastic inversion
 
 Performing stochastic inversion involves forming the model prior space, defining the likelihood and then getting samples from the posterior space.
 

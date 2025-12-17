@@ -1,29 +1,13 @@
-pages = [
-    "Home" => "index.md",
-    "model" => "model.md",
-    "forward" => "forward.md",
-    "Deterministic Inverse" => "deterministic_inverse.md",
-    "domain transformation" => "domain_transformation.md",
-    "interface guide" => "interface_guide.md",
-    "Probabilistic inverse" => Any[
-        "Interface" => "probabilistic_inverse.md",
-        "MCMC with fixed discretization" => "tutorials/fixed_discretization.md",
-        "MCMC with variable discretization" => "tutorials/variable_discretization.md",
-        "RTO-TKO" => "tutorials/rto.md"
-    ],
-    "Visualization" => "visualization.md",
-    "Rock physics" => [
-        "Introduction" => "rp/index.md",
-        "Conductivity models" => "rp/conductivity.md",
-        "Elasticity models" => "rp/elasticity.md",
-        "Viscosity models" => "rp/viscosity.md",
-        "Anelasticity models" => "rp/anelasticity.md",
-        "Mixing phases" => "rp/mixing_phases.md",
-        "Multi rock physics" => "rp/combine_models.md",
-        "Solidus" => "rp/solidus.md",
-        "Tuning rock physics hyperparameters" => "rp/tune_rp.md",
-        "Stochastic inverse" => "rp/stochastic_inverse.md"
-    ],
-    "API" => "api.md",
-    "mtpy tutorial" => "working_with_mtpy.md"
-]
+pages = ["Home" => "index.md",
+    "Getting Started" => ["intro/intro_julia.md", "intro/getting_started.md",
+        "intro/intro_figs.md", "intro/structure.md"],
+    "Models" => ["models/mt.md", "models/rayleigh.md", "models/love.md", "models/viz.md"],
+    "Deterministic inversion" => [
+        "deterministic_inverse/index.md", "deterministic_inverse/occam.md",
+        "deterministic_inverse/lm.md", "deterministic_inverse/cg.md"],
+    "Stochastic inversion" => [
+        "stochastic_inverse/index.md", "stochastic_inverse/fixed_discretization.md",
+        "stochastic_inverse/variable_discretization.md",
+        "stochastic_inverse/rto.md", "stochastic_inverse/viz.md"],
+    "Bonus Add-ons" => ["exts/mtpy.md", "exts/ad.md"],
+    "API" => "api.md"]
