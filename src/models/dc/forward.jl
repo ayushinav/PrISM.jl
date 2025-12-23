@@ -2,65 +2,83 @@
 get T for one wavelength
 """
 function get_T(m, h, k)
-    
     T = m[end]
-    
-    j = length(h)-1
-    while j>=1
-        T = (T + m[j]*tanh(k * h[j]))/ (1 + T * m[j]*tanh(k * h[j]))
+
+    j = length(h)
+    while j >= 1
+        T = (T + m[j] * tanh(k * h[j])) / (1 + T * tanh(k * h[j]) / m[j])
+        j -= 1
     end
 
     return T
-
 end
 
-
 """
-we can have relative r_locs 
+r_max : maximum r
+r_min : minimum r
+fn : kernel function
+hankel_filter : filter to be used, contains base and J₀
+
+returns an interpolated function that outputs the integral using Hankel transform at any r
+"""
+function do_Hankel_stuff(r_max, r_min, fn, hankel_filter)
+    base_ = hankel_filter.base
+    j0 = hankel_filter.J₀
+    n_filter = length(base_)
+    f = log(base_[2]) - log(base_[1])
+
+    n_r = Int(ceil((log(r_max) - log(r_min)) / f)) + 1
+    log_r_end = log(r_min) + (n_r - 1) * f # a + (n-1)d on log-scale
+
+    rs = exp.(range(log_r_end, log(r_min); length=n_r))
+    nλ = n_filter + n_r - 1
+
+    log_λ_max = log(base_[end] / r_min)
+    log_λ_start = log_λ_max - (nλ - 1) * f
+    λs = exp.(range(log_λ_start, log_λ_max; length=nλ))
+
+    T_at_λs = fn.(λs)
+    T_at_rs = zeros(n_r)
+
+    for ir in 1:n_r
+        T_at_rs[ir] = inv(rs[ir]) .* (j0 ⋅ T_at_λs[ir:(ir + n_filter - 1)])
+    end
+
+    # make interpolating function and return
+
+    f_spline = cubic_spline_interpolation(
+        range(log(r_min), log_r_end; length=n_r), reverse(T_at_rs))
+
+    return f_spline
+end
+"""
+we can have relative r_locs
 src_a_loc : 1 element
 src_b_loc : 1 element
 rec_m_loc : n, element
 rec_n_loc : n, element
 
 srcs = [src_a_loc, src_b_loc]
-recs = hcat(rec_m_loc ; rec_n_loc) 2 x n
+recs = hcat(rec_m_loc ; rec_n_loc) n x 2
 """
 function fwd(m, h, srcs, recs, hankel_filter)
     r_a = abs.(recs[:] .- srcs[1])
     r_b = abs.(recs[:] .- srcs[2])
-    r_min, r_max = extrema(r_a..., r_b...)
+    r_min, r_max = extrema([r_a..., r_b...])
 
-    log_λ_min = log(first(hankel_filter.base)/r_max)
-    log_λ_max = log(hankel_filter.base[end]/r_min)
+    fn(k) = get_T(m, h, k)
 
-    n_hankel = length(hankel_filter.base)
+    V_fn = do_Hankel_stuff(r_max, r_min, fn, hankel_filter)
 
-    d_log_λ = log(hankel_filter.base[1]) - log(hankel_filter.base[0])
-    n_points = Int((log_λ_max ÷ d_log_λ) + 1) # TODO : for λ_max close λ_min
-    log_λ_end = n_points * d_log_λ
+    r_am = abs.(recs[:, 1] .- srcs[1])
+    V_am = V_fn.(log.(r_am))
+    r_an = abs.(recs[:, 2] .- srcs[1])
+    V_an = V_fn.(log.(r_an))
 
-    λs = exp.(range(log_λ_min, log_λ_end, length = n_points))
-    nr = n_points + n_hankel
-    log_r_end = nr * d_log_λ
+    r_bm = abs.(recs[:, 1] .- srcs[2])
+    V_bm = V_fn.(log.(r_bm))
+    r_bn = abs.(recs[:, 2] .- srcs[2])
+    V_bn = V_fn.(log.(r_bn))
 
-    rs = r_min * exp.(range(0, log_r_end, length = nr))
-
-    T = [get_T(m, h, λ) for λ in λs] # TODO
-
-    appres = zeros(eltype(m), size(recs, 2))
-    V_r = zero(appres)
-
-    # V(r) = ∫ T(λ) J₀(λ r) dλ ≈ ∑ T_i * J₀_i
-    # ρₐ = 
-    for ir in eachindex(V_r)
-        Vr[ir] = hankel_filter.J₀ ⋅ T[ir:ir+n_hankel-1]
-    end
-
-    
-    # for ir in axes(recs, 2)
-    #     Va = l;
-    # end
-
-
-
+    ρₐ = (V_am - V_bm - V_an + V_bn) ./ (inv.(r_am) - inv.(r_bm) - inv.(r_an) + inv.(r_bn))
 end
