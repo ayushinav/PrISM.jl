@@ -1,12 +1,12 @@
 """
 get T for one wavelength
 """
-function get_T(m, h, k)
-    T = m[end]
+function get_T(m::Tm, k) where {Tm <: DCModel}
+    T = m.m[end]
 
-    j = length(h)
+    j = length(m.h)
     while j >= 1
-        T = (T + m[j] * tanh(k * h[j])) / (1 + T * tanh(k * h[j]) / m[j])
+        T = (T + m.m[j] * tanh(k * m.h[j])) / (1 + T * tanh(k * m.h[j]) / m.m[j])
         j -= 1
     end
 
@@ -18,11 +18,12 @@ function SubsurfaceCore.forward(m::Tm, locs::T3, params = default_params_DC) whe
     broadcast!(exp10, m.m, m.m)
     r_a = abs.(recs[:] .- srcs[1])
     r_b = abs.(recs[:] .- srcs[2])
-    r_min, r_max = extrema([r_a..., r_b...])
+    r_min, r_max = extrema(vcat(r_a, r_b))
 
-    fn(k) = get_T(m.m, m.h, k)
+    fn(k) = get_T(m, k)
 
     V_fn = hankel_transform_and_interpolation(r_max, r_min, fn, params.hankel_filter)
+    # V_fn = x -> x^2
 
     r_am = abs.(recs[:, 1] .- srcs[1])
     V_am = V_fn.(log.(r_am))

@@ -11,7 +11,7 @@ using Enzyme
 using DifferentiationInterface
 using UnPack
 using InteractiveUtils
-using Interpolations
+using DataInterpolations
 using Distributions
 using Turing
 import Base: show

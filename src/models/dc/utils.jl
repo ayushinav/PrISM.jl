@@ -41,8 +41,8 @@ function hankel_transform_and_interpolation(r_max, r_min, fn, hankel_filter)
 
     # make interpolating function and return
 
-    f_spline = cubic_spline_interpolation(
-        range(log(r_min), log_r_end; length=n_r), reverse(T_at_rs))
+    f_spline = CubicSpline(
+        reverse(T_at_rs), range(log(r_min), log_r_end; length=n_r))
 
     return f_spline
 end
