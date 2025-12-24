@@ -39,5 +39,5 @@ end
 # explain in blog the reasoning behind this! This covers all 1D, 2D, 3D models for MT.
 # make pretty tables to print these models
 
-SubsurfaceCore.default_params(::Type{T}) where {T <: AbstractGeophyModel} = (;)
+SubsurfaceCore.default_params(::Type{T}) where {T <: MTModel} = (;)
 const default_params_mt = default_params(MTModel)

@@ -21,9 +21,7 @@ end
 
 create a placeholder to store functions to obtain `Distributions.jl` samplers for the likelihood function
 """
-struct DCResponseDistribution{
-    T1 <: Union{Function, Nothing}, T2 <: Union{Function, Nothing}} <:
+struct DCResponseDistribution{T1 <: Union{Function, Nothing}} <:
        AbstractGeophyResponseDistribution
     ρₐ::T1
-    ϕ::T2
 end

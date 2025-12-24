@@ -1,6 +1,5 @@
-mutable struct DCResponse{T1, T2} <: AbstractGeophyResponse
+mutable struct DCResponse{T1} <: AbstractGeophyResponse
     ρₐ::T1
-    ϕ::T2
 end
 
 #=
@@ -39,5 +38,5 @@ end
 # explain in blog the reasoning behind this! This covers all 1D, 2D, 3D models for DC.
 # make pretty tables to print these models
 
-SubsurfaceCore.default_params(::Type{T}) where {T <: AbstractGeophyModel} = (; hankel_filter = Key101)
+SubsurfaceCore.default_params(::Type{T}) where {T <: DCModel} = (; hankel_filter = Key101)
 const default_params_DC = default_params(DCModel)

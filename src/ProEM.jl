@@ -11,6 +11,7 @@ using Enzyme
 using DifferentiationInterface
 using UnPack
 using InteractiveUtils
+using Interpolations
 using Distributions
 using Turing
 import Base: show
@@ -41,6 +42,7 @@ include("inverse/nl_inv.jl")
 include("inverse/opt_inv.jl")
 include("probabilistic/models/mt.jl")
 include("probabilistic/models/surface_waves.jl")
+include("probabilistic/models/dc.jl")
 include("probabilistic/utils.jl")
 include("probabilistic/rto.jl")
 include("plots/utils.jl")
@@ -65,5 +67,6 @@ export rto_cache
 export MTModelDistribution, MTResponseDistribution
 export RWModelDistribution, SurfaceWaveResponseDistribution
 export LWModelDistribution
+export DCModelDistribution, DCResponseDistribution
 
 end
