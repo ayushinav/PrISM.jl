@@ -17,12 +17,19 @@ import Base: show
 
 import SubsurfaceCore: forward, forward_helper, get_scales, get_labels
 
+include("models/filters.jl")
+
 include("models/mt/types.jl")
+include("models/mt/utils.jl")
 include("models/mt/forward.jl")
 
 include("models/surface_waves/types.jl")
 include("models/surface_waves/utils.jl")
 include("models/surface_waves/forward.jl")
+
+include("models/dc/types.jl")
+include("models/dc/utils.jl")
+include("models/dc/forward.jl")
 
 include("models/pretty_printing.jl")
 
@@ -41,6 +48,8 @@ include("plots/utils.jl")
 # geophysics
 export MTModel, MTResponse
 export RWModel, LWModel, SurfaceWaveResponse
+export DCModel, DCResponse
+
 # forward
 export get_Z, get_appres, get_phase, forward!, forward
 

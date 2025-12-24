@@ -47,3 +47,17 @@ function Base.show(io::IO,
     d_ = round(m.ρ[end]; digits=3)
     println("$(length(m.m)) \t ∞ \t \t $m_ \t $d_")
 end
+
+function Base.show(io::IO, m::model) where {model <:
+                                            DCModel{<:AbstractVector, <:AbstractVector}}
+    println("1D ", typeof(m).name.name, " : ")
+    println("Layer \t h \t log(ρ)")
+    println("____________________________")
+    for i in eachindex(m.h)
+        m_ = round(m.m[i]; digits=3)
+        h_ = round(m.h[i]; digits=3)
+        println("$i \t $h_ \t $m_")
+    end
+    m_ = round(m.m[end]; digits=3)
+    println("$(length(m.m)) \t ∞ \t \t $m_")
+end
