@@ -21,42 +21,32 @@ function surf96!(c, t, m, mode, dc, dt, ::Val{:group}) # TODO
     return nothing
 end
 
-function SubsurfaceCore.forward(m::Tm, t::T3, response_trans_utils::T=default_surf_tf_fns,
-        params=default_params_surface_waves) where {Tm <: LWModel, T, T3}
+function SubsurfaceCore.forward(m::Tm, t::T3, params=default_params_surface_waves) where {Tm <: LWModel, T3}
     c = zeros(eltype(m.m), length(t))
-    surf96!(c, t, m, params.mode, params.dc, params.dt, Val(params.type))
-    f1 = response_trans_utils.c.tf
-    SurfaceWaveResponse{typeof(c)}(f1.(c))
+    surf96!(c, t, m, params.mode, params.dc, params.dt, params.type)
+    SurfaceWaveResponse(c)
 end
 
-function SubsurfaceCore.forward(m::Tm, t::T3, response_trans_utils::T=default_surf_tf_fns,
-        params=default_params_surface_waves) where {Tm <: RWModel, T, T3}
+function SubsurfaceCore.forward(m::Tm, t::T3, params=default_params_surface_waves) where {Tm <: RWModel, T3}
     c = zeros(eltype(m.m), length(t))
-    surf96!(c, t, m, params.mode, params.dc, params.dt, Val(params.type))
-    f1 = response_trans_utils.c.tf
-    SurfaceWaveResponse{typeof(c)}(f1.(c))
+    surf96!(c, t, m, params.mode, params.dc, params.dt, params.type)
+    SurfaceWaveResponse(c)
 end
 
 function forward!(resp::Tr,
         m::Tm,
         t::T3,
-        response_trans_utils::T=default_surf_tf_fns,
         params=default_params_surface_waves) where {
-        Tm <: RWModel, T, T3, Tr <: SurfaceWaveResponse}
-    surf96!(resp.c, t, m, params.mode, params.dc, params.dt, Val(params.type))
-    f1 = response_trans_utils.c.tf
-    broadcast!(f1, resp.c, resp.c)
+        Tm <: RWModel, T3, Tr <: SurfaceWaveResponse}
+    surf96!(resp.c, t, m, params.mode, params.dc, params.dt, params.type)
     return nothing
 end
 
 function forward!(resp::Tr,
         m::Tm,
         t::T3,
-        response_trans_utils::T=default_surf_tf_fns,
         params=default_params_surface_waves) where {
-        Tm <: LWModel, T, T3, Tr <: SurfaceWaveResponse}
-    surf96!(resp.c, t, m, params.mode, params.dc, params.dt, Val(params.type))
-    f1 = response_trans_utils.c.tf
-    broadcast!(f1, resp.c, resp.c)
+        Tm <: LWModel, T3, Tr <: SurfaceWaveResponse}
+    surf96!(resp.c, t, m, params.mode, params.dc, params.dt, params.type)
     return nothing
 end

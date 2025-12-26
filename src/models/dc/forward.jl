@@ -41,7 +41,7 @@ function SubsurfaceCore.forward(m::Tm, locs::T3, params = default_params_DC) whe
 
 end
 
-function forward!(r::Tr, m::Tm, locs::T3, response_trans_utils = (;), params = default_params_DC) where {Tr <: DCResponse, Tm <: DCModel, T3}
+function forward!(r::Tr, m::Tm, locs::T3, params = default_params_DC) where {Tr <: DCResponse, Tm <: DCModel, T3}
     @unpack recs, srcs = locs
     broadcast!(exp10, m.m, m.m)
     r_a = abs.(recs[:] .- srcs[1])
