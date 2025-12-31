@@ -53,17 +53,23 @@ mutable struct return_code{T1 <: AbstractModel}
     misfit_achieved::AbstractFloat
 end
 
-function wrapper_DI!(r_vec, m, h, vars, model_trans_utils, resp_cache,
-        resp_fields, response_trans_utils, model_type)
-    model_ = model_type(model_trans_utils.tf.(m), h)
-    forward!(resp_cache, model_, vars, response_trans_utils)
+# function DifferentiationInterface.recursive_similar(r::Tr, ::Type{T}) where {T, Tr <: AbstractGeophyResponse}
+#     return Tr.name.wrapper(map(k -> DifferentiationInterface.recursive_similar(getproperty(r, k), T),propertynames(r))...)
+# end
+
+function wrapper_DI!(r_vec, m, m_const, vars,
+        response_fields, model_type, model_trans_utils, response_trans_utils)
+    m0 = merge( (; m = model_trans_utils.tf.(m)), m_const)
+    model_ = from_nt(model_type, m0)
+    resp = ProEM.forward(model_, vars)
 
     n_resp_start = 1
     n_resp_end = 0
-    for k in resp_fields
-        n_resp_end += length(getfield(resp_cache, k))
-        r_vec[n_resp_start:n_resp_end] .= getfield(resp_cache, k)
+    for k in response_fields
+        n_resp_end += length(getfield(resp, k))
+        broadcast!(getfield(response_trans_utils, k).tf, view(r_vec, n_resp_start:n_resp_end), getfield(resp, k))
         n_resp_start += n_resp_end
     end
     nothing
+
 end

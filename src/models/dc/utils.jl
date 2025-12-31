@@ -33,10 +33,14 @@ function hankel_transform_and_interpolation(r_max, r_min, fn, hankel_filter)
     λs = exp.(range(log_λ_start, log_λ_max; length=nλ))
 
     T_at_λs = fn.(λs)
-    T_at_rs = zeros(n_r)
+    # T_at_rs = zeros(typeof(r_max+r_min), n_r)
 
-    for ir in 1:n_r
-        T_at_rs[ir] = inv(rs[ir]) .* (j0 ⋅ T_at_λs[ir:(ir + n_filter - 1)])
+    # for ir in 1:n_r
+    #     T_at_rs[ir] = inv(rs[ir]) .* (j0 ⋅ T_at_λs[ir:(ir + n_filter - 1)])
+    # end
+
+    T_at_rs = map(1:n_r) do ir
+        inv(rs[ir]) .* (j0 ⋅ T_at_λs[ir:(ir + n_filter - 1)])
     end
 
     # make interpolating function and return

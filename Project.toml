@@ -1,7 +1,7 @@
 name = "ProEM"
 uuid = "fde4c310-c20a-4a4a-8ff2-565b2b89066a"
 authors = ["Abhinav Pratap Singh <abhinavps0905@gmail.com>"]
-version = "0.1.4"
+version = "0.1.5"
 
 [deps]
 DataInterpolations = "82cc6244-b520-54b8-b5a6-8a565e85f1d0"

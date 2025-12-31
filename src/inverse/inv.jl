@@ -81,6 +81,7 @@ function inverse!(mₖ::model1,
         model_trans_utils::trans_utils_T=sigmoid_tf,
         response_trans_utils::resp_utils_T=default_mt_tf_fns,
         smoothing_step=false,
+        ad_type = DifferentiationInterface.AutoFiniteDiff(),
         mᵣ=nothing,
         reg_term=nothing,
         verbose::Union{Bool, Int}=true) where {model1 <: AbstractGeophyModel,
@@ -99,6 +100,11 @@ function inverse!(mₖ::model1,
 
     nresps = sum([length(getfield(robs, k)) for k in response_fields])
     nmods = length(mₖ.m)
+
+    ks = Tuple([k for k in propertynames(mₖ) if k != :m])
+    ps = Tuple([getfield(mₖ, k) for k in propertynames(mₖ) if k != :m])
+
+    const_m = NamedTuple{ks}(ps)
 
     jc = zeros(eltype(mₖ.m), nresps, nmods)
     # jc = jacobian_cache(response_fields, robs, mₖ, model_fields).j
@@ -121,7 +127,7 @@ function inverse!(mₖ::model1,
         assumptions=LinearSolve.OperatorAssumptions(
             true; condition=LinearSolve.OperatorCondition.WellConditioned))
 
-    forward!(respₖ, mₖ, vars, response_trans_utils, params) # for the first iteration
+    forward!(respₖ, mₖ, vars, params) # for the first iteration
     itr = 1
     chi2 = prec(1e6)
 
@@ -142,15 +148,16 @@ function inverse!(mₖ::model1,
 
     model_type = typeof(mₖ).name.wrapper
     prep_j = prepare_jacobian(
-        wrapper_DI!, rvec, AutoEnzyme(; mode=set_runtime_activity(Enzyme.Reverse)), mₖ.m,
-        Constant_DI(mₖ.h), Constant_DI(vars), Constant_DI(model_trans_utils), Cache(resp_cache),
-        Constant_DI(response_fields), Constant_DI(response_trans_utils), Constant_DI(model_type))
+        wrapper_DI!, rvec, ad_type, mₖ.m,
+        Constant_DI(const_m), Constant_DI(vars),
+        Constant_DI(response_fields), Constant_DI(model_type),
+        Constant_DI(model_trans_utils), Constant_DI(response_trans_utils))
 
     DifferentiationInterface.jacobian!(wrapper_DI!, rvec, jc, prep_j,
-        AutoEnzyme(; mode=set_runtime_activity(Enzyme.Reverse)), mₖ.m,
-        Constant_DI(mₖ.h), Constant_DI(vars), Constant_DI(model_trans_utils),
-        Cache(resp_cache), Constant_DI(response_fields),
-        Constant_DI(response_trans_utils), Constant_DI(model_type))
+        ad_type, mₖ.m,
+        Constant_DI(const_m), Constant_DI(vars),
+        Constant_DI(response_fields), Constant_DI(model_type),
+        Constant_DI(model_trans_utils), Constant_DI(response_trans_utils))
 
     while itr <= max_iters
         do_verbose(itr, verbose) && (print("$itr: "))
@@ -164,10 +171,10 @@ function inverse!(mₖ::model1,
         end
 
         DifferentiationInterface.jacobian!(
-            wrapper_DI!, rvec, jc, AutoEnzyme(; mode=set_runtime_activity(Enzyme.Reverse)),
-            mₖ.m, Constant_DI(mₖ.h), Constant_DI(vars), Constant_DI(model_trans_utils),
-            Cache(resp_cache), Constant_DI(response_fields),
-            Constant_DI(response_trans_utils), Constant_DI(model_type))
+            wrapper_DI!, rvec, jc, ad_type,
+            mₖ.m, Constant_DI(const_m), Constant_DI(vars),
+        Constant_DI(response_fields), Constant_DI(model_type),
+        Constant_DI(model_trans_utils), Constant_DI(response_trans_utils))
 
         μ_last,
         chi2 = occam_step!(mₖ₊₁, # to store the next update, which will eventually be copied to mₖ
@@ -205,10 +212,10 @@ function inverse!(mₖ::model1,
     if smoothing_step
 
         # DifferentiationInterface.jacobian!(
-        #     wrapper_DI!, rvec, jc, AutoEnzyme(; mode=set_runtime_activity(Enzyme.Reverse)),
-        #     mₖ.m, Constant_DI(mₖ.h), Constant_DI(vars), Constant_DI(model_trans_utils),
-        #     Cache(resp_cache), Constant_DI(response_fields),
-        #     Constant_DI(response_trans_utils), Constant_DI(model_type))
+        #     wrapper_DI!, rvec, jc, ad_type,
+        #     mₖ.m, Constant_DI(const_m), Constant_DI(vars),
+            # Constant_DI(response_fields), Constant_DI(model_type),
+            # Constant_DI(model_trans_utils), Constant_DI(response_trans_utils))
 
         # for k in model_fields # to model domain
         #     getfield(mₖ, k) .= model_trans_utils.tf.(getfield(mₖ, k))
