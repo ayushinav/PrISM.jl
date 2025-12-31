@@ -32,6 +32,7 @@ include("models/surface_waves/forward.jl")
 include("models/dc/types.jl")
 include("models/dc/utils.jl")
 include("models/dc/forward.jl")
+include("models/dc/arrays.jl")
 
 include("models/pretty_printing.jl")
 
@@ -52,6 +53,7 @@ include("plots/utils.jl")
 export MTModel, MTResponse
 export RWModel, LWModel, SurfaceWaveResponse
 export DCModel, DCResponse
+export get_schlumberger_array, get_wenner_array
 
 # forward
 export get_Z, get_appres, get_phase, forward!, forward

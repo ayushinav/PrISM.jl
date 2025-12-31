@@ -154,9 +154,9 @@ function occam_step!(mₖ₊₁::model1, # to store the next update, which will 
 end
 
 function find_x(x::T1, mₖ₊₁::model, respₖ₊₁::response, vars, inv_utils::inverse_utils,
-        lin_utils::linear_utils, model_fields,
-        response_fields, model_trans_utils::T3, response_trans_utils::T,
-        linsolve_prob, reg_term, mᵣ::Nothing) where {T1, T, T3, model, response}
+        lin_utils::linear_utils, model_fields, response_fields,
+        model_trans_utils::T3, response_trans_utils::T, linsolve_prob,
+        reg_term, mᵣ::Nothing) where {T1, T, T3, model, response}
     linsolve!(mₖ₊₁.m,
         linsolve_prob,
         x .* inv_utils.D' * inv_utils.D .+ lin_utils.Jₖ' * inv_utils.W * lin_utils.Jₖ,
@@ -173,8 +173,8 @@ function find_x(x::T1, mₖ₊₁::model, respₖ₊₁::response, vars, inv_uti
     return χ²(reduce(vcat, [getfield(respₖ₊₁, k) for k in response_fields]), inv_utils.dobs; W=inv_utils.W)
 end
 
-function find_x(x::T1, mₖ₊₁::model, respₖ₊₁::response, vars, inv_utils::inverse_utils,
-        lin_utils::linear_utils, model_fields,
+function find_x(x::T1, mₖ₊₁::model, respₖ₊₁::response, vars,
+        inv_utils::inverse_utils, lin_utils::linear_utils, model_fields,
         response_fields, model_trans_utils::T3, response_trans_utils::T,
         linsolve_prob, reg_term, mᵣ) where {T1, T, T3, model, response}
     linsolve!(mₖ₊₁.m,

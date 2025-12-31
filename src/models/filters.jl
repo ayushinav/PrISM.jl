@@ -1,3 +1,5 @@
+#! format: off
+
 #=
 Hankel filters (borrowed from Dipole1D codes, under GNU General Public License)
 

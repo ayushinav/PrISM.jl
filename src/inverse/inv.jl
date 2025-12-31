@@ -72,7 +72,7 @@ function inverse!(mₖ::model1,
         robs::response,
         vars,
         alg_cache::occam_cache;
-        params = default_params(model1),
+        params=default_params(model1),
         W=nothing,
         L=nothing,
         max_iters=30,
@@ -81,11 +81,11 @@ function inverse!(mₖ::model1,
         model_trans_utils=sigmoid_tf,
         response_trans_utils=nothing,
         smoothing_step=false,
-        ad_type = DifferentiationInterface.AutoFiniteDiff(),
+        ad_type=DifferentiationInterface.AutoFiniteDiff(),
         mᵣ=nothing,
         reg_term=nothing,
-        verbose::Union{Bool, Int}=true) where {model1 <: AbstractGeophyModel,
-        response <: AbstractGeophyResponse}
+        verbose::Union{Bool, Int}=true) where {
+        model1 <: AbstractGeophyModel, response <: AbstractGeophyResponse}
     prec = eltype(mₖ.m)
     model_fields = [:m]
 
@@ -94,8 +94,7 @@ function inverse!(mₖ::model1,
     n_resp = sum([length(getfield(robs, k)) for k in response_fields])
 
     if isnothing(response_trans_utils)
-        response_trans_utils = NamedTuple{response_fields}(ntuple(
-        i -> no_tf, length(response_fields)))
+        response_trans_utils = NamedTuple{response_fields}(ntuple(i -> no_tf, length(response_fields)))
     end
 
     (W === nothing) && (W = prec.(I(n_resp)))
@@ -159,16 +158,13 @@ function inverse!(mₖ::model1,
     rvec = zero(lin_utils.Fₖ)
 
     model_type = typeof(mₖ).name.wrapper
-    prep_j = prepare_jacobian(
-        wrapper_DI!, rvec, ad_type, mₖ.m,
-        Constant_DI(const_m), Constant_DI(vars),
-        Constant_DI(response_fields), Constant_DI(model_type),
+    prep_j = prepare_jacobian(wrapper_DI!, rvec, ad_type, mₖ.m, Constant_DI(const_m),
+        Constant_DI(vars), Constant_DI(response_fields), Constant_DI(model_type),
         Constant_DI(model_trans_utils), Constant_DI(response_trans_utils))
 
-    DifferentiationInterface.jacobian!(wrapper_DI!, rvec, jc, prep_j,
-        ad_type, mₖ.m,
-        Constant_DI(const_m), Constant_DI(vars),
-        Constant_DI(response_fields), Constant_DI(model_type),
+    DifferentiationInterface.jacobian!(
+        wrapper_DI!, rvec, jc, prep_j, ad_type, mₖ.m, Constant_DI(const_m),
+        Constant_DI(vars), Constant_DI(response_fields), Constant_DI(model_type),
         Constant_DI(model_trans_utils), Constant_DI(response_trans_utils))
 
     while itr <= max_iters
@@ -186,10 +182,9 @@ function inverse!(mₖ::model1,
         end
 
         DifferentiationInterface.jacobian!(
-            wrapper_DI!, rvec, jc, ad_type,
-            mₖ.m, Constant_DI(const_m), Constant_DI(vars),
-        Constant_DI(response_fields), Constant_DI(model_type),
-        Constant_DI(model_trans_utils), Constant_DI(response_trans_utils))
+            wrapper_DI!, rvec, jc, ad_type, mₖ.m, Constant_DI(const_m),
+            Constant_DI(vars), Constant_DI(response_fields), Constant_DI(model_type),
+            Constant_DI(model_trans_utils), Constant_DI(response_trans_utils))
 
         μ_last,
         chi2 = occam_step!(mₖ₊₁, # to store the next update, which will eventually be copied to mₖ
@@ -229,8 +224,8 @@ function inverse!(mₖ::model1,
         # DifferentiationInterface.jacobian!(
         #     wrapper_DI!, rvec, jc, ad_type,
         #     mₖ.m, Constant_DI(const_m), Constant_DI(vars),
-            # Constant_DI(response_fields), Constant_DI(model_type),
-            # Constant_DI(model_trans_utils), Constant_DI(response_trans_utils))
+        # Constant_DI(response_fields), Constant_DI(model_type),
+        # Constant_DI(model_trans_utils), Constant_DI(response_trans_utils))
 
         # for k in model_fields # to model domain
         #     getfield(mₖ, k) .= model_trans_utils.tf.(getfield(mₖ, k))
