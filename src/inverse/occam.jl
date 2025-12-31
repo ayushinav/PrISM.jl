@@ -57,7 +57,7 @@ performs a single step of occam inversion, using golden line search.
 """
 function occam_step!(mₖ₊₁::model1, # to store the next update, which will eventually be copied to mₖ
         respₖ₊₁::response, # to store the response for mₖ₊₁, for error calculation and anything
-        vars::Union{AbstractVector{Float32}, AbstractVector{Float64}}, # to compute the forward model
+        vars, # to compute the forward model
         χ2::Union{Float64, Float32}, # threshold chi-squared error that needs to be met
         μgrid::Vector{Float64}, # contains end points of the bounds for the lagrange multiplier
         lin_utils::linear_utils, # contains the mₖ, Jₖ, Fₖ associate with the current iteration
@@ -65,8 +65,8 @@ function occam_step!(mₖ₊₁::model1, # to store the next update, which will 
         model_trans_utils::transform_utils, # to  transform to and from the computational domain
         response_trans_utils::NamedTuple, #for scaling the response parameters,
         linsolve_prob::LinearSolve.LinearCache; # for faster inverse operations
-        model_fields::Vector{Symbol}=[k for k in fieldnames(typeof(mₖ₊₁))],
-        response_fields::Vector{Symbol}=[k for k in fieldnames(typeof(respₖ₊₁))],
+        model_fields=propertynames(mₖ₊₁),
+        response_fields=propertynames(respₖ₊₁),
         mᵣ::model2,
         verbose::Bool=true,
         reg_term::AbstractVector) where {
@@ -141,7 +141,10 @@ function occam_step!(mₖ₊₁::model1, # to store the next update, which will 
         getfield(mₖ₊₁, k) .= model_trans_utils.tf.(getfield(mₖ₊₁, k))
     end
 
-    forward!(respₖ₊₁, mₖ₊₁, vars, response_trans_utils)
+    forward!(respₖ₊₁, mₖ₊₁, vars)
+    for k in response_fields
+        broadcast!(getfield(response_trans_utils, k).tf, getfield(respₖ₊₁, k), getfield(respₖ₊₁, k))
+    end
 
     chi2 = χ²(
         reduce(vcat, [copy(getfield(respₖ₊₁, k)) for k in response_fields]), inv_utils.dobs; W=inv_utils.W)
@@ -151,8 +154,8 @@ function occam_step!(mₖ₊₁::model1, # to store the next update, which will 
 end
 
 function find_x(x::T1, mₖ₊₁::model, respₖ₊₁::response, vars, inv_utils::inverse_utils,
-        lin_utils::linear_utils, model_fields::Vector{Symbol},
-        response_fields::Vector{Symbol}, model_trans_utils::T3, response_trans_utils::T,
+        lin_utils::linear_utils, model_fields,
+        response_fields, model_trans_utils::T3, response_trans_utils::T,
         linsolve_prob, reg_term, mᵣ::Nothing) where {T1, T, T3, model, response}
     linsolve!(mₖ₊₁.m,
         linsolve_prob,
@@ -162,14 +165,17 @@ function find_x(x::T1, mₖ₊₁::model, respₖ₊₁::response, vars, inv_uti
         (inv_utils.dobs + lin_utils.Jₖ * lin_utils.mₖ - lin_utils.Fₖ) .+ reg_term)
 
     broadcast!(model_trans_utils.tf, mₖ₊₁.m, mₖ₊₁.m)
-    forward!(respₖ₊₁, mₖ₊₁, vars, response_trans_utils)
+    forward!(respₖ₊₁, mₖ₊₁, vars)
+    for k in response_fields
+        broadcast!(getfield(response_trans_utils, k).tf, getfield(respₖ₊₁, k), getfield(respₖ₊₁, k))
+    end
 
     return χ²(reduce(vcat, [getfield(respₖ₊₁, k) for k in response_fields]), inv_utils.dobs; W=inv_utils.W)
 end
 
 function find_x(x::T1, mₖ₊₁::model, respₖ₊₁::response, vars, inv_utils::inverse_utils,
-        lin_utils::linear_utils, model_fields::Vector{Symbol},
-        response_fields::Vector{Symbol}, model_trans_utils::T3, response_trans_utils::T,
+        lin_utils::linear_utils, model_fields,
+        response_fields, model_trans_utils::T3, response_trans_utils::T,
         linsolve_prob, reg_term, mᵣ) where {T1, T, T3, model, response}
     linsolve!(mₖ₊₁.m,
         linsolve_prob,
@@ -180,7 +186,10 @@ function find_x(x::T1, mₖ₊₁::model, respₖ₊₁::response, vars, inv_uti
         x .* inv_utils.D' * inv_utils.D * mᵣ.m .+ reg_term)
 
     broadcast!(model_trans_utils.tf, mₖ₊₁.m, mₖ₊₁.m)
-    forward!(respₖ₊₁, mₖ₊₁, vars, response_trans_utils)
+    forward!(respₖ₊₁, mₖ₊₁, vars)
+    for k in response_fields
+        broadcast!(getfield(response_trans_utils, k).tf, getfield(respₖ₊₁, k), getfield(respₖ₊₁, k))
+    end
 
     return χ²(reduce(vcat, [getfield(respₖ₊₁, k) for k in response_fields]), inv_utils.dobs; W=inv_utils.W)
 end
@@ -196,8 +205,8 @@ function smoothing_step_fn(mₖ₊₁::model1, # already in computational domain
         model_trans_utils::transform_utils, # to  transform to and from the computational domain
         response_trans_utils::NamedTuple, #for scaling the response parameters,
         linsolve_prob::LinearSolve.LinearCache; # for faster inverse operations
-        model_fields::Vector{Symbol}=[k for k in fieldnames(typeof(mₖ₊₁))],
-        response_fields::Vector{Symbol}=[k for k in fieldnames(typeof(respₖ₊₁))],
+        model_fields=propertynames(mₖ₊₁),
+        response_fields=propertynames(respₖ₊₁),
         mᵣ::model2,
         verbose::Bool=true,
         reg_term::AbstractVector) where {
@@ -273,7 +282,10 @@ function smoothing_step_fn(mₖ₊₁::model1, # already in computational domain
         getfield(mₖ₊₁, k) .= model_trans_utils.tf.(getfield(mₖ₊₁, k))
     end
 
-    forward!(respₖ₊₁, mₖ₊₁, vars, response_trans_utils)
+    forward!(respₖ₊₁, mₖ₊₁, vars)
+    for k in response_fields
+        broadcast!(getfield(response_trans_utils, k).tf, getfield(respₖ₊₁, k), getfield(respₖ₊₁, k))
+    end
 
     chi2 = χ²(
         reduce(vcat, [copy(getfield(respₖ₊₁, k)) for k in response_fields]), inv_utils.dobs; W=inv_utils.W)

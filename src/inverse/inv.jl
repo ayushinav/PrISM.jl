@@ -77,21 +77,26 @@ function inverse!(mₖ::model1,
         L=nothing,
         max_iters=30,
         χ2=1.0,
-        response_fields::Vector{Symbol}=[k for k in fieldnames(typeof(robs))],
-        model_trans_utils::trans_utils_T=sigmoid_tf,
-        response_trans_utils::resp_utils_T=default_mt_tf_fns,
+        response_fields=propertynames(robs),
+        model_trans_utils=sigmoid_tf,
+        response_trans_utils=nothing,
         smoothing_step=false,
         ad_type = DifferentiationInterface.AutoFiniteDiff(),
         mᵣ=nothing,
         reg_term=nothing,
         verbose::Union{Bool, Int}=true) where {model1 <: AbstractGeophyModel,
-        response <: AbstractGeophyResponse, trans_utils_T, resp_utils_T}
+        response <: AbstractGeophyResponse}
     prec = eltype(mₖ.m)
     model_fields = [:m]
 
     n_model = length(mₖ.m)
     n_vars = length(getfield(robs, first(response_fields)))
     n_resp = sum([length(getfield(robs, k)) for k in response_fields])
+
+    if isnothing(response_trans_utils)
+        response_trans_utils = NamedTuple{response_fields}(ntuple(
+        i -> no_tf, length(response_fields)))
+    end
 
     (W === nothing) && (W = prec.(I(n_resp)))
     (L === nothing) && (L = prec.(∂(n_model)))
@@ -114,6 +119,13 @@ function inverse!(mₖ::model1,
     for (i, k) in enumerate(response_fields)
         setfield!(respₖ, k, view(lin_utils.Fₖ, ((i - 1) * n_vars + 1):(i * n_vars)))
     end
+
+    @show "HELLO"
+
+    # @show size(L)
+    # @show size(W)
+    # @show size(reduce(vcat, [copy(getfield(robs, k))
+    #                                               for k in response_fields]))
 
     inv_utils = inverse_utils(L, W, reduce(vcat, [copy(getfield(robs, k))
                                                   for k in response_fields]))
@@ -164,7 +176,10 @@ function inverse!(mₖ::model1,
         # @time jacobian!(jc, mₖ, vars, model_fields, response_fields)
         # jc.j .= first(Enzyme.jacobian(set_runtime_activity(Reverse), f_temp, mₖ.m))
 
-        forward!(respₖ, mₖ, vars, response_trans_utils)
+        forward!(respₖ₊₁, mₖ₊₁, vars)
+        for k in response_fields
+            broadcast!(getfield(response_trans_utils, k).tf, getfield(respₖ₊₁, k), getfield(respₖ₊₁, k))
+        end
 
         for k in model_fields # to computational domain
             getfield(mₖ, k) .= model_trans_utils.itf.(getfield(mₖ, k))

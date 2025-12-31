@@ -48,7 +48,7 @@ function forward!(r::Tr, m::Tm, locs::T3, params = default_params_DC) where {Tr 
     r_b = abs.(recs[:] .- srcs[2])
     r_min, r_max = extrema([r_a..., r_b...])
 
-    fn(k) = get_T(m.m, m.h, k)
+    fn(k) = get_T(m, k)
 
     V_fn = hankel_transform_and_interpolation(r_max, r_min, fn, params.hankel_filter)
 
