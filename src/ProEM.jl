@@ -11,18 +11,28 @@ using Enzyme
 using DifferentiationInterface
 using UnPack
 using InteractiveUtils
+using DataInterpolations
 using Distributions
 using Turing
 import Base: show
+# import DifferentiationInterface: recursive_similar
 
 import SubsurfaceCore: forward, forward_helper, get_scales, get_labels
 
+include("models/filters.jl")
+
 include("models/mt/types.jl")
+include("models/mt/utils.jl")
 include("models/mt/forward.jl")
 
 include("models/surface_waves/types.jl")
 include("models/surface_waves/utils.jl")
 include("models/surface_waves/forward.jl")
+
+include("models/dc/types.jl")
+include("models/dc/utils.jl")
+include("models/dc/forward.jl")
+include("models/dc/arrays.jl")
 
 include("models/pretty_printing.jl")
 
@@ -34,6 +44,7 @@ include("inverse/nl_inv.jl")
 include("inverse/opt_inv.jl")
 include("probabilistic/models/mt.jl")
 include("probabilistic/models/surface_waves.jl")
+include("probabilistic/models/dc.jl")
 include("probabilistic/utils.jl")
 include("probabilistic/rto.jl")
 include("plots/utils.jl")
@@ -41,6 +52,9 @@ include("plots/utils.jl")
 # geophysics
 export MTModel, MTResponse
 export RWModel, LWModel, SurfaceWaveResponse
+export DCModel, DCResponse
+export get_schlumberger_array, get_wenner_array
+
 # forward
 export get_Z, get_appres, get_phase, forward!, forward
 
@@ -56,5 +70,6 @@ export rto_cache
 export MTModelDistribution, MTResponseDistribution
 export RWModelDistribution, SurfaceWaveResponseDistribution
 export LWModelDistribution
+export DCModelDistribution, DCResponseDistribution
 
 end

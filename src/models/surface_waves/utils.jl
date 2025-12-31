@@ -268,18 +268,17 @@ function get_c!(resp_, t, m, mode, dc)
     c_low_global = minimum(m.m)
     c_high = oftype(c_low_global, 10) # should not really go this far
     # c_low = oftype(c_low_global, c_low_global * 0.8)
-    c_start = minimum(m.m) * 0.8
+    c_start = minimum(m.m) 
 
     e = MMatrix{1, 5}(zeros(eltype(m.m), 1, 5)) # can be preallocated
     ee = MMatrix{1, 5}(zeros(eltype(m.m), 1, 5)) # can be preallocated
     C = MMatrix{5, 5}(zeros(eltype(m.m), 5, 5)) # can be preallocated
-    # C = SVector{5}([MMatrix{5,1}(zeros(5,1)) for _ in 1:5])
 
     # resp_ = zero(t)
 
     f(c, p) = dltar(p / c, p, m, e, ee, C)
-    prob_init = IntervalNonlinearProblem{false}(f, (c_start - 2dc, c_high), 2π *
-                                                                            inv(first(t)))
+    # prob_init = IntervalNonlinearProblem{false}(f, (c_start - 2dc, c_high), 2π *
+    #                                                                         inv(first(t)))
 
     for i in eachindex(t) # this can be parallelized
         flag = true # soln exists
@@ -292,7 +291,8 @@ function get_c!(resp_, t, m, mode, dc)
             f_low = f(c_low, ω)
             while c_high_each <= c_high
                 f_high_each = f(c_high_each, ω)
-                if sign(f_high_each) * sign(f_low) < 0
+                # @show c_high_each, f_high_each
+                if f_high_each * f_low < 0
                     break
                 else
                     c_high_each += dc
@@ -304,7 +304,8 @@ function get_c!(resp_, t, m, mode, dc)
                 end
             end
 
-            c = ifelse(flag, find_c(prob_init, c_high_each - 2dc, c_high_each, ω), c_high_each)
+            # c = ifelse(flag, find_c(prob_init, c_high_each - dc, c_high_each, ω), c_high_each)
+            c = ifelse(flag, find_c_(f, c_high_each - dc, c_high_each, ω), c_high_each)
 
             c_low = c + dc
             resp_[i] = c
@@ -317,4 +318,41 @@ function find_c(prob, c1, c2, ω)
     prob_new = remake(prob; tspan=(c1, c2), p=ω)
     sol = solve(prob_new)
     return oftype(c1, sol.u)
+end
+
+
+function find_c_(f, c1, c2, ω)
+
+    # @show c1, c2
+    
+    f1 = f(c1, ω)
+    f2 = f(c2, ω)
+    c3 = (c1+c2)/2
+    i = 1
+    while i <= 30
+        f3 = f(c3, ω)
+
+        if abs(f3) < 1f-9
+            break
+        elseif f3 * f1 <0
+            c2 = c3
+            f2 = f3
+        else
+            c1 = c3
+            f1 = f3
+        end
+
+        if abs(c2-c1) < 1f-9
+
+            break
+        end
+        c3 = (c1+c2)/2
+        i+=1
+        
+    end
+    
+    # @show i
+    # @show c3, 2π/ω
+
+    return c3
 end

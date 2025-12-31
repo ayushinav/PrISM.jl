@@ -1,3 +1,5 @@
+Constant_DI = DifferentiationInterface.Constant
+
 """
     function inverse!(mₖ, robs, vars, alg_cache::occam_cache; 
             W, L, max_iters, χ2, response_fields, model_trans_utils,
@@ -68,26 +70,32 @@ return_code{MTModel{Vector{Float64}, Vector{Float64}}}(true, (μ = 0.22874422627
 """
 function inverse!(mₖ::model1,
         robs::response,
-        vars::Vector{Float64},
+        vars,
         alg_cache::occam_cache;
+        params=default_params(model1),
         W=nothing,
         L=nothing,
         max_iters=30,
         χ2=1.0,
-        response_fields::Vector{Symbol}=[k for k in fieldnames(typeof(robs))],
-        model_trans_utils::trans_utils_T=sigmoid_tf,
-        response_trans_utils::resp_utils_T=default_mt_tf_fns,
+        response_fields=propertynames(robs),
+        model_trans_utils=sigmoid_tf,
+        response_trans_utils=nothing,
         smoothing_step=false,
+        ad_type=DifferentiationInterface.AutoFiniteDiff(),
         mᵣ=nothing,
         reg_term=nothing,
-        verbose::Union{Bool, Int}=true) where {model1 <: AbstractGeophyModel,
-        response <: AbstractGeophyResponse, trans_utils_T, resp_utils_T}
+        verbose::Union{Bool, Int}=true) where {
+        model1 <: AbstractGeophyModel, response <: AbstractGeophyResponse}
     prec = eltype(mₖ.m)
     model_fields = [:m]
 
     n_model = length(mₖ.m)
-    n_vars = length(vars)
-    n_resp = length(response_fields) * n_vars
+    n_vars = length(getfield(robs, first(response_fields)))
+    n_resp = sum([length(getfield(robs, k)) for k in response_fields])
+
+    if isnothing(response_trans_utils)
+        response_trans_utils = NamedTuple{response_fields}(ntuple(i -> no_tf, length(response_fields)))
+    end
 
     (W === nothing) && (W = prec.(I(n_resp)))
     (L === nothing) && (L = prec.(∂(n_model)))
@@ -97,6 +105,11 @@ function inverse!(mₖ::model1,
     nresps = sum([length(getfield(robs, k)) for k in response_fields])
     nmods = length(mₖ.m)
 
+    ks = Tuple([k for k in propertynames(mₖ) if k != :m])
+    ps = Tuple([getfield(mₖ, k) for k in propertynames(mₖ) if k != :m])
+
+    const_m = NamedTuple{ks}(ps)
+
     jc = zeros(eltype(mₖ.m), nresps, nmods)
     # jc = jacobian_cache(response_fields, robs, mₖ, model_fields).j
 
@@ -105,6 +118,13 @@ function inverse!(mₖ::model1,
     for (i, k) in enumerate(response_fields)
         setfield!(respₖ, k, view(lin_utils.Fₖ, ((i - 1) * n_vars + 1):(i * n_vars)))
     end
+
+    @show "HELLO"
+
+    # @show size(L)
+    # @show size(W)
+    # @show size(reduce(vcat, [copy(getfield(robs, k))
+    #                                               for k in response_fields]))
 
     inv_utils = inverse_utils(L, W, reduce(vcat, [copy(getfield(robs, k))
                                                   for k in response_fields]))
@@ -118,7 +138,7 @@ function inverse!(mₖ::model1,
         assumptions=LinearSolve.OperatorAssumptions(
             true; condition=LinearSolve.OperatorCondition.WellConditioned))
 
-    forward!(respₖ, mₖ, vars, response_trans_utils) # for the first iteration
+    forward!(respₖ, mₖ, vars, params) # for the first iteration
     itr = 1
     chi2 = prec(1e6)
 
@@ -138,33 +158,33 @@ function inverse!(mₖ::model1,
     rvec = zero(lin_utils.Fₖ)
 
     model_type = typeof(mₖ).name.wrapper
-    prep_j = prepare_jacobian(
-        wrapper_DI!, rvec, AutoEnzyme(; mode=set_runtime_activity(Enzyme.Reverse)), mₖ.m,
-        Constant(mₖ.h), Constant(vars), Constant(model_trans_utils), Cache(resp_cache),
-        Constant(response_fields), Constant(response_trans_utils), Constant(model_type))
+    prep_j = prepare_jacobian(wrapper_DI!, rvec, ad_type, mₖ.m, Constant_DI(const_m),
+        Constant_DI(vars), Constant_DI(response_fields), Constant_DI(model_type),
+        Constant_DI(model_trans_utils), Constant_DI(response_trans_utils))
 
-    DifferentiationInterface.jacobian!(wrapper_DI!, rvec, jc, prep_j,
-        AutoEnzyme(; mode=set_runtime_activity(Enzyme.Reverse)), mₖ.m,
-        Constant(mₖ.h), Constant(vars), Constant(model_trans_utils),
-        Cache(resp_cache), Constant(response_fields),
-        Constant(response_trans_utils), Constant(model_type))
+    DifferentiationInterface.jacobian!(
+        wrapper_DI!, rvec, jc, prep_j, ad_type, mₖ.m, Constant_DI(const_m),
+        Constant_DI(vars), Constant_DI(response_fields), Constant_DI(model_type),
+        Constant_DI(model_trans_utils), Constant_DI(response_trans_utils))
 
     while itr <= max_iters
         do_verbose(itr, verbose) && (print("$itr: "))
         # @time jacobian!(jc, mₖ, vars, model_fields, response_fields)
         # jc.j .= first(Enzyme.jacobian(set_runtime_activity(Reverse), f_temp, mₖ.m))
 
-        forward!(respₖ, mₖ, vars, response_trans_utils)
+        forward!(respₖ₊₁, mₖ₊₁, vars)
+        for k in response_fields
+            broadcast!(getfield(response_trans_utils, k).tf, getfield(respₖ₊₁, k), getfield(respₖ₊₁, k))
+        end
 
         for k in model_fields # to computational domain
             getfield(mₖ, k) .= model_trans_utils.itf.(getfield(mₖ, k))
         end
 
         DifferentiationInterface.jacobian!(
-            wrapper_DI!, rvec, jc, AutoEnzyme(; mode=set_runtime_activity(Enzyme.Reverse)),
-            mₖ.m, Constant(mₖ.h), Constant(vars), Constant(model_trans_utils),
-            Cache(resp_cache), Constant(response_fields),
-            Constant(response_trans_utils), Constant(model_type))
+            wrapper_DI!, rvec, jc, ad_type, mₖ.m, Constant_DI(const_m),
+            Constant_DI(vars), Constant_DI(response_fields), Constant_DI(model_type),
+            Constant_DI(model_trans_utils), Constant_DI(response_trans_utils))
 
         μ_last,
         chi2 = occam_step!(mₖ₊₁, # to store the next update, which will eventually be copied to mₖ
@@ -202,10 +222,10 @@ function inverse!(mₖ::model1,
     if smoothing_step
 
         # DifferentiationInterface.jacobian!(
-        #     wrapper_DI!, rvec, jc, AutoEnzyme(; mode=set_runtime_activity(Enzyme.Reverse)),
-        #     mₖ.m, Constant(mₖ.h), Constant(vars), Constant(model_trans_utils),
-        #     Cache(resp_cache), Constant(response_fields),
-        #     Constant(response_trans_utils), Constant(model_type))
+        #     wrapper_DI!, rvec, jc, ad_type,
+        #     mₖ.m, Constant_DI(const_m), Constant_DI(vars),
+        # Constant_DI(response_fields), Constant_DI(model_type),
+        # Constant_DI(model_trans_utils), Constant_DI(response_trans_utils))
 
         # for k in model_fields # to model domain
         #     getfield(mₖ, k) .= model_trans_utils.tf.(getfield(mₖ, k))
