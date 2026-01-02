@@ -1,4 +1,4 @@
-using Porosity
+using ProEM
 using Documenter, DocumenterVitepress
 
 include("pages.jl")

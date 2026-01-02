@@ -1,17 +1,19 @@
 # Magnetotellurics (MT)
 
 ```@setup mt_demo
-using ProEM, CairoMakie, BenchmarkTools, InteractiveUtils
+using ProEM, CairoMakie, InteractiveUtils
 ```
 
 ## Model
 
 We assume the following subsurface resistivity distribution with 4 layers:
 
-  - Layer 1: 500 $\Omega m$, thickness= 2000 $m$
-  - Layer 2: 1000 $\Omega m$, thickness= 1000 $m$
-  - Layer 3: 10 $\Omega m$, thickness= 200 $m$
-  - Layer 4: 100 $\Omega m$, half-space
+| Layer # | thickness (m) | $\rho \; (\Omega m$) | 
+| :-: | :-: | :-: |
+| 1 | 2000 | 500 |
+| 2 | 1000 | 1000 |
+| 3 | 200 | 10 |
+| 4 | $\infty$ | 100 |
 
 The `MTModel` is defined as :
 
@@ -38,7 +40,7 @@ nothing # hide
 </details>
 ```
 
-```
+```@example mt_demo
 fig # hide
 ```
 
@@ -80,7 +82,7 @@ nothing # hide
 </details>
 ```
 
-```
+```@example mt_demo
 fig # hide
 ```
 
@@ -111,7 +113,7 @@ While the exact runtimes will vary across processors, the runtimes increase line
 <details closed><summary>Benchmark code</summary>
 ```
 
-```example mt_demo
+```@example mt_demo
 n_layers = Int.(exp2.(2:1:6))
 freq = exp10.(-2:0.2:4)
 ω = 2π .* freq
@@ -123,13 +125,15 @@ for i in eachindex(n_layers)
     h = 100 .* rand(n_layers[i]-1)
     m = MTModel(ρ, h)
     resp = forward(m, ω)
-    time_oop = @btimed begin 
-        forward($m, $ω)
+    time_oop = @timed begin 
+        for i in 1:1000 forward(m, ω) end
     end
-    btime_oop[i] = time_oop.time
+    btime_oop[i] = time_oop.time/1e3
     forward!(resp, m, ω)
-    time_iip = @btimed forward!($resp, $m, $ω)
-    btime_iip[i] = time_iip.time
+    time_iip = @timed begin
+        for i in 1:1000 forward!(resp, m, ω) end
+    end
+    btime_iip[i] = time_iip.time/1e3
 end
 
 fig = Figure()
@@ -144,7 +148,7 @@ nothing # hide
 </details>
 ```
 
-```
+```@example mt_demo
 fig # hide
 ```
 
@@ -152,5 +156,5 @@ fig # hide
 
 ```@example mt_demo
 println("The above benchmarks were obtained on $(Sys.cpu_info()[1].model)") # hide
-println("versionfo()") # hide
+# println(versionfo()) # hide
 ```
