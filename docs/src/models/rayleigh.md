@@ -8,7 +8,6 @@ using ProEM, CairoMakie, InteractiveUtils
 ## Model
 
 We assume the following subsurface resistivity distribution with 4 layers:
-6.8  5.95  7.14  7.65
 | Layer # | thickness (m) | $V_s \; (km s^{-1}$) | $V_p \; (km s^{-1}$) | $\rho \; (g cm^{-3}$) | 
 | :-: | :-: | :-: | :-: | :-: |
 | 1 | 8000 | 4 | 6.8 | 2
@@ -162,6 +161,3 @@ fig # hide
 println("The above benchmarks were obtained on $(Sys.cpu_info()[1].model)") # hide
 # println(versionfo()) # hide
 ```
-
-Hello Mehdia,
-Happy birthday and a very happy new year! I have always admired you for the person you are. Honestly, I consider myself lucky to have found a friend in you. I think this year was a great milestone for you and a testament to your own commitments. You passed your comprehensive exam, not that there was any doubt, but it is still a hard objective you have achieved since coming here. I have already expressed my awe at the transformation because of working out, but you have achieved even greater transformation in other aspects. That picture you showed us in front of your school, with 10 years in between, captures beautifully how long you have come. I have always appreciated our discussions on relationships and religion, and I hope we continue to do so. In a world getting more and more radicalised, you are a gem to talk critically about the values you have held close growing up. I hope the coming year brings you joy, and fills your heart with love and happiness. 
