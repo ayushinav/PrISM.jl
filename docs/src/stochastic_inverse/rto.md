@@ -3,9 +3,9 @@
 
 RTO-TKO is a stochastic framework introduced in the electromagnetic geophysical community by Blatter et al., 2022 ([a](https://doi.org/10.1093/gji/ggac241) and [b](https://doi.org/10.1093/gji/ggac242))
 
-Similar to fixed discretization scheme, the grid sizes do not change. RTO-TKO chooses a perturbation in the prior space and optimzes for a response sampled from the response domain.
+Similar to fixed discretization scheme, the grid sizes do not change. RTO-TKO tries to obtain the samples of the posterior distribution by unrolling the optimization for the misfit function, that is, it perturbs the model space obtained after one iteration before optimizing for the next. It does this iteratively for both the values of the model space and the regularization coefficient in alternative steps.
 
-Let's have
+Therefore, if we have
 
 ```math
 m = [m_1, m_2, m_3, ... , m_N] \\
@@ -18,13 +18,13 @@ and
 d = \mathcal{F}(m)
 ```
 
-Let ``C_d`` be the data covariance matrix and we want to explore uncertainty for the following misfit function:
+Let $C_d$ be the data covariance matrix and we want to explore uncertainty for the following misfit function:
 
 ```math
 J(m) = [\mathcal{F}(m) - d]^T C_d [\mathcal{F}(m) - d] + \mu (Lm)^T(Lm)
 ```
 
-where ``\mu`` is the regularization weight and ``L`` is the derivative matrix. RTO-TKO explores the uncertainty in ``\mu``-space instead of fixing it and gives a family of models that fit the data. The algorithm works as:
+where $\mu$ is the regularization weight and $L$ is the derivative matrix. RTO-TKO explores the uncertainty in $\mu$-space instead of fixing it and gives a family of models that fit the data. The algorithm works as:
 
 Solving for
 
@@ -48,7 +48,7 @@ Solving for
 
 !!! note
     
-      - Usually, the prior of ``\mu``is a uniform distribution and we do not have to compute the log pdf term
+      - Usually, the prior of $\mu$ is a uniform distribution and we do not have to compute the log pdf term
       - Implementing the above from scratch might not be trivial because of ``L'L`` being non-invertible, and we do the optimization in the domain defined by $\xi = \sqrt{\mu}Lm$.
         Such a variable will then have a standard normal distribution $\mathcal{N}(0, I)$ when $m \sim \mathcal{N}(0, \frac{1}{\mu}(L^T L))$
 

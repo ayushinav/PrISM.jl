@@ -1,12 +1,25 @@
 # Stochastic inversion
 
-Performing stochastic inversion involves forming the model prior space, defining the likelihood and then getting samples from the posterior space.
+Stochastic inversion revolves around the Bayesian formulation : 
 
-## Constructing distributions to sample from
+$$
+p(m|d) \propto p(d|m) p(m)
+$$
+
+where $d$ is the data to be inverted and $m$ is the model. $p(m)$ defines the prior information about the model (our guess about what we know about the model prior to performing inversion). We update this to obtain the posterior distribution $p(m|d)$ using the observed dataset. $p(d|m)$ is called the likelihood term and includes the physics of the system as well as the metric of misfit.
+
+We do not generally get an explicit analytical form of the posterior distribution, but obtain the samples from it. The most common way to obtain these samples is via Markov chain Monte Carlo (MCMC). Without going into details of MCMC, we complete here by mentioning that we usually need a large number of samples to obtain a good estimate of the posterior distribution. Naive MCMC schemes such as Random Walk Metropolis can take a long time to converge, and using gradient information can lead to a more efficient traversal of the probability space.
+
+To sum it up, performing stochastic inversion involves 
+* specifying the *a priori* distribution
+* specifying the likelihood (physics + misfit)
+* specifying the MCMC scheme (sampler + no of samples)
+
+## Constructing distributions
 
 ### Model distribution (*a priori* information)
 
-Before beginning to talk about how to construct the *a priori* distribution, it is important to understand that the model here refers to the discretization space as well as the values of physical properties. For eg, for electrical methods, the model space will consist of the electrical resistivity as well as the grid sizes represented by those. This is primarily useful in 1D, but can have its own consequences.
+Before beginning to talk about how to construct the *a priori* distribution, it is important to understand that the model here refers to the discretization space as well as the values of physical properties. For eg, for electrical methods, the model space will consist of the electrical resistivity as well as the grid sizes discretizing the spatial domain. You can vary both or keep the grid size fixed. Grid sizes are usually kept fixed. Varying them can be useful in 1D, but it can also have its implicit effect on the results
 
 For most applications, however, we fix the node points. We follow a 1D MT example to show the framework. For now, we begin by choosing a very broad prior for all the `n` layers. A model distribution can be constructed using `MTModelDistribution(...)`. This has the same structure as `MTModel`, that is, the first parameter denotes the prior for electrical conductivities, while the second is for the layer thicknesses `h`. If you do not want to infer on `h`, just pass it as a simple vector, as is also demonstrated in the following case:
 
@@ -41,11 +54,11 @@ modelD = MTModelDistribution(
 );
 ```
 
-This has its own consequences on the results and one needs to be mindful of that while interpreting the results.
-
 ### Response distribution (*likelihood*)
 
-A likelihood is determined by an observed response `r_obs` we want to fit, and the errors associated with it `err_resp`. One of the popular ways in which likelihood can be formed is using the gaussian distribution, centered around `r_obs` with variance given by `err_resp`. To make things consistent, we pass `r_obs` and `err_resp` into the final function. To make a likelihood, we just need to pass a function that can take in a response parameter and the associated error and produce a distribution. We already provide a function `norm_dist` that takes in a vector for the response and another vector/matrix for the covariance matrix of the errors. The response distribution is then constructed by:
+A likelihood is determined by an observed response `r_obs` we want to fit, and the errors associated with it `err_resp`. One of the popular ways in which likelihood can be formed is using the gaussian distribution, centered around `r_obs` with variance given by `err_resp`. To make things consistent, we pass `r_obs` and `err_resp` into the final function. 
+
+Remember that to make a likelihood, we need the physics of the system and the error metric. With the data at avail, we now need to specify the misfit function. Here, we just need to pass a function that can take in a response parameter and the associated error and produce a distribution. We already provide a function `norm_dist` that takes in a vector for the response and another vector/matrix for the covariance matrix of the errors. The response distribution is then constructed by:
 
 ```julia
 respD = MTResponseDistribution(normal_dist, normal_dist)
@@ -54,6 +67,8 @@ respD = MTResponseDistribution(normal_dist, normal_dist)
 !!! note
     
     Both `r_obs` and `err_resp` have the same type, eg. `MTResponse`.
+
+In the above, `MTResponseDistribution` specifies the physics of the system to completely specify the likelihood.
 
 ## Inference
 
@@ -116,12 +131,6 @@ The obtained `mcmc_chain` contains the distributions that can be saved using [JL
 using JLD2
 JLD2.@save "file_path.jld2" mcmc_chains
 ```
-
-**Note**:
-
-!!! note
-    
-    The returned chains will be sampled in the distribution specified by `modelD`. In the presented case, it will have values $\in [-1, 5]$ and we can get the values by `10. ^ value`.
 
 The list of models can then be obtained from chains using
 

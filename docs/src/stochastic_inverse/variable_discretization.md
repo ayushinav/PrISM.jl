@@ -1,6 +1,6 @@
 ## Variable discretization
 
-Especially in 1D, we have an analytical solution to the model with any grid spacing. This allows us to move the layer interfaces up and down while parameterizing the model space in a different way wherein there is more flexibility.
+There are a few cases when we can simplify the subsurface structure by expressing it using only a few layers. In those cases, it may be desirable to vary the cell size (layer thickness) along with the model parameters. This allows us to move the layer interfaces up and down while parameterizing the model space in a different way wherein there is more flexibility.
 
 Let's denote the model parameters, eg., conductivity, by `m`, and the layer thickness by `h`. Therefore, in a N-layer case, we will have
 
@@ -12,11 +12,28 @@ h = [h_1, h_2, h_3, ... , h_{N_1}]
 such that
 
 ```math
-m\_i  \in \mathcal{D}_{m_i} \text{ ; where } \mathcal{D}_{m_i} = \textit{a priori} \text{ distribution for } m_i \text{ ; and} \\
- h\_i  \in \mathcal{D}_{h_i} \text{ ; where } \mathcal{D}_{h_i} = \textit{a priori} \text{ distribution for } h_i 
+m_i  \in \mathcal{D}_{m_i} \text{ ; where } \mathcal{D}_{m_i} = \textit{a priori} \text{ distribution for } m_i \text{ ; and} \\
+ h_i  \in \mathcal{D}_{h_i} \text{ ; where } \mathcal{D}_{h_i} = \textit{a priori} \text{ distribution for } h_i 
 ```
 
 In the following example, we show how to perform MCMC inversion for such a case using a synthetic dataset. We assume a 6-layered earth, including the half-space where all layers have resistivities bounded between $10^{-1}$ and $10^5$, defined using a uniform distribution, and layered thickness values vary between 100 m and 500 m for all the layers above the half-space.
+
+!!! note
+
+    The only thing to be noted here is the specification of the prior distribution, done via:
+
+    ```julia
+    modelD = MTModelDistribution(
+        Product(
+            [Uniform(-1.0, 5.0) for i in eachindex(z)]
+        ),
+        Product(
+            [Uniform(h_lb[i], h_ub[i]) for i in eachindex(h)]
+        )
+    );
+    ```
+
+    in the following code-block.
 
 ## Copy-Pasteable code
 
@@ -47,7 +64,7 @@ h = diff(z);
 h_ub = h .+ 100;
 h_lb = h .- 100;
 
-# fixed discretization
+# variable discretization
 modelD = MTModelDistribution(
     Product(
         [Uniform(-1.0, 5.0) for i in eachindex(z)]

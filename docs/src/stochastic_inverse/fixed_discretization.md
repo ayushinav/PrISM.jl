@@ -1,6 +1,6 @@
 # Fixed discretization
 
-Geophysical models generally have fixed discretization. This is mostly because the different numerical schemes such as finite difference and finite element are computationally expensive and allocating a grid prior to solving the corresponding PDEs saves some computational resources. We provide the capability to do MCMC inference on such fixed grids.
+Geophysical models generally have fixed discretization. This is mostly because the geophysical inverse problem is already very non-unique, and varying the discretization points together with the model values (e.g. resistivity and velocity) can make the posterior space even wider for model values. While Finite Element schemes have recently stepped in solving the corresponding PDEs, geophysical simulations have traditionally been done using finite differences which do not do well with really non-uniform discretization. Moreover, sensitivity kernels can change drastically if the cell sizes (thickness of the layers) are allowed to vary. We provide the capability to do MCMC inference on such fixed grids.
 
 Let's denote the model parameters, eg., conductivity, by `m`, and the layer thickness by `h`. Therefore, in a N-layer case, we will have
 
@@ -12,12 +12,29 @@ h = [h_1, h_2, h_3, ... , h_{N-1}]
 such that
 
 ```math
-m\_i  \in \mathcal{D}_{m_i} \text{ ; where } \mathcal{D}_{m_i} = \textit{a priori} \text{ distribution for } m_i
+m_i  \in \mathcal{D}_{m_i} \text{ ; where } \mathcal{D}_{m_i} = \textit{a priori} \text{ distribution for } m_i
 ```
 
 and $h_i$ is fixed.
 
 In the following example, we show how to perform MCMC inversion for such a case using a synthetic dataset. We assume a 6-layered earth, including the half-space where all layers have resistivities bounded between $10^{-1}$ and $10^5$, defined using a uniform distribution.
+
+!!! note
+
+    The only thing to be noted here is the specification of the prior distribution, done via:
+
+    ```julia
+    modelD = MTModelDistribution(
+        Product(
+            [Uniform(-1.0, 5.0) for i in eachindex(z)]
+        ),
+        vec(h)
+    );
+    ```
+
+    in the following code-block.
+
+
 
 ## Copy-Pasteable code
 
