@@ -67,6 +67,6 @@ end
 RWModel(m, h, ρ, γ::T) where {T <: Number} = RWModel(m, h, ρ, m .* γ)
 
 function SubsurfaceCore.default_params(::Type{T}) where {T <: Union{LWModel, RWModel}}
-    (; mode=0, dc=0.01, dt=0.001, type=:phase)
+    (; mode=0, dc=0.01, dt=0.001, type=Val(:phase))
 end
 const default_params_surface_waves = default_params(RWModel) # same for LWModel

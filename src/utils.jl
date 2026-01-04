@@ -38,6 +38,11 @@ function zero_abstract(m::swresponse) where {swresponse <:
     SurfaceWaveResponse{AbstractVector}(zero(m.c))
 end
 
+function zero_abstract(m::dcresponse) where {dcresponse <:
+                                             DCResponse{<:AbstractVector{<:Any}}}
+    DCResponse{AbstractVector}(zero(m.ρₐ))
+end
+
 # function inverse(t::mtresponse; abstract=false) where {mtresponse <: MTResponse}
 #     if abstract
 #         return MTModel{AbstractArray{<:Any, length(size(t.ρₐ))}, # length(size(...)) => dimensionality
