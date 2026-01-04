@@ -194,7 +194,7 @@ function dltar(c, ω, model::LWModel, e, ee, C)
 
         e10 = e1 * cosq + e2 * G * z
         e20 = e1 * y / G + e2 * cosq
-        max_ = maximum([abs(e10), abs(e20)])
+        max_ = max(abs(e10), abs(e20))
         dr = ifelse(max_ < 1.0f-40, zero(max_) + 1, max_)
         e1 = e10 / dr
         e2 = e20 / dr
