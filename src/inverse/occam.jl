@@ -95,6 +95,12 @@ function occam_step!(mₖ₊₁::model1, # to store the next update, which will 
     tol = 1e-5
     count = 0
     while (x₃ - x₁) >= tol
+
+        if (abs(fx₂ - fx₄) < tol)
+            x₁ = x₄
+            x₃ = x₄
+            break
+        end
         count += 1
         if count > 100
             verbose && (print("100 golden section iterations done. \t"))
@@ -149,7 +155,7 @@ function occam_step!(mₖ₊₁::model1, # to store the next update, which will 
     chi2 = χ²(
         reduce(vcat, [copy(getfield(respₖ₊₁, k)) for k in response_fields]), inv_utils.dobs; W=inv_utils.W)
 
-    do_verbose(verbose) && (print("Works golden section search: μ= $μ, χ²= ", chi2, "\n"))
+    do_verbose(verbose) && (print("golden section search: μ= $μ, χ²= ", chi2, "\n"))
     return μ, chi2
 end
 

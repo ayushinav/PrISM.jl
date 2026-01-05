@@ -1,5 +1,7 @@
 Constant_DI = DifferentiationInterface.Constant
 
+# TODO : params -> wrapper_DI, occam_step, smoothing_step_fn
+
 """
     function inverse!(mₖ, robs, vars, alg_cache::occam_cache; 
             W, L, max_iters, χ2, response_fields, model_trans_utils,
@@ -119,13 +121,6 @@ function inverse!(mₖ::model1,
         setfield!(respₖ, k, view(lin_utils.Fₖ, ((i - 1) * n_vars + 1):(i * n_vars)))
     end
 
-    @show "HELLO"
-
-    # @show size(L)
-    # @show size(W)
-    # @show size(reduce(vcat, [copy(getfield(robs, k))
-    #                                               for k in response_fields]))
-
     inv_utils = inverse_utils(L, W, reduce(vcat, [copy(getfield(robs, k))
                                                   for k in response_fields]))
 
@@ -139,6 +134,9 @@ function inverse!(mₖ::model1,
             true; condition=LinearSolve.OperatorCondition.WellConditioned))
 
     forward!(respₖ, mₖ, vars, params) # for the first iteration
+    for k in response_fields
+            broadcast!(getfield(response_trans_utils, k).tf, getfield(respₖ, k), getfield(respₖ, k))
+    end
     itr = 1
     chi2 = prec(1e6)
 
@@ -172,9 +170,9 @@ function inverse!(mₖ::model1,
         # @time jacobian!(jc, mₖ, vars, model_fields, response_fields)
         # jc.j .= first(Enzyme.jacobian(set_runtime_activity(Reverse), f_temp, mₖ.m))
 
-        forward!(respₖ₊₁, mₖ₊₁, vars)
+        forward!(respₖ, mₖ, vars)
         for k in response_fields
-            broadcast!(getfield(response_trans_utils, k).tf, getfield(respₖ₊₁, k), getfield(respₖ₊₁, k))
+            broadcast!(getfield(response_trans_utils, k).tf, getfield(respₖ, k), getfield(respₖ, k))
         end
 
         for k in model_fields # to computational domain
