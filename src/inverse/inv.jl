@@ -113,7 +113,6 @@ function inverse!(mₖ::model1,
     const_m = NamedTuple{ks}(ps)
 
     jc = zeros(eltype(mₖ.m), nresps, nmods)
-    # jc = jacobian_cache(response_fields, robs, mₖ, model_fields).j
 
     lin_utils = linear_utils(view(mₖ.m, :), zeros(prec, n_resp), view(jc, :, :))
 
@@ -158,12 +157,12 @@ function inverse!(mₖ::model1,
     model_type = typeof(mₖ).name.wrapper
     prep_j = prepare_jacobian(wrapper_DI!, rvec, ad_type, mₖ.m, Constant_DI(const_m),
         Constant_DI(vars), Constant_DI(response_fields), Constant_DI(model_type),
-        Constant_DI(model_trans_utils), Constant_DI(response_trans_utils))
+        Constant_DI(model_trans_utils), Constant_DI(response_trans_utils), Constant_DI(params))
 
     DifferentiationInterface.jacobian!(
         wrapper_DI!, rvec, jc, prep_j, ad_type, mₖ.m, Constant_DI(const_m),
         Constant_DI(vars), Constant_DI(response_fields), Constant_DI(model_type),
-        Constant_DI(model_trans_utils), Constant_DI(response_trans_utils))
+        Constant_DI(model_trans_utils), Constant_DI(response_trans_utils), Constant_DI(params))
 
     while itr <= max_iters
         do_verbose(itr, verbose) && (print("$itr: "))
@@ -182,7 +181,7 @@ function inverse!(mₖ::model1,
         DifferentiationInterface.jacobian!(
             wrapper_DI!, rvec, jc, ad_type, mₖ.m, Constant_DI(const_m),
             Constant_DI(vars), Constant_DI(response_fields), Constant_DI(model_type),
-            Constant_DI(model_trans_utils), Constant_DI(response_trans_utils))
+            Constant_DI(model_trans_utils), Constant_DI(response_trans_utils), Constant_DI(params))
 
         μ_last,
         chi2 = occam_step!(mₖ₊₁, # to store the next update, which will eventually be copied to mₖ
