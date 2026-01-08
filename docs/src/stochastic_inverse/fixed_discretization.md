@@ -35,11 +35,10 @@ In the following example, we show how to perform MCMC inversion for such a case 
     in the following code-block.
 
 
-
 ## Copy-Pasteable code
 
 ```@example fixed_mcmc
-using MT
+using ProEM
 using Distributions
 using Turing
 using LinearAlgebra
@@ -74,7 +73,7 @@ modelD = MTModelDistribution(
 n_samples = 1000;
 mcache = mcmc_cache(modelD, respD, n_samples, NUTS());
 
-mt_chain = stochastic_inverse(r_obs, err_resp, ω, mcache)
+mt_chain = stochastic_inverse(r_obs, err_resp, ω, mcache, progress = false)
 ```
 
 The obtained `mt_chain` contains the *a posteriori* distributions that can be saved using [JLD2.jl](https://github.com/JuliaIO/JLD2.jl).
@@ -88,9 +87,8 @@ and plotted as :
 
 ```@example fixed_mcmc
 fig = Figure()
-ax = Axis(fig[1, 1]; xscale=log10)
-hm = get_kde_image!(ax, mt_chain, modelD; kde_transformation_fn=log10,
-    trans_utils=(; m=pow_tf), colormap=:thermal, colorrange=(-3.0, 0))
+ax = Axis(fig[1, 1]; xlabel =  "log ρ (Ωm)" , ylabel = "depth (m)" )
+hm = get_kde_image!(ax, mt_chain, modelD; kde_transformation_fn=log10, colormap=:thermal, colorrange=(-3.0, 0))
 Colorbar(fig[1, 2], hm; label="log pdf")
 
 mean_kws = (; color=:blue, linewidth=2)
@@ -102,7 +100,7 @@ ylims!(ax, [2500, 0])
 
 plot_model!(ax, m_test; color=:black, linestyle=:dash, label="true")
 Legend(fig[2, :], ax; orientation=:horizontal)
-fig
+fig # hide
 ```
 
 The list of models can then be obtained from chains using
@@ -128,18 +126,5 @@ end
 plot_response!([ax1, ax2], ω, r_obs; errs=err_resp, plt_type=:errors, whiskerwidth=10)
 plot_response!([ax1, ax2], ω, r_obs; plt_type=:scatter, label="true")
 
-fig
-```
-
-The posterior distribution can then be obtained as:
-
-```julia
-pre_img = pre_image(m_dist, mt_chain);
-kde_img = get_kde_image(pre_img..., false; xscale=:identity, yscale=:identity, yflip=true)
-```
-
-We can also obtain the mean and 1 std deviation bounds as:
-
-```julia
-mean_std_plt_lin = get_mean_std_image(pre_img...; yscale=:identity)
+fig # hide
 ```

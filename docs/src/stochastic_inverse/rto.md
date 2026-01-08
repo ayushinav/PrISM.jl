@@ -54,8 +54,8 @@ Solving for
 
 ## Copy-Pasteable code
 
-```@example rto_tko
-using MT
+```@example rto_tko_demo
+using ProEM
 using Distributions
 using Turing
 using LinearAlgebra
@@ -109,7 +109,6 @@ rto_chain = stochastic_inverse(
     err_resp,
     ω,
     r_cache;
-    model_trans_utils=(; m=MT.lin_tf)
 )
 
 mt_chain = Turing.Chains(
@@ -127,11 +126,10 @@ JLD2.@save "file_path.jld2" mt_chain
 
 and plotted as :
 
-```@example rto_tko
+```@example rto_tko_demo
 fig = Figure()
-ax = Axis(fig[1, 1]; xscale=log10)
-hm = get_kde_image!(ax, mt_chain, modelD; kde_transformation_fn=log10,
-    trans_utils=(; m=pow_tf), colormap=:thermal, colorrange=(-2.0, -1.5))
+ax = Axis(fig[1, 1]; xlabel =  "log ρ (Ωm)" , ylabel = "depth (m)" )
+hm = get_kde_image!(ax, mt_chain, modelD; kde_transformation_fn=log10, colormap=:thermal, colorrange=(-3.0, 0), trans_utils = (; m = no_tf, h = no_tf))
 Colorbar(fig[1, 2], hm; label="log pdf")
 
 mean_kws = (; color=:blue, linewidth=2)
@@ -148,14 +146,14 @@ fig
 
 The list of models can then be obtained from chains using
 
-```@example rto_tko
+```@example rto_tko_demo
 model_list = get_model_list(mt_chain, modelD);
 nothing # hide
 ```
 
 We can then easily check the fit of the response curves
 
-```@example rto_tko
+```@example rto_tko_demo
 fig = Figure()
 ax1 = Axis(fig[1, 1])
 ax2 = Axis(fig[1, 2])

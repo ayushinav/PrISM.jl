@@ -49,6 +49,7 @@ Pkg.add("ProEM.jl")
 ### Conductivity models
 
   - Magnetotellurics (MT)
+  - DC resistivity
 
 ### Seismic models
 

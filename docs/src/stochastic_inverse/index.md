@@ -2,9 +2,9 @@
 
 Stochastic inversion revolves around the Bayesian formulation : 
 
-$$
+```math
 p(m|d) \propto p(d|m) p(m)
-$$
+```
 
 where $d$ is the data to be inverted and $m$ is the model. $p(m)$ defines the prior information about the model (our guess about what we know about the model prior to performing inversion). We update this to obtain the posterior distribution $p(m|d)$ using the observed dataset. $p(d|m)$ is called the likelihood term and includes the physics of the system as well as the metric of misfit.
 
@@ -19,7 +19,7 @@ To sum it up, performing stochastic inversion involves
 
 ### Model distribution (*a priori* information)
 
-Before beginning to talk about how to construct the *a priori* distribution, it is important to understand that the model here refers to the discretization space as well as the values of physical properties. For eg, for electrical methods, the model space will consist of the electrical resistivity as well as the grid sizes discretizing the spatial domain. You can vary both or keep the grid size fixed. Grid sizes are usually kept fixed. Varying them can be useful in 1D, but it can also have its implicit effect on the results
+Before beginning to talk about how to construct the *a priori* distribution, it is important to understand that the model here refers to the discretization space as well as the values of physical properties. For e.g., for electrical methods, the model space will consist of the electrical resistivity as well as the grid sizes discretizing the spatial domain. You can vary both or keep the grid size fixed. Grid sizes are usually kept fixed. Varying them can be useful in 1D, but it can also have its implicit effect on the results
 
 For most applications, however, we fix the node points. We follow a 1D MT example to show the framework. For now, we begin by choosing a very broad prior for all the `n` layers. A model distribution can be constructed using `MTModelDistribution(...)`. This has the same structure as `MTModel`, that is, the first parameter denotes the prior for electrical conductivities, while the second is for the layer thicknesses `h`. If you do not want to infer on `h`, just pass it as a simple vector, as is also demonstrated in the following case:
 
@@ -89,7 +89,7 @@ mcmc_chain = stochastic_inverse(r_obs, err_resp, ω, mcache)
 ## Copy-Pasteable code
 
 ```julia
-using MT
+using PRoEM
 using Distributions
 using Turing
 using LinearAlgebra

@@ -21,9 +21,9 @@ We assume the following subsurface resistivity distribution with 4 layers:
 The `LWModel` is defined as :
 
 ```@example lw_demo
-vs = [4, 3.5, 4.2, 4.5]
-ρ = [2., 2., 2., 2.]
-h = [8e3, 4e3, 8e3]
+vs = [3.2, 4.39731, 4.40192, 4.40653, 4.41113, 4.41574]
+ρ = [2.6, 3.38014, 3.37797, 3.37579, 3.37362, 3.37145]
+h = [20.0, 20.0, 20.0, 20.0, 20.0] .* 1e3
 m = LWModel(vs, h, ρ)
 ```
 
@@ -57,11 +57,11 @@ fig # hide
 To obtain the responses, that is apparent resistivity `ρₐ` and phase `ϕ`, we first need to define the frequencies :
 
 ```@example lw_demo
-freq = exp10.(-1:0.2:2)
+freq = exp10.(-2:0.1:1)
 T = inv.(freq)
 ```
 
-and then call the `forward` dispatch and get `MTResponse`:
+and then call the `forward` dispatch and get `SurfaceWaveResponse`:
 
 ```@example lw_demo
 resp = forward(m, T)
@@ -90,7 +90,7 @@ fig # hide
 
 ### In-place operations
 
-Mutating forward calls are also supported. This leads to no extra allocations while calculating the forward responses. This also speeds up the performance, though the calculations in the well-optimized forward calls are way more expensive than allocations to get a significant boost here. We now call the in-place variant `forward!` and provide an `MTResponse` variable to be overwritten :
+Mutating forward calls are also supported. This leads to no extra allocations while calculating the forward responses. This also speeds up the performance, though the calculations in the well-optimized forward calls are way more expensive than allocations to get a significant boost here. We now call the in-place variant `forward!` and provide a `SurfaceWaveResponse` variable to be overwritten :
 
 ```@example lw_demo
 forward!(resp, m, T)
@@ -123,7 +123,7 @@ T = 2π .* freq
 btime_iip = Float64.(zero(n_layers))
 btime_oop = Float64.(zero(n_layers))
 for i in eachindex(n_layers)
-    vs = 3 .+ 0.5 .* randn(n_layers[i])
+    vs = 3 .+ 0.005 .* randn(n_layers[i])
     ρ = 2 .* ones(n_layers[i])
     h = 100 .* rand(n_layers[i]-1)
     m = LWModel(vs, h, ρ)

@@ -38,7 +38,7 @@ In the following example, we show how to perform MCMC inversion for such a case 
 ## Copy-Pasteable code
 
 ```@example variable_mcmc
-using MT
+using ProEM
 using Distributions
 using Turing
 using LinearAlgebra
@@ -77,7 +77,7 @@ modelD = MTModelDistribution(
 n_samples = 1000;
 mcache = mcmc_cache(modelD, respD, n_samples, NUTS());
 
-mt_chain = stochastic_inverse(r_obs, err_resp, ω, mcache)
+mt_chain = stochastic_inverse(r_obs, err_resp, ω, mcache, progress = false)
 ```
 
 The obtained `mt_chain` contains the *a posteriori* distributions that can be saved using [JLD2.jl](https://github.com/JuliaIO/JLD2.jl).
@@ -91,7 +91,7 @@ and plotted as :
 
 ```@example variable_mcmc
 fig = Figure()
-ax = Axis(fig[1, 1]; xscale=log10)
+ax = Axis(fig[1, 1]; xlabel =  "log ρ (Ωm)" , ylabel = "depth (m)" )
 hm = get_kde_image!(
     ax, mt_chain, modelD; kde_transformation_fn=log10, trans_utils=(; m=pow_tf),
     grid=(m=collect(-1:0.1:5), z=collect(1:50:2.5e3)),
@@ -101,7 +101,7 @@ Colorbar(fig[1, 2], hm; label="log pdf")
 mean_kws = (; color=:blue, linewidth=2)
 std_kws = (; color=:red, linewidth=2)
 get_mean_std_image!(
-    ax, mt_chain, modelD; confidence_interval=0.9, trans_utils=(; m=pow_tf),
+    ax, mt_chain, modelD; confidence_interval=0.9, 
     mean_kwargs=mean_kws, std_plus_kwargs=std_kws,
     std_minus_kwargs=std_kws, z_points=collect(1:10:2.5e3))
 xlims!(ax, [1e-1, 1e5])
