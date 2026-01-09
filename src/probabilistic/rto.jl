@@ -1,5 +1,6 @@
 import SubsurfaceCore: stochastic_inverse
 
+# TODO : ad_types
 """
     rto_cache(m₀, μgrid, alg, max_iters, n_samples, χ2, response_fields, L, verbose)
 
@@ -61,14 +62,32 @@ end
   - `model_trans_utils`: A named tuple containing `transform_utils` for the fields of model that need to be scaled/modified. If not provided for any `model` field, the field won't be modified
   - `response_trans_utils`: for scaling the response parameters
 """
-function SubsurfaceCore.stochastic_inverse(r_obs::resp1,
-        err_resp::resp2,
-        vars,
-        alg_cache::rto_cache;
-        model_trans_utils::NamedTuple=(m=sigmoid_tf, h=lin_tf),
-        response_trans_utils::NamedTuple=(ρₐ=lin_tf, ϕ=lin_tf),
-        progress_bar=true) where {
-        resp1 <: AbstractGeophyResponse, resp2 <: AbstractGeophyResponse}
+function SubsurfaceCore.stochastic_inverse(r_obs::resp1, err_resp::resp2, vars, alg_cache::rto_cache; n_chains=1,
+        model_trans_utils::NamedTuple=(;), # need to take care of this
+        response_trans_utils::NamedTuple=(;),
+        params=(;), progress = true,
+        kwargs...) where {resp1 <: AbstractGeophyResponse, resp2 <: AbstractGeophyResponse}
+    
+    model_fields = Symbol[]
+
+    # segregate the constants and the Distribution parts of the alg_cache
+
+
+    (length(params) == 0) && (params = default_params(typeof(alg_cache.m₀)))
+    
+    model_fields = (:m,)
+    response_fields = alg_cache.response_fields
+
+    # model transform_utils
+    model_trans_utils_ = (; m = no_tf)
+    model_trans_utils_ = merge(model_trans_utils_, model_trans_utils)
+
+    # response transform_utils
+
+    response_trans_utils_ = NamedTuple{Tuple(response_fields)}(ntuple(
+        i -> no_tf, length(response_fields)))
+    response_trans_utils_ = merge(response_trans_utils_, response_trans_utils)
+
     W = Diagonal(vcat([inv.(getfield(err_resp, k)) .^ 2
                        for k in fieldnames(typeof(err_resp))]...))
 
@@ -86,8 +105,7 @@ function SubsurfaceCore.stochastic_inverse(r_obs::resp1,
     μ_chains = zeros(1, alg_cache.n_samples)
 
     i = 1
-    # (!(verbose==false)) && (prog = Progress(alg_cache.n_samples; enabled=true))
-    (progress_bar) && (prog = Progress(alg_cache.n_samples; enabled=true))
+    (progress) && (prog = Progress(alg_cache.n_samples; enabled=true))
 
     while i <= (alg_cache.n_samples)
 
@@ -113,13 +131,13 @@ function SubsurfaceCore.stochastic_inverse(r_obs::resp1,
         if typeof(alg_cache.alg) <: occam_cache
             ret_code = inverse!(alg_cache.m₀, pert_resp, vars, Occam(; μgrid=[μ, μ]);
                 W=W, χ2=alg_cache.χ2, max_iters=alg_cache.max_iters,
-                response_fields=alg_cache.response_fields, verbose=alg_cache.verbose,
-                reg_term=reg_term, model_trans_utils=model_trans_utils[:m],
-                response_trans_utils=response_trans_utils)
+                response_fields=response_fields, verbose=alg_cache.verbose,
+                reg_term=reg_term, model_trans_utils=model_trans_utils_.m,
+                response_trans_utils=response_trans_utils_)
 
         elseif typeof(alg_cache.alg) <: nl_cache
             ret_code = inverse!(
-                alg_cache.m₀, pert_resp, vars, NonlinearAlg(; alg=alg_cache.alg.alg, μ=μ);
+                alg_cache.m₀, pert_resp, vars, NonlinearAlg(; alg=alg_cache.alg, μ=μ);
                 W=W, χ2=alg_cache.χ2, L=alg_cache.L, max_iters=alg_cache.max_iters,
                 response_fields=alg_cache.response_fields,
                 verbose=alg_cache.verbose, model_trans_utils=model_trans_utils[:m])
@@ -205,7 +223,7 @@ function SubsurfaceCore.stochastic_inverse(r_obs::resp1,
 
         i += 1
 
-        (progress_bar) && (next!(prog; showvalues=[(Symbol("#samples"), i)]))
+        (progress) && (next!(prog; showvalues=[(Symbol("#samples"), i)]))
         # @show i
     end
 
