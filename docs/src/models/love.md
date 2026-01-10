@@ -1,6 +1,6 @@
 
 
-# Rayleigh wave (MT)
+# Love wave
 
 ```@setup lw_demo
 using ProEM, CairoMakie, InteractiveUtils

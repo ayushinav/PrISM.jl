@@ -91,7 +91,7 @@ and plotted as :
 
 ```@example variable_mcmc
 fig = Figure()
-ax = Axis(fig[1, 1]; xlabel =  "log ρ (Ωm)" , ylabel = "depth (m)" )
+ax = Axis(fig[1, 1]; xscale = log10, xlabel =  "log ρ (Ωm)", ylabel = "depth (m)")
 hm = get_kde_image!(
     ax, mt_chain, modelD; kde_transformation_fn=log10, trans_utils=(; m=pow_tf),
     grid=(m=collect(-1:0.1:5), z=collect(1:50:2.5e3)),

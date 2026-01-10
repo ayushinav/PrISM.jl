@@ -90,4 +90,5 @@ plot_response!([ax1, ax2], T, resp; errs = err_resp, plt_type = :errors, whisker
 
 resp_occam = forward(m_occam, ω)
 plot_response!([ax1, ax2], T, resp; color = :tomato, label = "occam")
+fig
 ```

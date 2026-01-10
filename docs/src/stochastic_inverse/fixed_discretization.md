@@ -44,9 +44,9 @@ using Turing
 using LinearAlgebra
 using CairoMakie
 
-m_test = MTModel(log10.([100.0, 10.0, 1000.0]), [1e3, 1e3]);
-f = 10 .^ range(-4; stop=1, length=25);
-ω = vec(2π .* f);
+m_test = MTModel(log10.([100.0, 10.0, 1000.0]), [1e3, 1e3])
+f = 10 .^ range(-4; stop=1, length=25)
+ω = vec(2π .* f)
 
 r_obs = forward(m_test, ω);
 
@@ -87,7 +87,7 @@ and plotted as :
 
 ```@example fixed_mcmc
 fig = Figure()
-ax = Axis(fig[1, 1]; xlabel =  "log ρ (Ωm)" , ylabel = "depth (m)" )
+ax = Axis(fig[1, 1]; xscale = log10, xlabel =  "log ρ (Ωm)", ylabel = "depth (m)")
 hm = get_kde_image!(ax, mt_chain, modelD; kde_transformation_fn=log10, colormap=:thermal, colorrange=(-3.0, 0))
 Colorbar(fig[1, 2], hm; label="log pdf")
 

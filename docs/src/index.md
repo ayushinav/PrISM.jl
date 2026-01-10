@@ -33,7 +33,7 @@ features:
 ---
 ```
 
-`ProEM.jl` is supposed to be a high performance code for doing forward and inverse modeling in geophysics using julia. We hope to write the package such that any other geophysical survey can also be used and we can tend towards a joint forward and inverse modeling library.
+`ProEM.jl` is a high performance code for doing forward and inverse modeling in geophysics using julia. While the current capabilities sit at 1D methods, we hope to extend it for 2D and 3D problems as well.
 
 ## Installation
 

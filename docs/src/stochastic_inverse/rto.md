@@ -128,7 +128,7 @@ and plotted as :
 
 ```@example rto_tko_demo
 fig = Figure()
-ax = Axis(fig[1, 1]; xlabel =  "log ρ (Ωm)" , ylabel = "depth (m)" )
+ax = Axis(fig[1, 1]; xscale = log10, xlabel =  "log ρ (Ωm)", ylabel = "depth (m)")
 hm = get_kde_image!(ax, mt_chain, modelD; kde_transformation_fn=log10, colormap=:thermal, colorrange=(-3.0, 0), trans_utils = (; m = no_tf, h = no_tf))
 Colorbar(fig[1, 2], hm; label="log pdf")
 
