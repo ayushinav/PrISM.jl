@@ -108,10 +108,10 @@ fig # hide
 Let's also do an Occam inversion on Rayleigh waves. Like before, we define a synthetic model :
 
 ```@example occam_demo
-vs = [4.39731, 4.40192, 4.40653, 4.41113, 4.41574]
-vp = [8.01571, 7.99305, 7.97039, 7.94773, 7.92508]
-ρ = [3.38014, 3.37797, 3.37579, 3.37362, 3.37145]
-h = [20.0, 20.0, 20.0, 20.0] .* 1e3
+vs = [3.2, 4.39731, 4.40192, 4.40653, 4.41113, 4.41574]
+vp = [5.8, 8.01571, 7.99305, 7.97039, 7.94773, 7.92508]
+ρ = [2.6, 3.38014, 3.37797, 3.37579, 3.37362, 3.37145]
+h = [20.0, 20.0, 20.0, 20.0, 20.0] .* 1e3
 m = RWModel(vs, h, ρ, vp)
 ```
 
@@ -132,7 +132,7 @@ Then we declare an initial model, and define the error covariance matrix :
 
 ```@example occam_demo
 h_test = fill(2500., 50)
-m_occam = RWModel(4.0 .+ zeros(length(h_test) + 1), h_test, fill(7e3, 51), fill(3.3e3, 51))
+m_occam = RWModel(4.0 .+ zeros(length(h_test) + 1), h_test, fill(3e3, 51), fill(7e3, 51))
 
 C_d = diagm(inv.(err_resp.c)) .^ 2
 nothing # hide
@@ -140,14 +140,18 @@ nothing # hide
 
 and perform the inversion:
 ```@example occam_demo
-alg_cache = Occam()
+alg_cache = Occam(;μgrid= [1e-2, 1e2])
 rw_bounds = transform_utils(x -> SubsurfaceCore.sigmoid(x, 3., 5.), x -> SubsurfaceCore.inverse_sigmoid(x, 3., 5.))
 retcode = inverse!(m_occam, resp, t, alg_cache; W=C_d, max_iters=100, verbose=true, model_trans_utils = rw_bounds);
 ```
 
+```@raw html
+<details closed><summary>Code for this figure</summary>
+```
+
 ```@example occam_demo
 fig = Figure()
-ax_m = Axis(fig[1:2,1])
+ax_m = Axis(fig[1,1], xlabel = "Vs (km/s)", ylabel = "depth (m)")
 
 plot_model!(ax_m, m, label = "true", color = :steelblue3)
 plot_model!(ax_m, m_occam, label = "occam", color = :tomato)
@@ -160,7 +164,14 @@ plot_response!([ax1], t, resp; errs = err_resp, plt_type = :errors, whiskerwidth
 
 resp_occam = forward(m_occam, t)
 plot_response!([ax1], t, resp_occam; color = :tomato)
-Legend(fig[3,:], ax_m, orientation = :horizontal)
-fig
+Legend(fig[2,:], ax_m, orientation = :horizontal)
+nothing # hide
 ```
 
+```@raw html
+</details>
+```
+
+```@example cond_plts
+fig # hide
+```
