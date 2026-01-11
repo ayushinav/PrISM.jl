@@ -4,7 +4,7 @@ pages = ["Home" => "index.md",
     "Models" => ["models/mt.md", "models/rayleigh.md", "models/love.md", "models/viz.md"],
     "Deterministic inversion" => [
         "deterministic_inverse/index.md", "deterministic_inverse/occam.md",
-        "deterministic_inverse/lm.md", "deterministic_inverse/cg.md"],
+        "deterministic_inverse/nlsolve.md", "deterministic_inverse/optim.md"],
     "Stochastic inversion" => [
         "stochastic_inverse/index.md", "stochastic_inverse/fixed_discretization.md",
         "stochastic_inverse/variable_discretization.md",

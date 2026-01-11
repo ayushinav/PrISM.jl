@@ -31,3 +31,6 @@ Obviously, there are multiple ways to solve this non-linear equation. We provide
     * Particle Swarm
 
 All the inversion capabilities are accessed using `inverse!` function, which we cover in the next pages.
+
+!!! note
+    Do note that the inversion only takes care of the parameter denoted by `m`, even though there might be other parameters, e.g. for Rayleigh wave models, we invert of shear wave velocity even though the model also requires p-wave velocities and densities.
