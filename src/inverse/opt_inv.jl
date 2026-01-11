@@ -22,7 +22,7 @@ end
 
 function inverse!(mₖ::model1,
         robs::response,
-        vars::Vector{Float64},
+        vars,
         alg_cache::opt_cache;
         params=default_params(model1),
         W=nothing,
@@ -32,6 +32,7 @@ function inverse!(mₖ::model1,
         response_fields=propertynames(robs),
         model_trans_utils=sigmoid_tf,
         response_trans_utils=nothing,
+        ad_type=DifferentiationInterface.AutoFiniteDiff(),
         mᵣ=nothing,
         reg_term=nothing,
         verbose::Union{Bool, Int}=true) where {
@@ -63,7 +64,7 @@ function inverse!(mₖ::model1,
         response_trans_utils=response_trans_utils, vars=vars, params = params,
         response_fields=response_fields, W=W, μ=alg_cache.μ, r_obs=robs, L=L, mᵣ=mᵣ)
 
-    optfn = OptimizationFunction(construct_cost_function_for_opt, Optimization.AutoForwardDiff()) ## AD Type (?)
+    optfn = OptimizationFunction(construct_cost_function_for_opt, ad_type)
     prob = OptimizationProblem(optfn, model_trans_utils.itf.(mₖ.m), p)
 
     cb(state, l) = cb_(state, l, verbose, L, alg_cache.μ, model_trans_utils, χ2)

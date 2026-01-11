@@ -117,6 +117,8 @@ function var(p, q, ra, rb, wvno, xka, xkb, dpth)
     # Examine S-wave eigenfunctions
     # Checking whether c > vs, c = vs or c < vs
     sex = zero(q)
+    cosq = zero(q)
+    sinq = zero(q)
     if (wvno < xkb)
         sinq = sin(q)
         y = sinq / rb
@@ -153,8 +155,9 @@ function var(p, q, ra, rb, wvno, xka, xkb, dpth)
     cosq *= fac
     y *= fac
     z *= fac
-
     return w, cosp, a0, cpcq, cpy, cpz, cqw, cqx, xy, xz, wy, wz
+
+
 end
 
 function dltar(c, ω, model::LWModel, e, ee, C)
@@ -245,11 +248,15 @@ function dltar(k, ω, model::RWModel, e, ee, C)
         q = rb * dpth
 
         # Evaluate cosP, cosQ...
+        try
         _, _, a0, cpcq, cpy, cpz, cqw, cqx, xy, xz,
         wy, wz = var(p, q, ra, rb, k, xka, xkb, dpth)
+            dnka!(C, k * k, gam, gammk, ρ[m], a0, cpcq, cpy, cpz, cqw, cqx, xy, xz, wy, wz)
 
-        # Evaluate Dunkin's matrix
-        dnka!(C, k * k, gam, gammk, ρ[m], a0, cpcq, cpy, cpz, cqw, cqx, xy, xz, wy, wz)
+        catch
+            @show k
+        end
+            # Evaluate Dunkin's matrix
 
         mul!(ee, e, C)
         # for i in 1:5
@@ -268,7 +275,7 @@ function get_c!(resp_, t, m, mode, dc)
     c_low_global = minimum(m.m)
     c_high = oftype(c_low_global, 10) # should not really go this far
     # c_low = oftype(c_low_global, c_low_global * 0.8)
-    c_start = minimum(m.m) 
+    c_start = minimum(m.m) * 0.9
 
     e = MMatrix{1, 5}(zeros(eltype(m.m), 1, 5)) # can be preallocated
     ee = MMatrix{1, 5}(zeros(eltype(m.m), 1, 5)) # can be preallocated

@@ -4,8 +4,14 @@ SubsurfaceCore.get_scales(::Type{<:MTResponse}, ::Val{:ϕ}) = log10, identity
 SubsurfaceCore.get_labels(::Type{<:MTResponse}, ::Val{:ρₐ}) = "T(s)", "ρₐ (Ωm)"
 SubsurfaceCore.get_labels(::Type{<:MTResponse}, ::Val{:ϕ}) = "T(s)", "ϕ (ᴼ)"
 
-SubsurfaceCore.get_scales(::Type{<:MTModel}) = log10, log10
+SubsurfaceCore.get_scales(::Type{<:MTModel}) = identity, identity
 SubsurfaceCore.get_labels(::Type{<:MTModel}) = "ρ (Ωm)", "h(m)"
+
+SubsurfaceCore.get_scales(::Type{<:DCResponse}, ::Val{:ρₐ}) = identity, log10
+SubsurfaceCore.get_labels(::Type{<:DCResponse}, ::Val{:ρₐ}) = "AB/2 (m)", "ρₐ (Ωm)"
+
+SubsurfaceCore.get_scales(::Type{<:DCModel}) = identity, identity
+SubsurfaceCore.get_labels(::Type{<:DCModel}) = "ρ (Ωm)", "h(m)"
 
 SubsurfaceCore.get_scales(::Type{<:SurfaceWaveResponse}, ::Val{:c}) = log10, identity
 
@@ -17,5 +23,5 @@ function SubsurfaceCore.get_scales(::Type{T}) where {T <: Union{LWModel, RWModel
     identity, identity
 end
 function SubsurfaceCore.get_labels(::Type{T}) where {T <: Union{LWModel, RWModel}}
-    "vₛ (km/s)", "h(km)"
+    "vₛ (km/s)", "h(m)"
 end
