@@ -52,7 +52,7 @@ fig # hide
 
 ## Response
 
-To obtain the responses, that is apparent resistivity `ρₐ` and phase `ϕ`, we first need to define the frequencies :
+To obtain the response, that is the dispersion curve `c`. We first need to define the frequencies :
 
 ```@example rw_demo
 freq = exp10.(-2:0.1:1)
@@ -85,6 +85,19 @@ nothing # hide
 ```@example rw_demo
 fig # hide
 ```
+
+!!! note
+    By default, the forward response calculates the phase velocity at fundamental mode. This information is passed through params.
+    ```@example rw_demo
+    default_params(RWModel)
+    ```
+
+    Various symbols are defined as : 
+    * `mode` : fundamental mode corresponds to 0, higher modes correspond to 1,2,...
+    * `dc` : step size used to obtain solution of the propagater matrix
+    * `dt` : step size used to obtain the derivative for group velocity, unused for phase velocity
+    * `Val(:phase)` : to calculate phase velocity, pass `Val(:group)` to calculate group velocity
+
 
 ### In-place operations
 

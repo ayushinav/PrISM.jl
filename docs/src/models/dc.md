@@ -1,8 +1,4 @@
-# Magnetotellurics (MT)
-
-```@setup mt_demo
-using ProEM, CairoMakie, InteractiveUtils
-```
+# DC (Direct Current) Resistivity
 
 ## Model
 
@@ -10,26 +6,26 @@ We assume the following subsurface resistivity distribution with 4 layers:
 
 | Layer # | thickness (m) | $\rho \; (\Omega m$) | 
 | :-: | :-: | :-: |
-| 1 | 1000 | 500 |
-| 2 | 2000 | 1000 |
-| 3 | 200 | 10 |
+| 1 | 100 | 500 |
+| 2 | 200 | 1000 |
+| 3 | 20 | 10 |
 | 4 | $\infty$ | 100 |
 
-The `MTModel` is defined as :
+The `DCModel` is defined as :
 
-```@example mt_demo
+```@example dc_demo
 ρ = log10.([500.0, 1000.0, 10.0, 100.0])
-h = [1000.0, 2000.0, 200.0]
-m = MTModel(ρ, h)
+h = [100.0, 200.0, 20.0]
+m = DCModel(ρ, h)
 ```
 
 ```@raw html
 <details closed><summary>Code for this figure</summary>
 ```
 
-```@example mt_demo
+```@example dc_demo
 fig = Figure()
-ax = Axis(fig[1, 1]; xlabel="log ρ (Ωm)", ylabel="depth (m)", backgroundcolor=(
+ax = Axis(fig[1, 1]; xlabel="log ρ (locsm)", ylabel="depth (m)", backgroundcolor=(
     :magenta, 0.05))
 
 plot_model!(ax, m)
@@ -40,9 +36,10 @@ nothing # hide
 </details>
 ```
 
-```@example mt_demo
+```@example dc_demo
 fig # hide
 ```
+
 
 !!! warn
     
@@ -50,31 +47,33 @@ fig # hide
 
 ## Response
 
-To obtain the responses, that is apparent resistivity `ρₐ` and phase `ϕ`, we first need to define the frequencies :
-
-```@example mt_demo
-freq = exp10.(-2:0.2:4)
-ω = 2π .* freq
-T = inv.(freq)
+To obtain the responses, that is apparent resistivity `ρₐ`, we first need to define the current source and electrodes (receivers) locations. We provide two most common source receiver configurations
+```@doc; cannonical = false
+get_schlumberger_array
+get_wenner_array
 ```
 
-and then call the `forward` dispatch and get `MTResponse`:
-
-```@example mt_demo
-resp = forward(m, ω)
-nothing # hide
+Here, we demonstrate using the Wenner array for a vertical sounding survey:
+```@example dc_demo
+locs = get_wenner_array(100:50:2000)
 ```
+
+and then call the `forward` dispatch as usual to get `MTResponse`:
+```@example dc_demo
+resp = forward(m, locs)
+```
+
 
 ```@raw html
 <details closed><summary>Code for this figure</summary>
 ```
 
-```@example mt_demo
+```@example dc_demo
 fig = Figure() #size = (800, 600))
 ax1 = Axis(fig[1, 1]; backgroundcolor=(:magenta, 0.05), aspect=AxisAspect(1))
-ax2 = Axis(fig[1, 2]; backgroundcolor=(:magenta, 0.05), aspect=AxisAspect(1))
 
-plot_response!([ax1, ax2], T, resp; plt_type=:scatter)
+ab_2 = abs.(locs.srcs[:,2] .- locs.srcs[:,1])./2
+plot_response!([ax1], ab_2, resp; plt_type=:scatter)
 nothing # hide
 ```
 
@@ -82,7 +81,7 @@ nothing # hide
 </details>
 ```
 
-```@example mt_demo
+```@example dc_demo
 fig # hide
 ```
 
@@ -90,19 +89,19 @@ fig # hide
 
 Mutating forward calls are also supported. This leads to no extra allocations while calculating the forward responses. This also speeds up the performance, though the calculations in the well-optimized forward calls are way more expensive than allocations to get a significant boost here. We now call the in-place variant `forward!` and provide an `MTResponse` variable to be overwritten :
 
-```@example mt_demo
-forward!(resp, m, ω)
+```@example dc_demo
+forward!(resp, m, locs)
 nothing # hide
 ```
 
 We can compare the allocations made in the two calls:
 
-```@example mt_demo
-@allocated forward!(resp, m, ω)
+```@example dc_demo
+@allocated forward!(resp, m, locs)
 ```
 
-```@example mt_demo
-@allocated forward(m, ω)
+```@example dc_demo
+@allocated forward(m, locs)
 ```
 
 ## Benchmarks
@@ -113,25 +112,23 @@ While the exact runtimes will vary across processors, the runtimes increase line
 <details closed><summary>Benchmark code</summary>
 ```
 
-```@example mt_demo
-n_layers = Int.(exp2.(2:1:6))
-freq = exp10.(-2:0.2:4)
-ω = 2π .* freq
+```@example dc_demo
+locs = get_wenner_array(100:50:2000)
 
 btime_iip = Float64.(zero(n_layers))
 btime_oop = Float64.(zero(n_layers))
 for i in eachindex(n_layers)
     ρ = 2 .* randn(n_layers[i])
     h = 100 .* rand(n_layers[i]-1)
-    m = MTModel(ρ, h)
-    resp = forward(m, ω)
+    m = DCModel(ρ, h)
+    resp = forward(m, locs)
     time_oop = @timed begin 
-        for i in 1:1000 forward(m, ω) end
+        for i in 1:1000 forward(m, locs) end
     end
     btime_oop[i] = time_oop.time/1e3
-    forward!(resp, m, ω)
+    forward!(resp, m, locs)
     time_iip = @timed begin
-        for i in 1:1000 forward!(resp, m, ω) end
+        for i in 1:1000 forward!(resp, m, locs) end
     end
     btime_iip[i] = time_iip.time/1e3
 end
@@ -148,13 +145,14 @@ nothing # hide
 </details>
 ```
 
-```@example mt_demo
+```@example dc_demo
 fig # hide
 ```
 
 ### Reproducibility
 
-```@example mt_demo
+```@example dc_demo
 println("The above benchmarks were obtained on $(Sys.cpu_info()[1].model)") # hide
 # println(versionfo()) # hide
 ```
+
