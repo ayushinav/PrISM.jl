@@ -44,7 +44,7 @@ Some of the things to understand here are :
 ```julia
 
 # prior space with variable model discretization
-modelD = MTModelDistribution(
+modelD = DCModelDistribution(
     Product(
         [Uniform(-1, 5) for i in 1:n]
     ),
@@ -54,11 +54,13 @@ modelD = MTModelDistribution(
 );
 ```
 
+The above defines the *a priori* distribution for DC resistivity modeling. Corresponding functions exist for other geophysical models.
+
 ### Response distribution (*likelihood*)
 
-A likelihood is determined by an observed response `r_obs` we want to fit, and the errors associated with it `err_resp`. One of the popular ways in which likelihood can be formed is using the gaussian distribution, centered around `r_obs` with variance given by `err_resp`. To make things consistent, we pass `r_obs` and `err_resp` into the final function. 
+A likelihood is determined by an observed response `r_obs` we want to fit, and the errors associated with it `err_resp`. One of the popular ways in which likelihood can be formed is using the gaussian distribution, centered around `r_obs` with variance given by `err_resp`. This is the probabilistic equivalence of mean squared misfit. 
 
-Remember that to make a likelihood, we need the physics of the system and the error metric. With the data at avail, we now need to specify the misfit function. Here, we just need to pass a function that can take in a response parameter and the associated error and produce a distribution. We already provide a function `norm_dist` that takes in a vector for the response and another vector/matrix for the covariance matrix of the errors. The response distribution is then constructed by:
+Remember that to make a likelihood, we need the physics of the system and the error metric. With the data at avail, we now need to specify the misfit function. Here, we just need to pass a function that can take in a response parameter and the associated error and produce a distribution. We provide a function `norm_dist` that takes in a vector for the response and another vector/matrix for the covariance matrix of the errors. The response distribution is then constructed by:
 
 ```julia
 respD = MTResponseDistribution(normal_dist, normal_dist)
@@ -68,15 +70,15 @@ respD = MTResponseDistribution(normal_dist, normal_dist)
     
     Both `r_obs` and `err_resp` have the same type, eg. `MTResponse`.
 
-In the above, `MTResponseDistribution` specifies the physics of the system to completely specify the likelihood.
+In the above, `MTResponseDistribution` specifies the physics of the system to completely specify the likelihood. Similar `ResponseDistribution`s exist for other type of geophysical models.
 
 ## Inference
 
-We now have all the ingredients to perform inversion, except the sampler. This [page](https://turing.ml/dev/docs/using-turing/sampler-viz) provides a brief review of samplers `Turing.jl` provides. The number of posterior points to be sampled `n_samples`, the algorithm `mcmc_alg` and the distributions are brought together by `mcmc_cache`.
+We now have all the ingredients to perform inversion, except the sampler. This [page](https://turinglang.org/docs/usage/sampler-visualisation/) provides a brief review of samplers `Turing.jl` provides. The number of posterior points to be sampled `n_samples`, the algorithm `mcmc_alg` and the distributions are brought together by `mcmc_cache`.
 
 ```julia
 mcmc_alg = NUTS();
-n_samples = 40;
+n_samples = 10_000;
 mcache = mcmc_cache(modelD, respD, n_samples, mcmc_alg);
 ```
 
@@ -84,56 +86,4 @@ The posterior samples are then sampled by simply calling:
 
 ```julia
 mcmc_chain = stochastic_inverse(r_obs, err_resp, ω, mcache)
-```
-
-## Copy-Pasteable code
-
-```julia
-using PRoEM
-using Distributions
-using Turing
-using LinearAlgebra
-
-m_test = MTModel(log10.([100.0, 10.0, 1000.0]), [1e3, 1e3]);
-f = 10 .^ range(-4; stop=1, length=25);
-ω = vec(2π .* f);
-
-r_obs = forward(m_test, ω);
-
-err_phi = asin(0.01) * 180 / π .* ones(length(ω));
-err_appres = 0.02 * r_obs.ρₐ;
-err_resp = MTResponse(err_appres, err_phi);
-
-r_obs.ρₐ .= r_obs.ρₐ .+ err_appres;
-r_obs.ϕ .= r_obs.ϕ .+ err_phi;
-
-respD = MTResponseDistribution(normal_dist, normal_dist);
-
-z = 10 .^ collect(range(1; stop=4, length=100));
-h = diff(z);
-
-modelD = MTModelDistribution(
-    Product(
-        [Uniform(-1.0, 5.0) for i in eachindex(z)]
-    ),
-    vec(h)
-);
-
-n_samples = 50;
-mcache = mcmc_cache(modelD, respD, 50, NUTS());
-
-mcmc_chain = stochastic_inverse(r_obs, err_resp, ω, mcache)
-```
-
-The obtained `mcmc_chain` contains the distributions that can be saved using [JLD2.jl](https://github.com/JuliaIO/JLD2.jl).
-
-```julia
-using JLD2
-JLD2.@save "file_path.jld2" mcmc_chains
-```
-
-The list of models can then be obtained from chains using
-
-```
-model_list = get_model_list(mcmc_chains, modelD)
 ```
