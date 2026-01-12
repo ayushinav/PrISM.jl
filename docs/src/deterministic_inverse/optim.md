@@ -1,6 +1,6 @@
 # Solvers from `Optimisation.jl`
 
-```@setup occam_demo
+```@setup optim_demo
 using ProEM, LinearAlgebra, CairoMakie, Optimization, OptimizationOptimJL, DifferentiationInterface
 ```
 
@@ -22,7 +22,7 @@ Following, we demonstrate using Conjugate Gradient on a couple of models:
 We begin by defining a simple synthetic model:
 with 5 % error floors for Wenner array.
 
-```@example occam_demo
+```@example optim_demo
 ρ = log10.([1000.0, 100.0])
 h = [2000.0]
 m = DCModel(ρ, h)
@@ -34,7 +34,7 @@ err_resp = DCResponse(0.05 .* resp.ρₐ)
 ```
 
 Now, defining an initial model and covariance matrix:
-```@example occam_demo
+```@example optim_demo
 h_test = fill(60., 50)
 m_lbfgs = DCModel(2.0 .+ zeros(length(h_test) + 1), h_test)
 
@@ -44,7 +44,7 @@ nothing # hide
 
 and then 
 
-```@example occam_demo
+```@example optim_demo
 alg_cache = OptAlg(; alg=LBFGS, μ=10.0)
 retcode = inverse!(m_lbfgs, resp, locs, alg_cache; W=C_d, max_iters=100);
 nothing # hide
@@ -55,12 +55,12 @@ nothing # hide
 <details closed><summary>Code for this figure</summary>
 ```
 
-```@example occam_demo
+```@example optim_demo
 fig = Figure()
 ax_m = Axis(fig[1,1])
 
 plot_model!(ax_m, m, label = "true", color = :steelblue3)
-plot_model!(ax_m, m_lm, label = "inverse", color = :tomato)
+plot_model!(ax_m, m_lbfgs, label = "inverse", color = :tomato)
 fig
 
 ax1 = Axis(fig[1,2], xscale = log10)
@@ -80,7 +80,7 @@ nothing # hide
 </details>
 ```
 
-```@example occam_demo
+```@example optim_demo
 fig # hide
 ```
 

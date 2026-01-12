@@ -1,5 +1,9 @@
 # DC (Direct Current) Resistivity
 
+```@setup dc_demo
+using ProEM, CairoMakie, InteractiveUtils
+```
+
 ## Model
 
 We assume the following subsurface resistivity distribution with 4 layers:
@@ -113,6 +117,7 @@ While the exact runtimes will vary across processors, the runtimes increase line
 ```
 
 ```@example dc_demo
+n_layers = Int.(exp2.(2:1:6))
 locs = get_wenner_array(100:50:2000)
 
 btime_iip = Float64.(zero(n_layers))

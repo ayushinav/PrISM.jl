@@ -1,6 +1,6 @@
 # Solvers from `NonlinearSolve.jl`
 
-```@setup occam_demo
+```@setup nl_demo
 using ProEM, LinearAlgebra, CairoMakie, NonlinearSolve, DifferentiationInterface
 ```
 
@@ -24,7 +24,7 @@ We first begin with an example for Rayleigh waves
 
 Let's define a synthetic model:
 
-```@example occam_demo
+```@example nl_demo
 vs = [3.2, 4.39731, 4.40192, 4.40653, 4.41113, 4.41574]
 vp = [5.8, 8.01571, 7.99305, 7.97039, 7.94773, 7.92508]
 ρ = [2.6, 3.38014, 3.37797, 3.37579, 3.37362, 3.37145]
@@ -34,7 +34,7 @@ m = RWModel(vs, h, ρ, vp)
 
 and then get the forward response, with 1% error floors :
 
-```@example occam_demo
+```@example nl_demo
 freq = exp10.(-2:0.1:1)
 t = inv.(freq)
 
@@ -47,7 +47,7 @@ err_resp = SurfaceWaveResponse(
 
 We need to define a data covariance matrix $C_d$ and an initial model. Let's assume gaussian noise in this case, and choose an initial model a half-space of 100 $\Omega m$.
 
-```@example occam_demo
+```@example nl_demo
 h_test = fill(2500., 50)
 m_lm = RWModel(4.0 .+ zeros(length(h_test) + 1), h_test, fill(3e3, 51), fill(7e3, 51))
 
@@ -60,7 +60,7 @@ The final result will be stored in the same variable `m_occam`. All we need to d
 !!! note
     Using Occam, you also have the option to perform a smoothing step. Once the model has achieved the threshold misfit, it is smoothened until it fits the data just about the threshold misfit.
 
-```@example occam_demo
+```@example nl_demo
 alg_cache = NonlinearAlg(; alg=LevenbergMarquardt(; autodiff = AutoFiniteDiff()), μ=100.)
 rw_bounds = transform_utils(x -> SubsurfaceCore.sigmoid(x, 3., 5.), x -> SubsurfaceCore.inverse_sigmoid(x, 3., 5.))
 C_m = Float64.(I(51))
@@ -72,7 +72,7 @@ nothing # hide
 <details closed><summary>Code for this figure</summary>
 ```
 
-```@example occam_demo
+```@example nl_demo
 fig = Figure()
 ax_m = Axis(fig[1,1], xlabel = "Vs (km/s)", ylabel = "depth (m)")
 
@@ -96,7 +96,7 @@ nothing # hide
 </details>
 ```
 
-```@example cond_plts
+```@example nl_demo
 fig # hide
 ```
 
@@ -106,7 +106,7 @@ This one did not converge, and that's geophysical inversion 90% of the time. :)
 
 Let's try and see if we can get things to converge for a simple DC resistivity model. Let's make another synthetic model with 5 % error floors for Wenner array.
 
-```@example occam_demo
+```@example nl_demo
 ρ = log10.([1000.0, 100.0])
 h = [2000.0]
 m = DCModel(ρ, h)
@@ -118,7 +118,7 @@ err_resp = DCResponse(0.05 .* resp.ρₐ)
 ```
 
 Now, defining an initial model and covariance matrix:
-```@example occam_demo
+```@example nl_demo
 h_test = fill(60., 50)
 m_lm = DCModel(2.0 .+ zeros(length(h_test) + 1), h_test)
 
@@ -128,7 +128,7 @@ nothing # hide
 
 and then 
 
-```@example occam_demo
+```@example nl_demo
 alg_cache = NonlinearAlg(; alg=LevenbergMarquardt(; autodiff = AutoFiniteDiff()), μ=10.0)
 retcode = inverse!(m_lm, resp, locs, alg_cache; W=C_d, max_iters=100);
 nothing # hide
@@ -138,7 +138,7 @@ nothing # hide
 <details closed><summary>Code for this figure</summary>
 ```
 
-```@example occam_demo
+```@example nl_demo
 fig = Figure()
 ax_m = Axis(fig[1,1])
 
@@ -163,6 +163,6 @@ nothing # hide
 </details>
 ```
 
-```@example occam_demo
+```@example nl_demo
 fig # hide
 ```

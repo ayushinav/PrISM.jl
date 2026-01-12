@@ -90,7 +90,7 @@ fig # hide
 
 !!! note
     By default, the forward response calculates the phase velocity at fundamental mode. This information is passed through params.
-    ```@example rw_demo
+    ```@example lw_demo
     default_params(RWModel)
     ```
 

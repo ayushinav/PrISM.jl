@@ -100,7 +100,7 @@ nothing # hide
 </details>
 ```
 
-```@example cond_plts
+```@example occam_demo
 fig # hide
 ```
 
@@ -172,6 +172,6 @@ nothing # hide
 </details>
 ```
 
-```@example cond_plts
+```@example occam_demo
 fig # hide
 ```
