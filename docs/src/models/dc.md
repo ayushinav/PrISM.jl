@@ -52,7 +52,7 @@ fig # hide
 ## Response
 
 To obtain the responses, that is apparent resistivity `ρₐ`, we first need to define the current source and electrodes (receivers) locations. We provide two most common source receiver configurations
-```@doc; cannonical = false
+```@docs; cannonical = false
 get_schlumberger_array
 get_wenner_array
 ```

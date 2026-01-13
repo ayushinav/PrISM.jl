@@ -183,6 +183,6 @@ ylims!(ax2, [12, 70])
 fig
 ```
 
-!!! warning Note
+!!! warning
     
     It is recommended that the samples from RTO-TKO can be filtered out to reject the samples that have a poor fit on the data.
