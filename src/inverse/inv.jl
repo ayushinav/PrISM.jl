@@ -1,5 +1,7 @@
 Constant_DI = DifferentiationInterface.Constant
 
+# TODO : params -> wrapper_DI, occam_step, smoothing_step_fn
+
 """
     function inverse!(mₖ, robs, vars, alg_cache::occam_cache; 
             W, L, max_iters, χ2, response_fields, model_trans_utils,
@@ -111,20 +113,12 @@ function inverse!(mₖ::model1,
     const_m = NamedTuple{ks}(ps)
 
     jc = zeros(eltype(mₖ.m), nresps, nmods)
-    # jc = jacobian_cache(response_fields, robs, mₖ, model_fields).j
 
     lin_utils = linear_utils(view(mₖ.m, :), zeros(prec, n_resp), view(jc, :, :))
 
     for (i, k) in enumerate(response_fields)
         setfield!(respₖ, k, view(lin_utils.Fₖ, ((i - 1) * n_vars + 1):(i * n_vars)))
     end
-
-    @show "HELLO"
-
-    # @show size(L)
-    # @show size(W)
-    # @show size(reduce(vcat, [copy(getfield(robs, k))
-    #                                               for k in response_fields]))
 
     inv_utils = inverse_utils(L, W, reduce(vcat, [copy(getfield(robs, k))
                                                   for k in response_fields]))
@@ -139,6 +133,9 @@ function inverse!(mₖ::model1,
             true; condition=LinearSolve.OperatorCondition.WellConditioned))
 
     forward!(respₖ, mₖ, vars, params) # for the first iteration
+    for k in response_fields
+        broadcast!(getfield(response_trans_utils, k).tf, getfield(respₖ, k), getfield(respₖ, k))
+    end
     itr = 1
     chi2 = prec(1e6)
 
@@ -159,22 +156,24 @@ function inverse!(mₖ::model1,
 
     model_type = typeof(mₖ).name.wrapper
     prep_j = prepare_jacobian(wrapper_DI!, rvec, ad_type, mₖ.m, Constant_DI(const_m),
-        Constant_DI(vars), Constant_DI(response_fields), Constant_DI(model_type),
-        Constant_DI(model_trans_utils), Constant_DI(response_trans_utils))
+        Constant_DI(vars), Constant_DI(response_fields),
+        Constant_DI(model_type), Constant_DI(model_trans_utils),
+        Constant_DI(response_trans_utils), Constant_DI(params))
 
     DifferentiationInterface.jacobian!(
         wrapper_DI!, rvec, jc, prep_j, ad_type, mₖ.m, Constant_DI(const_m),
-        Constant_DI(vars), Constant_DI(response_fields), Constant_DI(model_type),
-        Constant_DI(model_trans_utils), Constant_DI(response_trans_utils))
+        Constant_DI(vars), Constant_DI(response_fields),
+        Constant_DI(model_type), Constant_DI(model_trans_utils),
+        Constant_DI(response_trans_utils), Constant_DI(params))
 
     while itr <= max_iters
         do_verbose(itr, verbose) && (print("$itr: "))
         # @time jacobian!(jc, mₖ, vars, model_fields, response_fields)
         # jc.j .= first(Enzyme.jacobian(set_runtime_activity(Reverse), f_temp, mₖ.m))
 
-        forward!(respₖ₊₁, mₖ₊₁, vars)
+        forward!(respₖ, mₖ, vars)
         for k in response_fields
-            broadcast!(getfield(response_trans_utils, k).tf, getfield(respₖ₊₁, k), getfield(respₖ₊₁, k))
+            broadcast!(getfield(response_trans_utils, k).tf, getfield(respₖ, k), getfield(respₖ, k))
         end
 
         for k in model_fields # to computational domain
@@ -183,8 +182,9 @@ function inverse!(mₖ::model1,
 
         DifferentiationInterface.jacobian!(
             wrapper_DI!, rvec, jc, ad_type, mₖ.m, Constant_DI(const_m),
-            Constant_DI(vars), Constant_DI(response_fields), Constant_DI(model_type),
-            Constant_DI(model_trans_utils), Constant_DI(response_trans_utils))
+            Constant_DI(vars), Constant_DI(response_fields),
+            Constant_DI(model_type), Constant_DI(model_trans_utils),
+            Constant_DI(response_trans_utils), Constant_DI(params))
 
         μ_last,
         chi2 = occam_step!(mₖ₊₁, # to store the next update, which will eventually be copied to mₖ

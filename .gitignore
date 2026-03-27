@@ -1,4 +1,7 @@
-.vscode
 wip*
 Manifest.toml
+.vscode
+node_modules
+docs/build
+docs/package-lock.json
 *.DS_Store

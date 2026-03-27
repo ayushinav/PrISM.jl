@@ -18,16 +18,18 @@ that can be used to calculate forward response for 1d MT
 m = [4.0, 2.0, 3.0]
 h = [1000.0, 1000.0]
 model = MTModel(m, h)
-print(model)
 
 # output
 
-1D MTModel : 
-Layer    h       log(ρ)
-____________________________
-1        1000.0          4.0
-2        1000.0          2.0
-3        ∞               3.0
+1D MT Model
+┌───────┬───────┬─────────┬─────────┐
+│ Layer │ log-ρ │       h │       z │
+│       │  [Ωm] │     [m] │     [m] │
+├───────┼───────┼─────────┼─────────┤
+│     1 │  4.00 │ 1000.00 │ 1000.00 │
+│     2 │  2.00 │ 1000.00 │ 2000.00 │
+│     3 │  3.00 │       ∞ │       ∞ │
+└───────┴───────┴─────────┴─────────┘
 ```
 """
 mutable struct MTModel{T1 <: AbstractArray{<:Any}, T2 <: AbstractArray{<:Any}} <:
