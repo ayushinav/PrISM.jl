@@ -8,12 +8,12 @@ using ProEM, CairoMakie, InteractiveUtils
 
 We assume the following subsurface resistivity distribution with 4 layers:
 
-| Layer # | thickness (m) | $\rho \; (\Omega m$) | 
-| :-: | :-: | :-: |
-| 1 | 1000 | 500 |
-| 2 | 2000 | 1000 |
-| 3 | 200 | 10 |
-| 4 | $\infty$ | 100 |
+| Layer # | thickness (m) | $\rho \; (\Omega m$) |
+|:-------:|:-------------:|:--------------------:|
+| 1       | 1000          | 500                  |
+| 2       | 2000          | 1000                 |
+| 3       | 200           | 10                   |
+| 4       | $\infty$      | 100                  |
 
 The `MTModel` is defined as :
 
@@ -125,22 +125,28 @@ for i in eachindex(n_layers)
     h = 100 .* rand(n_layers[i]-1)
     m = MTModel(ρ, h)
     resp = forward(m, ω)
-    time_oop = @timed begin 
-        for i in 1:1000 forward(m, ω) end
+    time_oop = @timed begin
+        for i in 1:1000
+            forward(m, ω)
+        end
     end
     btime_oop[i] = time_oop.time/1e3
     forward!(resp, m, ω)
     time_iip = @timed begin
-        for i in 1:1000 forward!(resp, m, ω) end
+        for i in 1:1000
+            forward!(resp, m, ω)
+        end
     end
     btime_iip[i] = time_iip.time/1e3
 end
 
 fig = Figure()
-ax = Axis(fig[1,1], xscale = log2, backgroundcolor = (:magenta, 0.05), xlabel = "no. of layers", ylabel = "time (ms)")
-lines!(n_layers, btime_oop .* 1e3, label = "out-of place forward calls", color = :tomato)
-lines!(n_layers, btime_iip .* 1e3, label = "in place forward calls", linestyle = :dash, color = :steelblue3)
-Legend(fig[1,2], ax)
+ax = Axis(fig[1, 1]; xscale=log2, backgroundcolor=(:magenta, 0.05),
+    xlabel="no. of layers", ylabel="time (ms)")
+lines!(n_layers, btime_oop .* 1e3; label="out-of place forward calls", color=:tomato)
+lines!(n_layers, btime_iip .* 1e3; label="in place forward calls",
+    linestyle=:dash, color=:steelblue3)
+Legend(fig[1, 2], ax)
 nothing # hide
 ```
 

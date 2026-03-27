@@ -1,6 +1,6 @@
 # Stochastic inversion
 
-Stochastic inversion revolves around the Bayesian formulation : 
+Stochastic inversion revolves around the Bayesian formulation :
 
 ```math
 p(m|d) \propto p(d|m) p(m)
@@ -10,10 +10,11 @@ where $d$ is the data to be inverted and $m$ is the model. $p(m)$ defines the pr
 
 We do not generally get an explicit analytical form of the posterior distribution, but obtain the samples from it. The most common way to obtain these samples is via Markov chain Monte Carlo (MCMC). Without going into details of MCMC, we complete here by mentioning that we usually need a large number of samples to obtain a good estimate of the posterior distribution. Naive MCMC schemes such as Random Walk Metropolis can take a long time to converge, and using gradient information can lead to a more efficient traversal of the probability space.
 
-To sum it up, performing stochastic inversion involves 
-* specifying the *a priori* distribution
-* specifying the likelihood (physics + misfit)
-* specifying the MCMC scheme (sampler + no of samples)
+To sum it up, performing stochastic inversion involves
+
+  - specifying the *a priori* distribution
+  - specifying the likelihood (physics + misfit)
+  - specifying the MCMC scheme (sampler + no of samples)
 
 ## Constructing distributions
 
@@ -28,12 +29,7 @@ n = 50 # number of layers
 h = fill(20.0, n - 1) # making the discretization
 
 # prior space with fixed model discretization
-modelD = MTModelDistribution(
-    Product(
-        [Uniform(-1, 5) for i in 1:n]
-    ),
-    vec(h) # fixed h
-);
+modelD = MTModelDistribution(Product([Uniform(-1, 5) for i in 1:n]), vec(h));
 ```
 
 Some of the things to understand here are :
@@ -45,20 +41,14 @@ Some of the things to understand here are :
 
 # prior space with variable model discretization
 modelD = DCModelDistribution(
-    Product(
-        [Uniform(-1, 5) for i in 1:n]
-    ),
-    Product(
-        [Uniform(15, 25) for i in 1:(n - 1)]
-    )
-);
+    Product([Uniform(-1, 5) for i in 1:n]), Product([Uniform(15, 25) for i in 1:(n - 1)]));
 ```
 
 The above defines the *a priori* distribution for DC resistivity modeling. Corresponding functions exist for other geophysical models.
 
 ### Response distribution (*likelihood*)
 
-A likelihood is determined by an observed response `r_obs` we want to fit, and the errors associated with it `err_resp`. One of the popular ways in which likelihood can be formed is using the gaussian distribution, centered around `r_obs` with variance given by `err_resp`. This is the probabilistic equivalence of mean squared misfit. 
+A likelihood is determined by an observed response `r_obs` we want to fit, and the errors associated with it `err_resp`. One of the popular ways in which likelihood can be formed is using the gaussian distribution, centered around `r_obs` with variance given by `err_resp`. This is the probabilistic equivalence of mean squared misfit.
 
 Remember that to make a likelihood, we need the physics of the system and the error metric. With the data at avail, we now need to specify the misfit function. Here, we just need to pass a function that can take in a response parameter and the associated error and produce a distribution. We provide a function `norm_dist` that takes in a vector for the response and another vector/matrix for the covariance matrix of the errors. The response distribution is then constructed by:
 

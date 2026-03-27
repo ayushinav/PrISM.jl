@@ -1,6 +1,6 @@
 pages = ["Home" => "index.md",
     "Getting Started" => ["intro/intro_julia.md", "intro/getting_started.md",
-        "intro/intro_figs.md", "intro/structure.md"],
+        "intro/intro_figs.md"],
     "Models" => ["models/mt.md", "models/rayleigh.md", "models/dc.md", "models/love.md", "models/viz.md"],
     "Deterministic inversion" => [
         "deterministic_inverse/index.md", "deterministic_inverse/occam.md",

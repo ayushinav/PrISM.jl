@@ -7,11 +7,12 @@ using ProEM, LinearAlgebra, CairoMakie, Optimization, OptimizationOptimJL, Diffe
 ## Brief introduction
 
 `Optimisation.jl` further provides an extensive [list of solvers](https://docs.sciml.ai/Optimization/stable/optimization_packages/optim/) to solve the inverse problem such as:
-* Conjugate Gradient
-* Gradient Descent
-* LBFGS
-* Simulated Annealing
-* Particle Swarm
+
+  - Conjugate Gradient
+  - Gradient Descent
+  - LBFGS
+  - Simulated Annealing
+  - Particle Swarm
 
 Following, we demonstrate using Conjugate Gradient on a couple of models:
 
@@ -34,15 +35,16 @@ err_resp = DCResponse(0.05 .* resp.ρₐ)
 ```
 
 Now, defining an initial model and covariance matrix:
+
 ```@example optim_demo
-h_test = fill(60., 50)
+h_test = fill(60.0, 50)
 m_lbfgs = DCModel(2.0 .+ zeros(length(h_test) + 1), h_test)
 
 C_d = diagm(inv.(err_resp.ρₐ)) .^ 2
 nothing # hide
 ```
 
-and then 
+and then
 
 ```@example optim_demo
 alg_cache = OptAlg(; alg=LBFGS, μ=10.0)
@@ -50,28 +52,28 @@ retcode = inverse!(m_lbfgs, resp, locs, alg_cache; W=C_d, max_iters=100);
 nothing # hide
 ```
 
-
 ```@raw html
 <details closed><summary>Code for this figure</summary>
 ```
 
 ```@example optim_demo
 fig = Figure()
-ax_m = Axis(fig[1,1])
+ax_m = Axis(fig[1, 1])
 
-plot_model!(ax_m, m, label = "true", color = :steelblue3)
-plot_model!(ax_m, m_lbfgs, label = "inverse", color = :tomato)
+plot_model!(ax_m, m; label="true", color=:steelblue3)
+plot_model!(ax_m, m_lbfgs; label="inverse", color=:tomato)
 fig
 
-ax1 = Axis(fig[1,2], xscale = log10)
+ax1 = Axis(fig[1, 2]; xscale=log10)
 
-ab_2 = abs.(locs.srcs[:,2] .- locs.srcs[:,1])./2
-plot_response!([ax1], ab_2, resp; plt_type = :scatter, color = :steelblue3)
-plot_response!([ax1], ab_2, resp; errs = err_resp, plt_type = :errors, whiskerwidth=10, color = :steelblue3)
+ab_2 = abs.(locs.srcs[:, 2] .- locs.srcs[:, 1]) ./ 2
+plot_response!([ax1], ab_2, resp; plt_type=:scatter, color=:steelblue3)
+plot_response!(
+    [ax1], ab_2, resp; errs=err_resp, plt_type=:errors, whiskerwidth=10, color=:steelblue3)
 
 resp_lbfgs = forward(m_lbfgs, locs)
-plot_response!([ax1], ab_2, resp_lbfgs; color = :tomato)
-Legend(fig[2,:], ax_m, orientation = :horizontal)
+plot_response!([ax1], ab_2, resp_lbfgs; color=:tomato)
+Legend(fig[2, :], ax_m; orientation=:horizontal)
 fig
 nothing # hide
 ```
@@ -83,5 +85,3 @@ nothing # hide
 ```@example optim_demo
 fig # hide
 ```
-
-### CSEM : TODO

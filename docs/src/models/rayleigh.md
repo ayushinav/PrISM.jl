@@ -1,4 +1,3 @@
-
 # Rayleigh wave
 
 ```@setup rw_demo
@@ -7,13 +6,13 @@ using ProEM, CairoMakie, InteractiveUtils
 
 ## Model
 
-We assume the following subsurface resistivity distribution with 4 layers:
-| Layer # | thickness (m) | $V_s \; (km s^{-1}$) | $V_p \; (km s^{-1}$) | $\rho \; (g cm^{-3}$) | 
-| :-: | :-: | :-: | :-: | :-: |
-| 1 | 8000 | 4 | 6.8 | 2 |
-| 2 | 4000 | 3.5 | 5.95 | 2 |
-| 3 | 8000 | 4.2 | 7.14 | 2 |
-| 4 | $\infty$ | 4.5 | 7.65 | 2 |
+| We assume the following subsurface resistivity distribution with 4 layers:
+Layer # | thickness (m) | $V_s \; (km s^{-1})$ | $V_p \; (km s^{-1})$ | $\rho \; (g cm^{-3})$ |
+|:----------------------------------------------------------------------------------:|:-------------:|:--------------------:|:--------------------:|:---------------------:|
+| 1                                                                                  | 8000          | 4                    | 6.8                  | 2                     |
+| 2                                                                                  | 4000          | 3.5                  | 5.95                 | 2                     |
+| 3                                                                                  | 8000          | 4.2                  | 7.14                 | 2                     |
+| 4                                                                                  | $\infty$      | 4.5                  | 7.65                 | 2                     |
 
 The `RWModel` is defined as :
 
@@ -87,17 +86,19 @@ fig # hide
 ```
 
 !!! note
+    
     By default, the forward response calculates the phase velocity at fundamental mode. This information is passed through params.
+    
     ```@example rw_demo
     default_params(RWModel)
     ```
-
-    Various symbols are defined as : 
-    * `mode` : fundamental mode corresponds to 0, higher modes correspond to 1,2,...
-    * `dc` : step size used to obtain solution of the propagater matrix
-    * `dt` : step size used to obtain the derivative for group velocity, unused for phase velocity
-    * `Val(:phase)` : to calculate phase velocity, pass `Val(:group)` to calculate group velocity
-
+    
+    Various symbols are defined as :
+    
+      - `mode` : fundamental mode corresponds to 0, higher modes correspond to 1,2,...
+      - `dc` : step size used to obtain solution of the propagater matrix
+      - `dt` : step size used to obtain the derivative for group velocity, unused for phase velocity
+      - `Val(:phase)` : to calculate phase velocity, pass `Val(:group)` to calculate group velocity
 
 ### In-place operations
 
@@ -140,22 +141,28 @@ for i in eachindex(n_layers)
     h = 100 .* rand(n_layers[i]-1)
     m = RWModel(vs, h, vp, ρ)
     resp = forward(m, T)
-    time_oop = @timed begin 
-        for i in 1:1000 forward(m, T) end
+    time_oop = @timed begin
+        for i in 1:1000
+            forward(m, T)
+        end
     end
     btime_oop[i] = time_oop.time/1e3
     forward!(resp, m, T)
     time_iip = @timed begin
-        for i in 1:1000 forward!(resp, m, T) end
+        for i in 1:1000
+            forward!(resp, m, T)
+        end
     end
     btime_iip[i] = time_iip.time/1e3
 end
 
 fig = Figure()
-ax = Axis(fig[1,1], xscale = log2, backgroundcolor = (:magenta, 0.05), xlabel = "no. of layers", ylabel = "time (ms)")
-lines!(n_layers, btime_oop .* 1e3, label = "out-of place forward calls", color = :tomato)
-lines!(n_layers, btime_iip .* 1e3, label = "in place forward calls", linestyle = :dash, color = :steelblue3)
-Legend(fig[1,2], ax)
+ax = Axis(fig[1, 1]; xscale=log2, backgroundcolor=(:magenta, 0.05),
+    xlabel="no. of layers", ylabel="time (ms)")
+lines!(n_layers, btime_oop .* 1e3; label="out-of place forward calls", color=:tomato)
+lines!(n_layers, btime_iip .* 1e3; label="in place forward calls",
+    linestyle=:dash, color=:steelblue3)
+Legend(fig[1, 2], ax)
 nothing # hide
 ```
 

@@ -1,4 +1,3 @@
-
 ## RTO-TKO
 
 RTO-TKO is a stochastic framework introduced in the electromagnetic geophysical community by Blatter et al., 2022 ([a](https://doi.org/10.1093/gji/ggac241) and [b](https://doi.org/10.1093/gji/ggac242))
@@ -23,7 +22,7 @@ Then for $C_d$, the inverse of data covariance matrix, and $C_m$ the inverse of 
 J(m) = [\mathcal{F}(m) - d]^T C_d [\mathcal{F}(m) - d] + \mu \; m^T C_m m
 ```
 
-where $\mu$ is the regularization weight and $L$ is the derivative matrix. Probabilistically, the above equation implies that the *a priori* distribution of $m$ is $\mathcal{N}(0, C_m)$. RTO-TKO explores the uncertainty in $m$, as well as the $\mu$-space instead of fixing it, and gives a family of models that fit the data. 
+where $\mu$ is the regularization weight and $L$ is the derivative matrix. Probabilistically, the above equation implies that the *a priori* distribution of $m$ is $\mathcal{N}(0, C_m)$. RTO-TKO explores the uncertainty in $m$, as well as the $\mu$-space instead of fixing it, and gives a family of models that fit the data.
 
 The algorithm was proposed for $C_m$ constructed with $L'L$, where $L$ is the discrete derivative matrix. The algorithm works as:
 
@@ -63,6 +62,7 @@ using Turing
 using LinearAlgebra
 using CairoMakie
 ```
+
 Let's create a synthetic dataset first, with 10% error floors:
 
 ```@example rto_tko
@@ -91,21 +91,14 @@ r_cache = rto_cache(
     m_rto, [1e-2, 1e4], Occam(), n_samples, n_samples, 1.0, [:ρₐ, :ϕ], false)
 
 rto_chain = stochastic_inverse(
-    r_obs,
-    err_resp,
-    ω,
-    r_cache;
-    model_trans_utils = (; m = sigmoid_tf)
-)
+    r_obs, err_resp, ω, r_cache; model_trans_utils=(; m=sigmoid_tf))
 ```
 
 Since RTO-TKO also samples the regularization coefficient along with model parameters, we exclude it to obtain another chain as:
 
 ```@example rto_tko
-mt_chain = Chains(
-    (rto_chain.value.data[:, 1:(end - 1), :]),
-    [Symbol("m[$i]") for i in 1:length(z)]
-)
+mt_chain = Chains((rto_chain.value.data[:, 1:(end - 1), :]), [Symbol("m[$i]")
+                                                              for i in 1:length(z)])
 ```
 
 Note that the chain contains fewer samples than we had asked for. This is because a few unstable samples were filtered out. The obtained `mt_chain` contains the *a posteriori* distributions that can be saved using [JLD2.jl](https://github.com/JuliaIO/JLD2.jl).
@@ -118,12 +111,7 @@ JLD2.@save "file_path.jld2" mt_chain
 Since RTO-TKO is closely related to Occam, we also include occam results in our figures below. Also, note that we did not require an *a priori* distribution to obtain samples. However, we would need to create the same to plot our posterior samples. This can just be something that encapsulates the whole prior space (or an envelope of the same), e.g., in the case of magnetotelluric imaging, we know that the resistivity values will always be in [-2, 5] on the log-scale.
 
 ```@example rto_tko
-modelD = MTModelDistribution(
-    Product(
-        [Uniform(-1.0, 5.0) for i in eachindex(z)]
-    ),
-    vec(h)
-)
+modelD = MTModelDistribution(Product([Uniform(-1.0, 5.0) for i in eachindex(z)]), vec(h))
 nothing # hide
 ```
 
@@ -134,7 +122,8 @@ nothing # hide
 ```@example rto_tko
 fig = Figure()
 ax = Axis(fig[1, 1])
-hm = get_kde_image!(ax, mt_chain, modelD; kde_transformation_fn=log10, colormap=:binary, colorrange=(-3.0, 0.))
+hm = get_kde_image!(ax, mt_chain, modelD; kde_transformation_fn=log10,
+    colormap=:binary, colorrange=(-3.0, 0.0))
 Colorbar(fig[1, 2], hm; label="log pdf")
 
 mean_kws = (; color=:seagreen3, linewidth=2)
@@ -143,7 +132,7 @@ get_mean_std_image!(ax, mt_chain, modelD; confidence_interval=0.99, mean_kwargs=
     std_plus_kwargs=std_kws, std_minus_kwargs=std_kws)
 ylims!(ax, [2500, 0])
 
-plot_model!(ax, m_test; color=:black, linestyle=:dash, label="true", linewidth = 2)
+plot_model!(ax, m_test; color=:black, linestyle=:dash, label="true", linewidth=2)
 Legend(fig[2, :], ax; orientation=:horizontal)
 nothing # hide
 ```

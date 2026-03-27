@@ -3,6 +3,7 @@
 ```@setup occam_demo
 using ProEM, LinearAlgebra, CairoMakie
 ```
+
 ## Brief introduction
 
 We provide inversion algorithm popularized as [Occam1D](https://marineemlab.ucsd.edu/steve/bio/Occam1D.pdf).
@@ -43,10 +44,7 @@ T = 10 .^ (range(-1, 5; length=19))
 ω = 2π ./ T
 resp = forward(m, ω)
 
-err_resp = MTResponse(
-    0.1 .* resp.ρₐ,
-    180 / π .* asin(0.1) .+ zero(ω)
-)
+err_resp = MTResponse(0.1 .* resp.ρₐ, 180 / π .* asin(0.1) .+ zero(ω))
 ```
 
 We need to define a data covariance matrix $C_d$ and an initial model. Let's assume gaussian noise in this case, and choose an initial model a half-space of 100 $\Omega m$.
@@ -64,11 +62,13 @@ m_occam = MTModel(ρ_test, h_test);
 The final result will be stored in the same variable `m_occam`. All we need to do now is specify using Occam and then calling `inverse!`.
 
 !!! note
+    
     Using Occam, you also have the option to perform a smoothing step. Once the model has achieved the threshold misfit, it is smoothened until it fits the data just about the threshold misfit.
 
 ```@example occam_demo
 alg_cache = Occam(; μgrid=[1e-2, 1e6])
-inverse!(m_occam, resp, ω, alg_cache; W=C_d, max_iters=50, verbose=true, smoothing_step = true)
+inverse!(
+    m_occam, resp, ω, alg_cache; W=C_d, max_iters=50, verbose=true, smoothing_step=true)
 ```
 
 ```@raw html
@@ -77,21 +77,22 @@ inverse!(m_occam, resp, ω, alg_cache; W=C_d, max_iters=50, verbose=true, smooth
 
 ```@example occam_demo
 fig = Figure()
-ax_m = Axis(fig[1:2,1], yscale = log10)
+ax_m = Axis(fig[1:2, 1]; yscale=log10)
 
-plot_model!(ax_m, m, label = "true", color = :steelblue3)
-plot_model!(ax_m, m_occam, label = "occam", color = :tomato)
+plot_model!(ax_m, m; label="true", color=:steelblue3)
+plot_model!(ax_m, m_occam; label="occam", color=:tomato)
 fig
 
-ax1 = Axis(fig[1,2], xscale = log10)
-ax2 = Axis(fig[2,2], xscale = log10)
+ax1 = Axis(fig[1, 2]; xscale=log10)
+ax2 = Axis(fig[2, 2]; xscale=log10)
 
-plot_response!([ax1, ax2], T, resp; plt_type = :scatter, color = :steelblue3)
-plot_response!([ax1, ax2], T, resp; errs = err_resp, plt_type = :errors, whiskerwidth=10, color = :steelblue3)
+plot_response!([ax1, ax2], T, resp; plt_type=:scatter, color=:steelblue3)
+plot_response!([ax1, ax2], T, resp; errs=err_resp, plt_type=:errors,
+    whiskerwidth=10, color=:steelblue3)
 
 resp_occam = forward(m_occam, ω)
-plot_response!([ax1, ax2], T, resp_occam; color = :tomato)
-Legend(fig[3,:], ax_m, orientation = :horizontal)
+plot_response!([ax1, ax2], T, resp_occam; color=:tomato)
+Legend(fig[3, :], ax_m; orientation=:horizontal)
 
 nothing # hide
 ```
@@ -105,6 +106,7 @@ fig # hide
 ```
 
 ### Rayleigh waves
+
 Let's also do an Occam inversion on Rayleigh waves. Like before, we define a synthetic model :
 
 ```@example occam_demo
@@ -123,15 +125,13 @@ t = inv.(freq)
 
 resp = forward(m, t)
 
-err_resp = SurfaceWaveResponse(
-    0.01 .* resp.c,
-)
+err_resp = SurfaceWaveResponse(0.01 .* resp.c,)
 ```
 
-Then we declare an initial model, and define the error covariance matrix : 
+Then we declare an initial model, and define the error covariance matrix :
 
 ```@example occam_demo
-h_test = fill(2500., 50)
+h_test = fill(2500.0, 50)
 m_occam = RWModel(4.0 .+ zeros(length(h_test) + 1), h_test, fill(3e3, 51), fill(7e3, 51))
 
 C_d = diagm(inv.(err_resp.c)) .^ 2
@@ -139,10 +139,13 @@ nothing # hide
 ```
 
 and perform the inversion:
+
 ```@example occam_demo
-alg_cache = Occam(;μgrid= [1e-2, 1e2])
-rw_bounds = transform_utils(x -> SubsurfaceCore.sigmoid(x, 3., 5.), x -> SubsurfaceCore.inverse_sigmoid(x, 3., 5.))
-retcode = inverse!(m_occam, resp, t, alg_cache; W=C_d, max_iters=100, verbose=true, model_trans_utils = rw_bounds);
+alg_cache = Occam(; μgrid=[1e-2, 1e2])
+rw_bounds = transform_utils(
+    x -> SubsurfaceCore.sigmoid(x, 3.0, 5.0), x -> SubsurfaceCore.inverse_sigmoid(x, 3.0, 5.0))
+retcode = inverse!(m_occam, resp, t, alg_cache; W=C_d, max_iters=100,
+    verbose=true, model_trans_utils=rw_bounds);
 ```
 
 ```@raw html
@@ -151,20 +154,21 @@ retcode = inverse!(m_occam, resp, t, alg_cache; W=C_d, max_iters=100, verbose=tr
 
 ```@example occam_demo
 fig = Figure()
-ax_m = Axis(fig[1,1], xlabel = "Vs (km/s)", ylabel = "depth (m)")
+ax_m = Axis(fig[1, 1]; xlabel="Vs (km/s)", ylabel="depth (m)")
 
-plot_model!(ax_m, m, label = "true", color = :steelblue3)
-plot_model!(ax_m, m_occam, label = "occam", color = :tomato)
+plot_model!(ax_m, m; label="true", color=:steelblue3)
+plot_model!(ax_m, m_occam; label="occam", color=:tomato)
 fig
 
-ax1 = Axis(fig[1,2], xscale = log10)
+ax1 = Axis(fig[1, 2]; xscale=log10)
 
-plot_response!([ax1], t, resp; plt_type = :scatter, color = :steelblue3)
-plot_response!([ax1], t, resp; errs = err_resp, plt_type = :errors, whiskerwidth=10, color = :steelblue3)
+plot_response!([ax1], t, resp; plt_type=:scatter, color=:steelblue3)
+plot_response!(
+    [ax1], t, resp; errs=err_resp, plt_type=:errors, whiskerwidth=10, color=:steelblue3)
 
 resp_occam = forward(m_occam, t)
-plot_response!([ax1], t, resp_occam; color = :tomato)
-Legend(fig[2,:], ax_m, orientation = :horizontal)
+plot_response!([ax1], t, resp_occam; color=:tomato)
+Legend(fig[2, :], ax_m; orientation=:horizontal)
 nothing # hide
 ```
 

@@ -34,7 +34,6 @@ In the following example, we demonstrate MCMC inversion for a 3-layered earth, i
 
     in the example.
 
-
 ## Demo
 
 ```@setup fixed_mcmc
@@ -64,14 +63,10 @@ Now, let's define the *a priori* with fixed grid points
 z = collect(0:500:2.5e3)
 h = diff(z)
 
-modelD = DCModelDistribution(
-    Product(
-        [Uniform(-1.0, 5.0) for i in eachindex(z)]
-    ),
-    vec(h)
-)
+modelD = DCModelDistribution(Product([Uniform(-1.0, 5.0) for i in eachindex(z)]), vec(h))
 nothing # hide
 ```
+
 then the likelihood
 
 ```@example fixed_mcmc
@@ -85,7 +80,7 @@ Put everything together for MCMC
 n_samples = 1000
 mcache = mcmc_cache(modelD, respD, n_samples, NUTS())
 
-dc_chain = stochastic_inverse(r_obs, err_resp, locs, mcache, progress = false)
+dc_chain = stochastic_inverse(r_obs, err_resp, locs, mcache; progress=false)
 ```
 
 The obtained `dc_chain` contains the *a posteriori* distributions that can be saved using [JLD2.jl](https://github.com/JuliaIO/JLD2.jl).
@@ -102,7 +97,8 @@ JLD2.@save "file_path.jld2" dc_chain
 ```@example fixed_mcmc
 fig = Figure()
 ax = Axis(fig[1, 1])
-hm = get_kde_image!(ax, dc_chain, modelD; kde_transformation_fn=log10, colormap=:binary, colorrange=(-3.0, 0.))
+hm = get_kde_image!(ax, dc_chain, modelD; kde_transformation_fn=log10,
+    colormap=:binary, colorrange=(-3.0, 0.0))
 Colorbar(fig[1, 2], hm; label="log pdf")
 
 mean_kws = (; color=:seagreen3, linewidth=2)
@@ -112,7 +108,7 @@ get_mean_std_image!(ax, dc_chain, modelD; confidence_interval=0.99, mean_kwargs=
 
 ylims!(ax, [2500, 0])
 
-plot_model!(ax, m_test; color=:black, linestyle=:dash, label="true", linewidth = 2)
+plot_model!(ax, m_test; color=:black, linestyle=:dash, label="true", linewidth=2)
 Legend(fig[2, :], ax; orientation=:horizontal)
 ```
 
@@ -139,7 +135,7 @@ nothing # hide
 fig = Figure()
 ax1 = Axis(fig[1, 1])
 
-ab_2 = abs.(locs.srcs[:,2] .- locs.srcs[:,1])./2
+ab_2 = abs.(locs.srcs[:, 2] .- locs.srcs[:, 1]) ./ 2
 
 resp_post = forward(model_list[1], locs);
 for i in 1:(length(model_list) > 100 ? 100 : length(model_list))
