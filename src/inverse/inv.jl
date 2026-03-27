@@ -134,7 +134,7 @@ function inverse!(mₖ::model1,
 
     forward!(respₖ, mₖ, vars, params) # for the first iteration
     for k in response_fields
-            broadcast!(getfield(response_trans_utils, k).tf, getfield(respₖ, k), getfield(respₖ, k))
+        broadcast!(getfield(response_trans_utils, k).tf, getfield(respₖ, k), getfield(respₖ, k))
     end
     itr = 1
     chi2 = prec(1e6)
@@ -156,13 +156,15 @@ function inverse!(mₖ::model1,
 
     model_type = typeof(mₖ).name.wrapper
     prep_j = prepare_jacobian(wrapper_DI!, rvec, ad_type, mₖ.m, Constant_DI(const_m),
-        Constant_DI(vars), Constant_DI(response_fields), Constant_DI(model_type),
-        Constant_DI(model_trans_utils), Constant_DI(response_trans_utils), Constant_DI(params))
+        Constant_DI(vars), Constant_DI(response_fields),
+        Constant_DI(model_type), Constant_DI(model_trans_utils),
+        Constant_DI(response_trans_utils), Constant_DI(params))
 
     DifferentiationInterface.jacobian!(
         wrapper_DI!, rvec, jc, prep_j, ad_type, mₖ.m, Constant_DI(const_m),
-        Constant_DI(vars), Constant_DI(response_fields), Constant_DI(model_type),
-        Constant_DI(model_trans_utils), Constant_DI(response_trans_utils), Constant_DI(params))
+        Constant_DI(vars), Constant_DI(response_fields),
+        Constant_DI(model_type), Constant_DI(model_trans_utils),
+        Constant_DI(response_trans_utils), Constant_DI(params))
 
     while itr <= max_iters
         do_verbose(itr, verbose) && (print("$itr: "))
@@ -180,8 +182,9 @@ function inverse!(mₖ::model1,
 
         DifferentiationInterface.jacobian!(
             wrapper_DI!, rvec, jc, ad_type, mₖ.m, Constant_DI(const_m),
-            Constant_DI(vars), Constant_DI(response_fields), Constant_DI(model_type),
-            Constant_DI(model_trans_utils), Constant_DI(response_trans_utils), Constant_DI(params))
+            Constant_DI(vars), Constant_DI(response_fields),
+            Constant_DI(model_type), Constant_DI(model_trans_utils),
+            Constant_DI(response_trans_utils), Constant_DI(params))
 
         μ_last,
         chi2 = occam_step!(mₖ₊₁, # to store the next update, which will eventually be copied to mₖ

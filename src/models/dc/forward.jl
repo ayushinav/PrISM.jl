@@ -14,19 +14,21 @@ function get_T(m::Tm, k) where {Tm <: DCModel}
 end
 
 """
-   forward(m::DCModel, locs)
+forward(m::DCModel, locs)
 
 returns `DCResponse` for the given `DCModel m` at the electrode locations defined by `locs`
 
 ## Arguments
 
- - `m` : DCModel for forward response
- - `locs` : `NamedTuple` containing locations of electric dipole defined by `srcs` 
- and electrode locations defined by `recs`
+  - `m` : DCModel for forward response
+  - `locs` : `NamedTuple` containing locations of electric dipole defined by `srcs`
+    and electrode locations defined by `recs`
 
 ## Optional arguments
- - `params` : `NamedTuple` containing configuration for forward calculation, contains 
-    - `hankel_filter` : Hankel filter to be used, defaults to Kerry Key's 101 point filter
+
+  - `params` : `NamedTuple` containing configuration for forward calculation, contains
+
+      + `hankel_filter` : Hankel filter to be used, defaults to Kerry Key's 101 point filter
 """
 function SubsurfaceCore.forward(m::Tm, locs::T3, params=default_params_DC) where {
         Tm <: DCModel, T3}
@@ -41,7 +43,7 @@ function SubsurfaceCore.forward(m::Tm, locs::T3, params=default_params_DC) where
     fn(k) = get_T(m, k)
 
     V_fn = hankel_transform_and_interpolation(r_max, r_min, fn, params.hankel_filter)
-    
+
     V_am = V_fn.(log.(r_am))
     V_an = V_fn.(log.(r_an))
     V_bm = V_fn.(log.(r_bm))
@@ -53,20 +55,22 @@ function SubsurfaceCore.forward(m::Tm, locs::T3, params=default_params_DC) where
 end
 
 """
-   forward(resp::DCResponse, m::DCModel, locs)
+forward(resp::DCResponse, m::DCModel, locs)
 
 overwrite `DCResponse resp` for the given `DCModel m` at the electrode locations defined by `locs`
 
 ## Arguments
 
- - `resp` : `DCResponse` to be overwritten
- - `m` : DCModel for forward response
- - `locs` : `NamedTuple` containing locations of electric dipole defined by `srcs` 
- and electrode locations defined by `recs`
+  - `resp` : `DCResponse` to be overwritten
+  - `m` : DCModel for forward response
+  - `locs` : `NamedTuple` containing locations of electric dipole defined by `srcs`
+    and electrode locations defined by `recs`
 
 ## Optional arguments
- - `params` : `NamedTuple` containing configuration for forward calculation, contains 
-    - `hankel_filter` : Hankel filter to be used, defaults to Kerry Key's 101 point filter
+
+  - `params` : `NamedTuple` containing configuration for forward calculation, contains
+
+      + `hankel_filter` : Hankel filter to be used, defaults to Kerry Key's 101 point filter
 """
 function forward!(r::Tr, m::Tm, locs::T3, params=default_params_DC) where {
         Tr <: DCResponse, Tm <: DCModel, T3}
@@ -81,7 +85,7 @@ function forward!(r::Tr, m::Tm, locs::T3, params=default_params_DC) where {
     fn(k) = get_T(m, k)
 
     V_fn = hankel_transform_and_interpolation(r_max, r_min, fn, params.hankel_filter)
-    
+
     V_am = V_fn.(log.(r_am))
     V_an = V_fn.(log.(r_an))
     V_bm = V_fn.(log.(r_bm))

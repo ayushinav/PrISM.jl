@@ -60,8 +60,8 @@ function inverse!(mₖ::model1,
         mᵣ.m .= zero(mₖ.m)
     end
 
-    p = (model_type=model_type, m_const = const_m, model_trans_utils=model_trans_utils,
-        response_trans_utils=response_trans_utils, vars=vars, params = params,
+    p = (model_type=model_type, m_const=const_m, model_trans_utils=model_trans_utils,
+        response_trans_utils=response_trans_utils, vars=vars, params=params,
         response_fields=response_fields, W=W, μ=alg_cache.μ, r_obs=robs, L=L, mᵣ=mᵣ)
 
     optfn = OptimizationFunction(construct_cost_function_for_opt, ad_type)
@@ -89,7 +89,7 @@ end
 function construct_cost_function_for_opt(m, p)
     @unpack model_type, m_const, model_trans_utils, response_trans_utils,
     vars, params, response_fields, W, μ, r_obs, L, mᵣ = p
-    
+
     m0 = merge((; m=model_trans_utils.tf.(m)), m_const)
     model = from_nt(model_type, m0)
     resp_ = forward(model, vars, params)

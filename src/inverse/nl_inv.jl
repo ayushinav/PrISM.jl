@@ -49,7 +49,7 @@ function inverse!(mₖ::model1,
     ks = Tuple([k for k in propertynames(mₖ) if k != :m])
     ps = Tuple([getfield(mₖ, k) for k in propertynames(mₖ) if k != :m])
 
-    const_m = NamedTuple{ks}(ps)    
+    const_m = NamedTuple{ks}(ps)
 
     (W === nothing) && (W = prec.(I(n_resp)))
     (L === nothing) && (L = prec.(∂(length(mₖ.m))))
@@ -60,8 +60,8 @@ function inverse!(mₖ::model1,
         mᵣ.m .= zero(mₖ.m)
     end
 
-    p = (model_type=model_type, m_const = const_m, model_trans_utils=model_trans_utils,
-        response_trans_utils=response_trans_utils, vars=vars, params = params,
+    p = (model_type=model_type, m_const=const_m, model_trans_utils=model_trans_utils,
+        response_trans_utils=response_trans_utils, vars=vars, params=params,
         response_fields=response_fields, W=W, μ=alg_cache.μ, r_obs=robs, L=L, mᵣ=mᵣ)
 
     prob = SciMLBase.NonlinearLeastSquaresProblem(
@@ -101,7 +101,7 @@ end
 function construct_cost_function_for_nl_inv(m, p)
     @unpack model_type, m_const, model_trans_utils, response_trans_utils,
     vars, params, response_fields, W, μ, r_obs, L, mᵣ = p
-    
+
     m0 = merge((; m=model_trans_utils.tf.(m)), m_const)
     model = from_nt(model_type, m0)
     resp_ = forward(model, vars, params)

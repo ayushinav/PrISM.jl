@@ -95,7 +95,6 @@ function occam_step!(mₖ₊₁::model1, # to store the next update, which will 
     tol = 1e-5
     count = 0
     while (x₃ - x₁) >= tol
-
         if (abs(fx₂ - fx₄) < tol)
             x₁ = x₄
             x₃ = x₄
