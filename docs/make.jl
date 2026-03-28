@@ -1,21 +1,21 @@
-using ProEM
+using PrISM
 using Documenter, DocumenterVitepress
 
 include("pages.jl")
-DocMeta.setdocmeta!(ProEM, :DocTestSetup, :(using ProEM); recursive=true)
+DocMeta.setdocmeta!(PrISM, :DocTestSetup, :(using PrISM); recursive=true)
 
 makedocs(; authors="Abhinav Pratap Singh et al.",
-    # sitename="ProEM.jl",
+    # sitename="PrISM.jl",
     # doctest=true,
     # clean=true,
-    repo="github.com/ayushinav/ProEM.jl",
+    repo="github.com/ayushinav/PrISM.jl",
     format=DocumenterVitepress.MarkdownVitepress(;
-        repo="github.com/ayushinav/ProEM.jl", devurl="dev"),
+        repo="github.com/ayushinav/PrISM.jl", devurl="dev"),
     pages=pages,
     # draft=false,
     # source="src",
     # build="build"
     )
 
-# DocumenterVitepress.deploydocs(; repo="github.com/ayushinav/ProEM.jl",
+# DocumenterVitepress.deploydocs(; repo="github.com/ayushinav/PrISM.jl",
 #     target=joinpath(@__DIR__, "build"), devbranch="main", push_preview=true)

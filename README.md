@@ -1,4 +1,4 @@
-# ProEM.jl
+# PrISM.jl
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://ayushinav.github.io/MT.jl/stable/)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://ayushinav.github.io/MT.jl/dev/)
@@ -6,7 +6,7 @@
 [![Coverage](https://codecov.io/gh/ayushinav/MT.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/ayushinav/MT.jl)
 [![Coverage](https://coveralls.io/repos/github/ayushinav/MT.jl/badge.svg?branch=main)](https://coveralls.io/github/ayushinav/MT.jl?branch=main)
 
-`ProEM.jl` is supposed to be a high performance code for doing forward and inverse modeling in geophysics using julia. We hope to write the code structure such that any other geophysical survey can also be used and we can tend towards a joint forward and inverse modeling library.
+`PrISM.jl` is supposed to be a high performance code for doing forward and inverse modeling in geophysics using julia. We hope to write the code structure such that any other geophysical survey can also be used and we can tend towards a joint forward and inverse modeling library.
 
 ## Forward modeling
 
@@ -15,6 +15,9 @@ While forward modeling typically requires solving a PDE obtained using the quasi
 Supported methods:
 
   - 1D Magnetotellurics (MT)
+  - 1D Rayleigh waves
+  - 1D Love waves
+  - 1D Direct Current (DC) Resistivity
 
 ## Inverse modeling
 
@@ -26,7 +29,7 @@ Deterministic schemes supported:
   - Nonlinear schemes using NonlinearSolve.jl
   - Nonlinear schemes using Optimization.jl
 
-Probabilistic schemes supported:'
+Probabilistic schemes supported:
 
   - MCMC with fixed grids
   - MCMC with flexible grids

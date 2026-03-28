@@ -1,4 +1,4 @@
-module ProEM
+module PrISM
 using Reexport
 @reexport using SubsurfaceCore
 using LinearAlgebra

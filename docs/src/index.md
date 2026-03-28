@@ -4,16 +4,16 @@
 layout: home
 
 hero:
-  name: ProEM.jl
+  name: PrISM.jl
   text: Geophysical modeling and inversion in Julia
   tagline: Automatic Differentiation enabled probabilistic inference of subsurface
   image:
     src: logo.png
-    alt: ProEM.jl
+    alt: PrISM.jl
   actions:
     - theme: alt
       text: View on Github
-      link: https://github.com/ayushinav/ProEM.jl
+      link: https://github.com/ayushinav/PrISM.jl
     
 features:
   - icon: 🔢
@@ -33,15 +33,15 @@ features:
 ---
 ```
 
-`ProEM.jl` is a high performance code for doing forward and inverse modeling in geophysics using julia. While the current capabilities sit at 1D methods, we hope to extend it for 2D and 3D problems as well.
+`PrISM.jl` is a high performance code for doing forward and inverse modeling in geophysics using julia. While the current capabilities sit at 1D methods, we hope to extend it for 2D and 3D problems as well.
 
 ## Installation
 
-You can install `ProEM.jl` on Julia by running:
+You can install `PrISM.jl` on Julia by running:
 
 ```julia
 using Pkg
-Pkg.add("ProEM.jl")
+Pkg.add("PrISM.jl")
 ```
 
 ## Available models
