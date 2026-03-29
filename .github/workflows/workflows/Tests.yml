@@ -2,6 +2,14 @@ name: "Tests"
 
 on:
   pull_request:
+    branches:
+      - main
+      - 'release-'
+    paths-ignore:
+      - 'docs/**'
+  push:
+    branches:
+      - main
     paths-ignore:
       - 'docs/**'
 
@@ -18,11 +26,14 @@ jobs:
       matrix:
         version: ["1.11"]
         group:
-          - "forward"
-          - "occam"
-          - "mcmc"
-          - "rto"
-          - "inference"
+          - "cond"
+          - "elastic"
+          - "visc"
+          - "anelastic"
+          - "phase_mixing"
+          - "combine_models"
+          - "tune_rp"
+          - "thermals"
     steps:
       - uses: actions/checkout@v4
 
