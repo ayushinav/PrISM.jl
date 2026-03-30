@@ -9,7 +9,10 @@ Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
 NonlinearSolve = "8913a72c-1f9b-4ce2-8d82-65094dcecaec"
 Optimization = "7f7a1694-90dd-40f0-9382-eb1efda571ba"
 OptimizationOptimJL = "36348300-93cb-4f02-beb5-3c3902f8871e"
-ProEM = "fde4c310-c20a-4a4a-8ff2-565b2b89066a"
+PrISM = "fde4c310-c20a-4a4a-8ff2-565b2b89066a"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 SubsurfaceCore = "3a78539b-9dce-42c5-be8d-f3fa4153f7a3"
 Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
+
+[sources.PrISM]
+path = ".."
