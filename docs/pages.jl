@@ -9,5 +9,5 @@ pages = ["Home" => "index.md",
         "stochastic_inverse/index.md", "stochastic_inverse/fixed_discretization.md",
         "stochastic_inverse/variable_discretization.md",
         "stochastic_inverse/rto.md", "stochastic_inverse/viz.md"],
-    "Bonus Add-ons" => ["exts/mtpy.md", "exts/ad.md"],
+    "Bonus Add-ons" => ["exts/mtpy.md"],
     "API" => "api.md"]

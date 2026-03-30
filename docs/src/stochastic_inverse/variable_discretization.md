@@ -108,18 +108,19 @@ JLD2.@save "file_path.jld2" rw_chain
 <details closed><summary>Code for this figure</summary>
 ```
 
-```@example variable_mcmc
+```julia
 fig = Figure()
 ax = Axis(fig[1, 1])
 hm = get_kde_image!(ax, rw_chain, modelD; kde_transformation_fn=log10,
     grid=(m=collect(4.0:0.01:5.0), z=collect(1:1e3:60e3)),
+    trans_utils=(m=no_tf, h=no_tf),
     colormap=:binary, colorrange=(-4, 0.0))
 Colorbar(fig[1, 2], hm; label="log pdf")
 
 mean_kws = (; color=:seagreen3, linewidth=2)
 std_kws = (; color=:red, linewidth=1.5)
-get_mean_std_image!(ax, rw_chain, modelD; confidence_interval=0.9, mean_kwargs=mean_kws,
-    std_plus_kwargs=std_kws, std_minus_kwargs=std_kws, z_points=collect(1:1e3:60e3))
+# get_mean_std_image!(ax, rw_chain, modelD; confidence_interval=0.9, trans_utils=(m=no_tf, h=no_tf), mean_kwargs=mean_kws,
+#     std_plus_kwargs=std_kws, std_minus_kwargs=std_kws, z_points=collect(1:1e3:60e3))
 ylims!(ax, [6e4, 0])
 
 plot_model!(ax, m_test; color=:black, linestyle=:dash, linewidth=2, label="true")
@@ -130,7 +131,7 @@ Legend(fig[2, :], ax; orientation=:horizontal)
 </details>
 ```
 
-```@example variable_mcmc
+```julia
 fig # hide
 ```
 

@@ -98,13 +98,12 @@ JLD2.@save "file_path.jld2" dc_chain
 fig = Figure()
 ax = Axis(fig[1, 1])
 hm = get_kde_image!(ax, dc_chain, modelD; kde_transformation_fn=log10,
-    colormap=:binary, colorrange=(-3.0, 0.0))
+    colormap=:binary, colorrange=(-3.0, 0.0), trans_utils=(m=no_tf, h=no_tf))
 Colorbar(fig[1, 2], hm; label="log pdf")
 
 mean_kws = (; color=:seagreen3, linewidth=2)
 std_kws = (; color=:red, linewidth=1.5)
-get_mean_std_image!(ax, dc_chain, modelD; confidence_interval=0.99, mean_kwargs=mean_kws,
-    std_plus_kwargs=std_kws, std_minus_kwargs=std_kws)
+# get_mean_std_image!(ax, dc_chain, modelD; confidence_interval=0.99, trans_utils=(m=no_tf, h=no_tf), mean_kwargs=mean_kws, std_plus_kwargs=std_kws, std_minus_kwargs=std_kws)
 
 ylims!(ax, [2500, 0])
 

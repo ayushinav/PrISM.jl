@@ -1,7 +1,7 @@
 # Occam1D
 
 ```@setup occam_demo
-using ProEM, LinearAlgebra, CairoMakie
+using PrISM, LinearAlgebra, CairoMakie
 ```
 
 ## Brief introduction
