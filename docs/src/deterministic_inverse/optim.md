@@ -1,7 +1,7 @@
 # Solvers from `Optimisation.jl`
 
 ```@setup optim_demo
-using ProEM, LinearAlgebra, CairoMakie, Optimization, OptimizationOptimJL, DifferentiationInterface
+using PrISM, LinearAlgebra, CairoMakie, Optimization, OptimizationOptimJL, DifferentiationInterface
 ```
 
 ## Brief introduction

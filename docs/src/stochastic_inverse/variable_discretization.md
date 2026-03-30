@@ -41,7 +41,7 @@ In the following example, we demonstrate MCMC inversion for a 3-layered earth, i
 ## Copy-Pasteable code
 
 ```@setup variable_mcmc
-using ProEM
+using PrISM
 using Distributions
 using Turing
 using LinearAlgebra

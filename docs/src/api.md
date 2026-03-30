@@ -1,14 +1,14 @@
 ```@autodocs
-Modules = [ProEM]
+Modules = [PrISM]
 Order = [:function]
 ```
 
 ```@autodocs
-Modules = [ProEM]
+Modules = [PrISM]
 Order = [:type]
 ```
 
 ```@autodocs
-Modules = [ProEM]
+Modules = [PrISM]
 Order = [:constant]
 ```

@@ -1,7 +1,7 @@
 # Love wave
 
 ```@setup lw_demo
-using ProEM, CairoMakie, InteractiveUtils
+using PrISM, CairoMakie, InteractiveUtils
 ```
 
 ## Model

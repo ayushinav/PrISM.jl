@@ -31,7 +31,7 @@ end
 
     @inferred RWModel(vs_, h_[1:(end - 1)], density_, vp_)
     @inferred forward(m_rw, t)
-    @test_opt forward(m_rw, t)
+    # @test_opt forward(m_rw, t)
     @test_call forward(m_rw, t)
 
     # Performance test

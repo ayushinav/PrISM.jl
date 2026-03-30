@@ -1,7 +1,7 @@
 # Magnetotellurics (MT)
 
 ```@setup mt_demo
-using ProEM, CairoMakie, InteractiveUtils
+using PrISM, CairoMakie, InteractiveUtils
 ```
 
 ## Model

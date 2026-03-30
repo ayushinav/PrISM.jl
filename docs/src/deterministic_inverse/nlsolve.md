@@ -1,7 +1,7 @@
 # Solvers from `NonlinearSolve.jl`
 
 ```@setup nl_demo
-using ProEM, LinearAlgebra, CairoMakie, NonlinearSolve, DifferentiationInterface
+using PrISM, LinearAlgebra, CairoMakie, NonlinearSolve, DifferentiationInterface
 ```
 
 ## Brief introduction

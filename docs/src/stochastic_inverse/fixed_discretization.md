@@ -37,7 +37,7 @@ In the following example, we demonstrate MCMC inversion for a 3-layered earth, i
 ## Demo
 
 ```@setup fixed_mcmc
-using ProEM
+using PrISM
 using Distributions
 using Turing
 using LinearAlgebra

@@ -56,7 +56,7 @@ In the following section, we demonstrate RTO-TKO for a 6-layered earth, includin
 ## Demo
 
 ```@setup rto_tko
-using ProEM
+using PrISM
 using Distributions
 using Turing
 using LinearAlgebra

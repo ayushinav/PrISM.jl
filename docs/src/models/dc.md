@@ -1,7 +1,7 @@
 # DC (Direct Current) Resistivity
 
 ```@setup dc_demo
-using ProEM, CairoMakie, InteractiveUtils
+using PrISM, CairoMakie, InteractiveUtils
 ```
 
 ## Model
