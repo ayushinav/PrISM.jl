@@ -1,10 +1,10 @@
-# Vizualization
+# Visualization
 
 ## Model
 
-You can plot models using the dispatchs
+You can plot models using the dispatches
 
-```@docs; cannonical = false
+```@docs; canonical = false
 plot_model
 plot_model!
 ```

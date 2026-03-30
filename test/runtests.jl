@@ -21,7 +21,7 @@ using PrISM, LinearAlgebra
        $(RETESTITEMS_NWORKER_THREADS) threads for group $(GROUP)"
 
 ReTestItems.runtests(
-    ProEM;
+    PrISM;
     tags = (GROUP == "all" ? nothing : [Symbol(GROUP)]),
     nworkers = RETESTITEMS_NWORKERS,
     nworker_threads = RETESTITEMS_NWORKER_THREADS,

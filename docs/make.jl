@@ -5,17 +5,15 @@ include("pages.jl")
 DocMeta.setdocmeta!(PrISM, :DocTestSetup, :(using PrISM); recursive=true)
 
 makedocs(; authors="Abhinav Pratap Singh et al.",
-    # sitename="PrISM.jl",
-    # doctest=true,
-    # clean=true,
-    repo="github.com/ayushinav/PrISM.jl",
+    sitename="PrISM.jl",
+    doctest=true,
+    clean=true,
     format=DocumenterVitepress.MarkdownVitepress(;
-        repo="github.com/ayushinav/PrISM.jl", devurl="dev"),
+        repo="github.com/ayushinav/PrISM.jl", devurl="dev", devbranch="main"),
     pages=pages,
-    # draft=false,
-    # source="src",
-    # build="build"
-    )
+    draft=false,
+    source="src",
+    build="build")
 
-# DocumenterVitepress.deploydocs(; repo="github.com/ayushinav/PrISM.jl",
-#     target=joinpath(@__DIR__, "build"), devbranch="main", push_preview=true)
+DocumenterVitepress.deploydocs(; repo="github.com/ayushinav/PrISM.jl",
+    target=joinpath(@__DIR__, "build"), devbranch="main", push_preview=true)
