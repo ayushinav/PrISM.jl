@@ -17,7 +17,7 @@ plot_model!
 
 Similarly, to plot response for different geophysical surveys, we have
 
-```@docs; cannonical = false
+```@docs; canonical = false
 plot_response
 plot_response!
 ```
