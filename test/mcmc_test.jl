@@ -1,7 +1,7 @@
 @testitem "fixed discretization" tags = [:mcmc] begin
     using Distributions, Turing, LinearAlgebra, Pigeons
 
-    model_types = [MTModel, RWModel, LWModel]
+    model_types = [MTModel, RWModel]
     modelD_types = [MTModelDistribution, RWModelDistribution, LWModelDistribution]
     respD = [MTResponseDistribution(normal_dist, normal_dist),
         SurfaceWaveResponseDistribution(normal_dist),

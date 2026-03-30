@@ -13,7 +13,7 @@
 end
 
 @testitem "type inference tests : Rayleigh Waves" tags = [:inference] begin
-    using BenchmarkTools
+    using BenchmarkTools, JET
     velocity_model = [
         [10.0, 7.00, 3.50, 2.00], [10.0, 6.80, 3.40, 2.00], [10.0, 7.00, 3.50, 2.00],
         [10.0, 7.60, 3.80, 2.00], [10.0, 8.40, 4.20, 2.00], [10.0, 9.00, 4.50, 2.00],
@@ -40,6 +40,7 @@ end
 end
 
 @testitem "type inference tests : DC Resistivity" tags = [:inference] begin
+    using BenchmarkTools, JET
     ρ = log10.([1e3, 4e3, 2e2])
     h = [100.0, 100.0]
     m = DCModel(ρ, h)
