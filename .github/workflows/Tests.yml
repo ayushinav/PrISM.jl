@@ -26,14 +26,11 @@ jobs:
       matrix:
         version: ["1.11"]
         group:
-          - "cond"
-          - "elastic"
-          - "visc"
-          - "anelastic"
-          - "phase_mixing"
-          - "combine_models"
-          - "tune_rp"
-          - "thermals"
+          - "forward"
+          - "occam"
+          - "mcmc"
+          - "rto"
+          - "inference"
     steps:
       - uses: actions/checkout@v4
 
