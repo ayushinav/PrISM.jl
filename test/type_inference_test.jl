@@ -39,7 +39,7 @@ end
 
 end
 
-@testitem "type inference tests : Rayleigh Waves" tags = [:inference] begin
+@testitem "type inference tests : DC Resistivity" tags = [:inference] begin
     ρ = log10.([1e3, 4e3, 2e2])
     h = [100.0, 100.0]
     m = DCModel(ρ, h)
