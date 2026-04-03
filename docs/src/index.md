@@ -5,8 +5,8 @@ layout: home
 
 hero:
   name: PrISM.jl
-  text: Geophysical modeling and inversion in Julia
-  tagline: Automatic Differentiation enabled probabilistic inference of subsurface
+  text: PRobabilistic Inference of Subsurface Models (PrISM) in Julia
+  tagline: Automatic Differentiation enabled deterministic and stochastic imaging of subsurface using geophysical data
   image:
     src: logo.png
     alt: PrISM.jl
@@ -18,13 +18,13 @@ hero:
 features:
   - icon: 🔢
     title: Modeling
-    details: Estimate geophysical observables using rock physics
-    link: intro/getting_started
+    details: Estimate subsurface models using deterministic inversion using wide suite of solvers
+    link: deterministic_inverse/index
 
   - icon: 📊
     title: Probabilstic inference
-    details: Perform probabilistic inference of parameters
-    link: /tutorials/stochastic_inverse
+    details: Perform Uncertainty Quantification of the subsurface models
+    link: stochastic_inverse/index
 
   - icon: ∂
     title: Differentiability
