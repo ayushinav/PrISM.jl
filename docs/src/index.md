@@ -5,7 +5,7 @@ layout: home
 
 hero:
   name: PrISM.jl
-  text: PRobabilistic Inference of Subsurface Models (PrISM) in Julia
+  text: PRobabilistic Inference of Subsurface Models in Julia
   tagline: Automatic Differentiation enabled deterministic and stochastic imaging of subsurface using geophysical data
   image:
     src: logo.png
@@ -56,5 +56,3 @@ Pkg.add("PrISM.jl")
   - Rayleigh waves
   - Love waves
 
-TODO : Links to the models?
-TODO : present probabilistic schemes here?
