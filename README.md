@@ -11,7 +11,7 @@
 [![codecov](https://codecov.io/gh/ayushinav/PrISM.jl/graph/badge.svg?token=VQM6W3DUI4)](https://codecov.io/gh/ayushinav/PrISM.jl)
 [![DOI](https://zenodo.org/badge/1030654501.svg)](https://doi.org/10.5281/zenodo.19382782)
 
-`PrISM.jl` (**Pr**obabilistic **I**nference of **S**ubsurface **M**odels) is a performant pacakge written in Julia for doing forward and inverse modeling in geophysics. We hope to write the code structure such that any other geophysical survey can also be used, and we can tend towards a joint forward and inverse modeling library.
+`PrISM.jl` (**Pr**obabilistic **I**nference of **S**ubsurface **M**odels) is a performant package written in Julia for doing forward and inverse modeling in geophysics. We hope to write the code structure such that any other geophysical survey can also be used, and we can tend towards a joint forward and inverse modeling library.
 
 ## Forward modeling
 
