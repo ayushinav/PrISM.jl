@@ -1,6 +1,6 @@
 # Working with `mtpy`
 
-`PrISM.jl` allows users to take advantage of the [mtpy](https://github.com/PrISMgeophysics/mtpy-v2) through the python calls offered by [PyCall.jl](https://github.com/JuliaPy/PyCall.jl). Installing `Pycall.jl` and making `mtpy` work can be slightly tricky. As `mtpy` gets updated, users would want to use the latest updated versions. To make things easier, we do not install `mtpy` via conda or python, and not get involved in the messy virtual environments, we simply clone `mtpy` from the github [repo](https://github.com/PrISMgeophysics/mtpy-v2).
+`PrISM.jl` allows users to take advantage of the [mtpy](https://github.com/MTgeophysics/mtpy-v2) through the python calls offered by [PyCall.jl](https://github.com/JuliaPy/PyCall.jl). Installing `Pycall.jl` and making `mtpy` work can be slightly tricky. As `mtpy` gets updated, users would want to use the latest updated versions. To make things easier, we do not install `mtpy` via conda or python, and not get involved in the messy virtual environments, we simply clone `mtpy` from the github [repo](https://github.com/PrISMgeophysics/mtpy-v2).
 
 *Add compat dependency for PyCall*
 
@@ -31,7 +31,7 @@ mtpy = imp.load_module(name, file, filename, data)
 ```
 
 ```julia
-mc = mtpy.PrISMCollection()
+mc = mtpy.MTCollection()
 
 mc.open_collection("../../../data_for_mtpy_demo/tf_collection2.h5")
 
@@ -106,15 +106,15 @@ end
 gif(anim; fps=0.5)
 ```
 
-Similar plots can also be made with `PrISM.jl`. We just need to create the corresponding `PrISMResponse`s and plot them.
+Similar plots can also be made with `PrISM.jl`. We just need to create the corresponding `MTResponse`s and plot them.
 
 ```julia
 anim = @animate for i in 1:n_stations
-    xy_resp = PrISMResponse(ρₐ_all[i][:, 1, 2], ϕ_all[i][:, 1, 2])
-    xy_err_resp = PrISMResponse(ρₐerr[i][:, 1, 2], ϕerr[i][:, 1, 2])
+    xy_resp = MTResponse(ρₐ_all[i][:, 1, 2], ϕ_all[i][:, 1, 2])
+    xy_err_resp = MTResponse(ρₐerr[i][:, 1, 2], ϕerr[i][:, 1, 2])
 
-    yx_resp = PrISMResponse(ρₐ_all[i][:, 2, 1], ϕ_all[i][:, 2, 1])
-    yx_err_resp = PrISMResponse(ρₐerr[i][:, 2, 1], ϕerr[i][:, 2, 1])
+    yx_resp = MTResponse(ρₐ_all[i][:, 2, 1], ϕ_all[i][:, 2, 1])
+    yx_err_resp = MTResponse(ρₐerr[i][:, 2, 1], ϕerr[i][:, 2, 1])
 
     plt = prepare_plot(xy_resp, 2π .* f_arr[i], xy_err_resp;
         label="XY", markershape=:circle, maerkersize=3)
