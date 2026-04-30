@@ -4,17 +4,13 @@ using Reexport
 using LinearAlgebra
 using StaticArrays
 using LinearSolve
-using NonlinearSolve
-using Optimization, OptimizationOptimJL
 using ProgressMeter
-using Enzyme
 using DifferentiationInterface
-using UnPack
-using InteractiveUtils
+using UnPack # TODO
+using InteractiveUtils # TODO 
 using PrettyTables
 using DataInterpolations
 using Distributions
-using Turing
 import Base: show
 
 # import DifferentiationInterface: recursive_similar
@@ -42,8 +38,6 @@ include("utils.jl")
 include("inverse/utils.jl")
 include("inverse/occam.jl")
 include("inverse/inv.jl")
-include("inverse/nl_inv.jl")
-include("inverse/opt_inv.jl")
 include("probabilistic/models/mt.jl")
 include("probabilistic/models/surface_waves.jl")
 include("probabilistic/models/dc.jl")
