@@ -1,28 +1,8 @@
-module PrISMNonlinearSolveExt
+module PrISMOptimizationExt
 
 using PrISM, Optimization, OptimizationOptimJL
 import PrISM: inverse!
 
-"""
-`nl_cache`: specifies the inverse algorithm while having a cache.
-"""
-mutable struct opt_cache{T1, T2}
-    alg::T1
-    μ::T2
-end
-"""
-    OptAlg(; alg = LBFGS, μ = 1.0, kwargs...)
-
-returns `opt_cache` that specifies which `Optimization.jl` solver to use for the inverse problem
-
-## Keyword Arguments
-
-  - `alg`: `Optimization`[@ref] algorithm to be used, defaults to LBFGS
-  - `μ` : regularization weight
-"""
-function OptAlg(; alg=LBFGS, μ=1.0)
-    return opt_cache(alg, μ)
-end
 # ======================== using Optimization.jl ===============================
 
 function inverse!(mₖ::model1,
@@ -48,8 +28,7 @@ function inverse!(mₖ::model1,
     n_resp = sum([length(getfield(robs, k)) for k in response_fields])
 
     if isnothing(response_trans_utils)
-        response_trans_utils = NamedTuple{response_fields}(ntuple(
-            i -> no_tf, length(response_fields)))
+        response_trans_utils = NamedTuple{response_fields}(ntuple(i -> no_tf, length(response_fields)))
     end
 
     ks = Tuple([k for k in propertynames(mₖ) if k != :m])
@@ -93,15 +72,15 @@ function cb_(state, l, verbose, L, μ, model_trans_utils, χ2)
 end
 
 function construct_cost_function_for_opt(m, p)
-    @unpack model_type, m_const, model_trans_utils, response_trans_utils, vars, params, response_fields, W, μ, r_obs, L, mᵣ = p
+    @unpack model_type, m_const, model_trans_utils, response_trans_utils,
+    vars, params, response_fields, W, μ, r_obs, L, mᵣ = p
 
     m0 = merge((; m=model_trans_utils.tf.(m)), m_const)
     model = from_nt(model_type, m0)
     resp_ = forward(model, vars, params)
 
     for k in response_fields
-        broadcast!(
-            getfield(response_trans_utils, k).tf, getfield(resp_, k), getfield(resp_, k))
+        broadcast!(getfield(response_trans_utils, k).tf, getfield(resp_, k), getfield(resp_, k))
     end
 
     L1 = χ²(reduce(vcat, [getfield(resp_, k) for k in response_fields]),

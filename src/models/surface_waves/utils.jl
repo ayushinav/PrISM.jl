@@ -156,8 +156,6 @@ function var(p, q, ra, rb, wvno, xka, xkb, dpth)
     y *= fac
     z *= fac
     return w, cosp, a0, cpcq, cpy, cpz, cqw, cqx, xy, xz, wy, wz
-
-
 end
 
 function dltar(c, ω, model::LWModel, e, ee, C)
@@ -249,14 +247,14 @@ function dltar(k, ω, model::RWModel, e, ee, C)
 
         # Evaluate cosP, cosQ...
         try
-        _, _, a0, cpcq, cpy, cpz, cqw, cqx, xy, xz,
-        wy, wz = var(p, q, ra, rb, k, xka, xkb, dpth)
+            _, _, a0, cpcq, cpy, cpz, cqw, cqx, xy, xz,
+            wy, wz = var(p, q, ra, rb, k, xka, xkb, dpth)
             dnka!(C, k * k, gam, gammk, ρ[m], a0, cpcq, cpy, cpz, cqw, cqx, xy, xz, wy, wz)
 
         catch
             @show k
         end
-            # Evaluate Dunkin's matrix
+        # Evaluate Dunkin's matrix
 
         mul!(ee, e, C)
         # for i in 1:5
@@ -327,11 +325,10 @@ function find_c(prob, c1, c2, ω)
     return oftype(c1, sol.u)
 end
 
-
 function find_c_(f, c1, c2, ω)
 
     # @show c1, c2
-    
+
     f1 = f(c1, ω)
     f2 = f(c2, ω)
     c3 = (c1+c2)/2
@@ -339,9 +336,9 @@ function find_c_(f, c1, c2, ω)
     while i <= 30
         f3 = f(c3, ω)
 
-        if abs(f3) < 1f-9
+        if abs(f3) < 1.0f-9
             break
-        elseif f3 * f1 <0
+        elseif f3 * f1 < 0
             c2 = c3
             f2 = f3
         else
@@ -349,15 +346,13 @@ function find_c_(f, c1, c2, ω)
             f1 = f3
         end
 
-        if abs(c2-c1) < 1f-9
-
+        if abs(c2-c1) < 1.0f-9
             break
         end
         c3 = (c1+c2)/2
         i+=1
-        
     end
-    
+
     # @show i
     # @show c3, 2π/ω
 

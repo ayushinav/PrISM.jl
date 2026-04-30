@@ -3,13 +3,6 @@ module PrISMNonlinearSolveExt
 using PrISM, NonlinearSolve
 import PrISM: inverse!
 """
-`nl_cache`: specifies the inverse algorithm while having a cache.
-"""
-mutable struct nl_cache{T1, T2}
-    alg::T1
-    μ::T2
-end
-"""
     NonlinearAlg(; alg = LevenbergMarquardt, μ = 1.0)
 
 returns `nl_cache` that specifies which non linear solver to use for the inverse problem
@@ -47,8 +40,7 @@ function inverse!(mₖ::model1,
     n_resp = sum([length(getfield(robs, k)) for k in response_fields])
 
     if isnothing(response_trans_utils)
-        response_trans_utils = NamedTuple{response_fields}(ntuple(
-            i -> no_tf, length(response_fields)))
+        response_trans_utils = NamedTuple{response_fields}(ntuple(i -> no_tf, length(response_fields)))
     end
 
     ks = Tuple([k for k in propertynames(mₖ) if k != :m])
@@ -83,8 +75,7 @@ function inverse!(mₖ::model1,
         forward!(resp_, model, vars, params)
 
         for k in response_fields
-            broadcast!(getfield(response_trans_utils, k).tf,
-                getfield(resp_, k), getfield(resp_, k))
+            broadcast!(getfield(response_trans_utils, k).tf, getfield(resp_, k), getfield(resp_, k))
         end
 
         chi2 = χ²(reduce(vcat, [getfield(resp_, k) for k in response_fields]),
@@ -105,15 +96,15 @@ end
 
 # Not performant at the moment
 function construct_cost_function_for_nl_inv(m, p)
-    @unpack model_type, m_const, model_trans_utils, response_trans_utils, vars, params, response_fields, W, μ, r_obs, L, mᵣ = p
+    @unpack model_type, m_const, model_trans_utils, response_trans_utils,
+    vars, params, response_fields, W, μ, r_obs, L, mᵣ = p
 
     m0 = merge((; m=model_trans_utils.tf.(m)), m_const)
     model = from_nt(model_type, m0)
     resp_ = forward(model, vars, params)
 
     for k in response_fields
-        broadcast!(
-            getfield(response_trans_utils, k).tf, getfield(resp_, k), getfield(resp_, k))
+        broadcast!(getfield(response_trans_utils, k).tf, getfield(resp_, k), getfield(resp_, k))
     end
 
     L1 = χ²(reduce(vcat, [getfield(resp_, k) for k in response_fields]),

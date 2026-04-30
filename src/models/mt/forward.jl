@@ -10,16 +10,17 @@ const default_mt_tf_fns = (ρₐ=no_tf, ϕ=no_tf)
 
 # dispatch on forward for 1d model
 """
-   forward(m::MTModel, ω)
+forward(m::MTModel, ω)
 
 returns `MTResponse` for the given `MTModel m` at the frequencies  `ω`
 
 ## Arguments
 
- - `m` : MTModel for forward response
- - `ω` : angular frequencies where the response are estimated (=2π/Time period )
+  - `m` : MTModel for forward response
+  - `ω` : angular frequencies where the response are estimated (=2π/Time period )
 """
-function SubsurfaceCore.forward(m::Tm, ω::T3, params=default_params_mt) where {Tm <: MTModel, T3}
+function SubsurfaceCore.forward(m::Tm, ω::T3, params=default_params_mt) where {
+        Tm <: MTModel, T3}
     if !(length(m.h) == length(m.m) - 1)
         error("number of model layers should be 1 less than the number of model parameters")
     end
@@ -43,11 +44,12 @@ overwrites `MTResponse resp` for the given `MTModel m` at the frequencies  `ω`
 
 ## Arguments
 
- - `resp` : `MTResponse` to be overwritten
- - `m` : `MTModel` for forward response
- - `ω` : angular frequencies where the response are estimated (=2π/Time period )
+  - `resp` : `MTResponse` to be overwritten
+  - `m` : `MTModel` for forward response
+  - `ω` : angular frequencies where the response are estimated (=2π/Time period )
 """
-function forward!(r::Tr, m::Tm, ω::T3, params=default_params_mt) where {Tr <: MTResponse, Tm <: MTModel, T3}
+function forward!(r::Tr, m::Tm, ω::T3, params=default_params_mt) where {
+        Tr <: MTResponse, Tm <: MTModel, T3}
     if !(length(m.h) == length(m.m) - 1)
         error("number of model layers should be 1 less than the number of model parameters")
     end

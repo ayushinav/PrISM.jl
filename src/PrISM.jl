@@ -1,16 +1,18 @@
 module PrISM
 using Reexport
 @reexport using SubsurfaceCore
+using DataInterpolations
+using DifferentiationInterface
+using Distributions
+using FiniteDiff
+using InteractiveUtils # TODO 
 using LinearAlgebra
-using StaticArrays
 using LinearSolve
 using ProgressMeter
-using DifferentiationInterface
-using UnPack # TODO
-using InteractiveUtils # TODO 
 using PrettyTables
-using DataInterpolations
-using Distributions
+using StaticArrays
+
+using UnPack # TODO
 import Base: show
 
 # import DifferentiationInterface: recursive_similar
@@ -35,6 +37,7 @@ include("models/dc/arrays.jl")
 include("models/pretty_printing.jl")
 
 include("utils.jl")
+include("inverse/alg_types.jl")
 include("inverse/utils.jl")
 include("inverse/occam.jl")
 include("inverse/inv.jl")
