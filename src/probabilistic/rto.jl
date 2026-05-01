@@ -221,14 +221,16 @@ function SubsurfaceCore.stochastic_inverse(
         i += 1
 
         (progress) && (next!(prog; showvalues=[(Symbol("#samples"), i)]))
-        # @show i
     end
 
     idcs = broadcast(!isnan, view(m_chains, 1, :))
-    @show sum(idcs)
+    @info sum(idcs)
 
-    return Turing.Chains(vcat(m_chains[:, idcs], μ_chains[:, idcs])', [Symbol("m[$i]")
-                                                                       for i in 1:(n + 1)])
+    chains_m = MCMCChains.Chains(m_chains[:, idcs]', [Symbol("m[$i]") for i in 1:(n + 1)])
+    chains_μ = MCMCChains.Chains(μ_chains[:, idcs]', [Symbol("μ") for i in 1:(n + 1)])
+
+    return chains_m, chains_μ
+                                                                       
 end
 
 # mutable struct RTO_MTModel <: AbstractGeophyModel

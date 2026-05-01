@@ -8,6 +8,7 @@ using FiniteDiff
 using InteractiveUtils # TODO 
 using LinearAlgebra
 using LinearSolve
+using MCMCChains
 using ProgressMeter
 using PrettyTables
 using StaticArrays

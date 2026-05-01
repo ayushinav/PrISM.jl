@@ -1,4 +1,5 @@
 Constant_DI = DifferentiationInterface.Constant
+Cache_DI = DifferentiationInterface.Cache
 
 # TODO : params -> wrapper_DI, occam_step, smoothing_step_fn
 
@@ -110,7 +111,7 @@ function inverse!(mₖ::model1,
     ks = Tuple([k for k in propertynames(mₖ) if k != :m])
     ps = Tuple([getfield(mₖ, k) for k in propertynames(mₖ) if k != :m])
 
-    const_m = NamedTuple{ks}(ps)
+    const_m = deepcopy(mₖ) #NamedTuple{ks}(ps)
 
     jc = zeros(eltype(mₖ.m), nresps, nmods)
 
@@ -150,18 +151,21 @@ function inverse!(mₖ::model1,
     end
 
     μ_last = 0.0
-    resp_cache = copy(robs)
+    resp_cache = deepcopy(robs)
+    m_cache = deepcopy(mₖ)
 
     rvec = zero(lin_utils.Fₖ)
 
     model_type = typeof(mₖ).name.wrapper
-    prep_j = prepare_jacobian(wrapper_DI!, rvec, ad_type, mₖ.m, Constant_DI(const_m),
+    prep_j = prepare_jacobian(wrapper_DI5!, rvec, ad_type, mₖ.m, 
+        Cache_DI(m_cache), Constant_DI(const_m), Cache_DI(resp_cache),
         Constant_DI(vars), Constant_DI(response_fields),
         Constant_DI(model_type), Constant_DI(model_trans_utils),
         Constant_DI(response_trans_utils), Constant_DI(params))
 
     DifferentiationInterface.jacobian!(
-        wrapper_DI!, rvec, jc, prep_j, ad_type, mₖ.m, Constant_DI(const_m),
+        wrapper_DI5!, rvec, jc, prep_j, ad_type, mₖ.m, 
+        Cache_DI(m_cache), Constant_DI(const_m), Cache_DI(resp_cache),
         Constant_DI(vars), Constant_DI(response_fields),
         Constant_DI(model_type), Constant_DI(model_trans_utils),
         Constant_DI(response_trans_utils), Constant_DI(params))
@@ -181,7 +185,8 @@ function inverse!(mₖ::model1,
         end
 
         DifferentiationInterface.jacobian!(
-            wrapper_DI!, rvec, jc, ad_type, mₖ.m, Constant_DI(const_m),
+            wrapper_DI5!, rvec, jc, prep_j, ad_type, mₖ.m, 
+            Cache_DI(m_cache), Constant_DI(const_m), Cache_DI(resp_cache),
             Constant_DI(vars), Constant_DI(response_fields),
             Constant_DI(model_type), Constant_DI(model_trans_utils),
             Constant_DI(response_trans_utils), Constant_DI(params))
@@ -222,7 +227,7 @@ function inverse!(mₖ::model1,
     if smoothing_step
 
         # DifferentiationInterface.jacobian!(
-        #     wrapper_DI!, rvec, jc, ad_type,
+        #     wrapper_DI5!, rvec, jc, ad_type,
         #     mₖ.m, Constant_DI(const_m), Constant_DI(vars),
         # Constant_DI(response_fields), Constant_DI(model_type),
         # Constant_DI(model_trans_utils), Constant_DI(response_trans_utils))
