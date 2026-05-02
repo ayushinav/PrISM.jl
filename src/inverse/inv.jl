@@ -157,14 +157,14 @@ function inverse!(mₖ::model1,
     rvec = zero(lin_utils.Fₖ)
 
     model_type = typeof(mₖ).name.wrapper
-    prep_j = prepare_jacobian(wrapper_DI5!, rvec, ad_type, mₖ.m, 
+    prep_j = prepare_jacobian(wrapper_DI!, rvec, ad_type, mₖ.m, 
         Cache_DI(m_cache), Constant_DI(const_m), Cache_DI(resp_cache),
         Constant_DI(vars), Constant_DI(response_fields),
         Constant_DI(model_type), Constant_DI(model_trans_utils),
         Constant_DI(response_trans_utils), Constant_DI(params))
 
     DifferentiationInterface.jacobian!(
-        wrapper_DI5!, rvec, jc, prep_j, ad_type, mₖ.m, 
+        wrapper_DI!, rvec, jc, prep_j, ad_type, mₖ.m, 
         Cache_DI(m_cache), Constant_DI(const_m), Cache_DI(resp_cache),
         Constant_DI(vars), Constant_DI(response_fields),
         Constant_DI(model_type), Constant_DI(model_trans_utils),
@@ -185,7 +185,7 @@ function inverse!(mₖ::model1,
         end
 
         DifferentiationInterface.jacobian!(
-            wrapper_DI5!, rvec, jc, prep_j, ad_type, mₖ.m, 
+            wrapper_DI!, rvec, jc, prep_j, ad_type, mₖ.m, 
             Cache_DI(m_cache), Constant_DI(const_m), Cache_DI(resp_cache),
             Constant_DI(vars), Constant_DI(response_fields),
             Constant_DI(model_type), Constant_DI(model_trans_utils),
@@ -227,7 +227,7 @@ function inverse!(mₖ::model1,
     if smoothing_step
 
         # DifferentiationInterface.jacobian!(
-        #     wrapper_DI5!, rvec, jc, ad_type,
+        #     wrapper_DI!, rvec, jc, ad_type,
         #     mₖ.m, Constant_DI(const_m), Constant_DI(vars),
         # Constant_DI(response_fields), Constant_DI(model_type),
         # Constant_DI(model_trans_utils), Constant_DI(response_trans_utils))

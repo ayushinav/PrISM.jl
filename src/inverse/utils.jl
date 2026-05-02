@@ -79,19 +79,13 @@ function wrapper_DI_!(r_vec, m, m_const, vars, response_fields, model_type,
     nothing
 end
 
-function wrapper_DI5!(r_vec, m_vec, m, m_const, resp_cache, vars,
+function wrapper_DI!(r_vec, m_vec, m, m_const, resp_cache, vars,
         response_fields, model_type, model_trans_utils, response_trans_utils, params)
-    # m0 = merge( (; m = model_trans_utils.tf.(m)), m_const)
-    # model_ = from_nt(model_type, m0)
     for k in propertynames(m_const)
-        # if k === :m
-        #         continue
-        # end
         copyto!(getproperty(m, k), getproperty(m_const, k))
     end
     copyto!(m.m, m_vec)
     broadcast!(model_trans_utils.tf, m.m, m.m)
-#     resp = forward(m, vars)
     forward!(resp_cache, m, vars, params)
 
     n_resp_start = 1

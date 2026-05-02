@@ -9,14 +9,25 @@ on:
     branches:
       - main
     tags: '*'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_name != github.event.repository.default_branch || github.ref != 'refs/tags/v*' }}
+
 jobs:
   tests:
     runs-on: 'ubuntu-latest'
-    name: "Tests"
+    name: "${{ matrix.group }} (Julia ${{ matrix.version }})"
     strategy:
       fail-fast: false
       matrix:
         version: ["1.11"]
+        group:
+          - "forward"
+          - "occam"
+          - "mcmc"
+          - "rto"
+          - "inference"
     steps:
       - uses: actions/checkout@v6
       - uses: julia-actions/setup-julia@v2
