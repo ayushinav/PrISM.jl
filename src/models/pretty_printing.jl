@@ -18,7 +18,6 @@ function Base.show(io::IO, m::model) where {model <:
                 title = "1D MT Model")
 end
 
-    println("Layer \t h(km) \t Vₛ (km/s) \t ρ (kg⋅m⁻³) \t Vₚ (km/s)")
 function Base.show(io::IO,
         m::model) where {model <: RWModel{
         <:AbstractVector, <:AbstractVector, <:AbstractVector, <:AbstractVector}}

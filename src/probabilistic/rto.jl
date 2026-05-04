@@ -62,30 +62,27 @@ end
   - `model_trans_utils`: A named tuple containing `transform_utils` for the fields of model that need to be scaled/modified. If not provided for any `model` field, the field won't be modified
   - `response_trans_utils`: for scaling the response parameters
 """
-function SubsurfaceCore.stochastic_inverse(r_obs::resp1, err_resp::resp2, vars, alg_cache::rto_cache; n_chains=1,
-        model_trans_utils::NamedTuple=(;), # need to take care of this
-        response_trans_utils::NamedTuple=(;),
-        params=(;), progress = true,
+function SubsurfaceCore.stochastic_inverse(
+        r_obs::resp1, err_resp::resp2, vars, alg_cache::rto_cache;
+        n_chains=1, model_trans_utils::NamedTuple=(;), # need to take care of this
+        response_trans_utils::NamedTuple=(;), params=(;), progress=true,
         kwargs...) where {resp1 <: AbstractGeophyResponse, resp2 <: AbstractGeophyResponse}
-    
     model_fields = Symbol[]
 
     # segregate the constants and the Distribution parts of the alg_cache
 
-
     (length(params) == 0) && (params = default_params(typeof(alg_cache.m₀)))
-    
+
     model_fields = (:m,)
     response_fields = alg_cache.response_fields
 
     # model transform_utils
-    model_trans_utils_ = (; m = no_tf)
+    model_trans_utils_ = (; m=no_tf)
     model_trans_utils_ = merge(model_trans_utils_, model_trans_utils)
 
     # response transform_utils
 
-    response_trans_utils_ = NamedTuple{Tuple(response_fields)}(ntuple(
-        i -> no_tf, length(response_fields)))
+    response_trans_utils_ = NamedTuple{Tuple(response_fields)}(ntuple(i -> no_tf, length(response_fields)))
     response_trans_utils_ = merge(response_trans_utils_, response_trans_utils)
 
     W = Diagonal(vcat([inv.(getfield(err_resp, k)) .^ 2
@@ -224,14 +221,16 @@ function SubsurfaceCore.stochastic_inverse(r_obs::resp1, err_resp::resp2, vars, 
         i += 1
 
         (progress) && (next!(prog; showvalues=[(Symbol("#samples"), i)]))
-        # @show i
     end
 
     idcs = broadcast(!isnan, view(m_chains, 1, :))
-    @show sum(idcs)
+    @info sum(idcs)
 
-    return Turing.Chains(vcat(m_chains[:, idcs], μ_chains[:, idcs])', [Symbol("m[$i]")
-                                                                       for i in 1:(n + 1)])
+    chains_m = MCMCChains.Chains(m_chains[:, idcs]', [Symbol("m[$i]") for i in 1:(n + 1)])
+    chains_μ = MCMCChains.Chains(μ_chains[end, idcs], [Symbol("μ") for i in 1:(n + 1)])
+
+    return chains_m, chains_μ
+                                                                       
 end
 
 # mutable struct RTO_MTModel <: AbstractGeophyModel
