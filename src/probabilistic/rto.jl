@@ -227,7 +227,7 @@ function SubsurfaceCore.stochastic_inverse(
     @info sum(idcs)
 
     chains_m = MCMCChains.Chains(m_chains[:, idcs]', [Symbol("m[$i]") for i in 1:(n + 1)])
-    chains_μ = MCMCChains.Chains(μ_chains[:, idcs]', [Symbol("μ") for i in 1:(n + 1)])
+    chains_μ = MCMCChains.Chains(μ_chains[end, idcs], [Symbol("μ") for i in 1:(n + 1)])
 
     return chains_m, chains_μ
                                                                        

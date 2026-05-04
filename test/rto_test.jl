@@ -33,7 +33,7 @@
     #                                                                      for i in
     #                                                                          1:length(z)])
 
-    mt_chain, mu_chain
+    mt_chain, mu_chain = rto_chain
     model_list = get_model_list(mt_chain, modelD)
 
     m_model = model_list[end]
