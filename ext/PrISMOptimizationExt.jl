@@ -2,6 +2,7 @@ module PrISMOptimizationExt
 
 using PrISM, Optimization, OptimizationOptimJL
 import PrISM: inverse!
+using UnPack
 
 # ======================== using Optimization.jl ===============================
 

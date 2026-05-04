@@ -2,6 +2,8 @@ module PrISMNonlinearSolveExt
 
 using PrISM, NonlinearSolve
 import PrISM: inverse!
+using UnPack
+
 """
     NonlinearAlg(; alg = LevenbergMarquardt, μ = 1.0)
 
