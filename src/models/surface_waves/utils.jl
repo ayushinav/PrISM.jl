@@ -246,14 +246,9 @@ function dltar(k, ω, model::RWModel, e, ee, C)
         q = rb * dpth
 
         # Evaluate cosP, cosQ...
-        try
-            _, _, a0, cpcq, cpy, cpz, cqw, cqx, xy, xz,
-            wy, wz = var(p, q, ra, rb, k, xka, xkb, dpth)
-            dnka!(C, k * k, gam, gammk, ρ[m], a0, cpcq, cpy, cpz, cqw, cqx, xy, xz, wy, wz)
-
-        catch
-            @show k
-        end
+        _, _, a0, cpcq, cpy, cpz, cqw, cqx, xy, xz,
+        wy, wz = var(p, q, ra, rb, k, xka, xkb, dpth)
+        dnka!(C, k * k, gam, gammk, ρ[m], a0, cpcq, cpy, cpz, cqw, cqx, xy, xz, wy, wz)
         # Evaluate Dunkin's matrix
 
         mul!(ee, e, C)
@@ -281,9 +276,8 @@ function get_c!(resp_, t, m, mode, dc)
 
     # resp_ = zero(t)
 
-    f(c, p) = dltar(p / c, p, m, e, ee, C)
-    # prob_init = IntervalNonlinearProblem{false}(f, (c_start - 2dc, c_high), 2π *
-    #                                                                         inv(first(t)))
+    f(c, p_omega, p_m) = dltar(p_omega / c, p_omega, p_m, e, ee, C)
+    # prob_init = IntervalNonlinearProblem{false}(f, (c_start - 2dc, c_high), 2π *inv(first(t)))
 
     for i in eachindex(t) # this can be parallelized
         flag = true # soln exists
@@ -293,9 +287,9 @@ function get_c!(resp_, t, m, mode, dc)
         c_high_each = c_low
 
         for im in 1:(mode + 1)
-            f_low = f(c_low, ω)
+            f_low = f(c_low, ω, m)
             while c_high_each <= c_high
-                f_high_each = f(c_high_each, ω)
+                f_high_each = f(c_high_each, ω, m)
                 # @show c_high_each, f_high_each
                 if f_high_each * f_low < 0
                     break
@@ -310,7 +304,7 @@ function get_c!(resp_, t, m, mode, dc)
             end
 
             # c = ifelse(flag, find_c(prob_init, c_high_each - dc, c_high_each, ω), c_high_each)
-            c = ifelse(flag, find_c_(f, c_high_each - dc, c_high_each, ω), c_high_each)
+            c = ifelse(flag, find_c_(f, c_high_each - dc, c_high_each, ω, m), c_high_each)
 
             c_low = c + dc
             resp_[i] = c
@@ -319,22 +313,22 @@ function get_c!(resp_, t, m, mode, dc)
     return nothing
 end
 
-function find_c(prob, c1, c2, ω)
-    prob_new = remake(prob; tspan=(c1, c2), p=ω)
-    sol = solve(prob_new)
-    return oftype(c1, sol.u)
-end
+# function find_c(prob, c1, c2, ω)
+#     prob_new = remake(prob; tspan=(c1, c2), p=ω)
+#     sol = solve(prob_new)
+#     return sol.u
+# end
 
-function find_c_(f, c1, c2, ω)
+function find_c_(f, c1, c2, ω, m)
 
     # @show c1, c2
 
-    f1 = f(c1, ω)
-    f2 = f(c2, ω)
+    f1 = f(c1, ω, m)
+    f2 = f(c2, ω, m)
     c3 = (c1+c2)/2
     i = 1
     while i <= 30
-        f3 = f(c3, ω)
+        f3 = f(c3, ω, m)
 
         if abs(f3) < 1.0f-9
             break

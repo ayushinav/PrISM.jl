@@ -21,19 +21,27 @@ SubsurfaceCore = "3a78539b-9dce-42c5-be8d-f3fa4153f7a3"
 UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
 
 [weakdeps]
-NonlinearSolve = "8913a72c-1f9b-4ce2-8d82-65094dcecaec"
+ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+ForwardDiffChainRules = "c9556dd2-1aed-4cfe-8560-1557cf593001"
 Optimization = "7f7a1694-90dd-40f0-9382-eb1efda571ba"
 OptimizationOptimJL = "36348300-93cb-4f02-beb5-3c3902f8871e"
+NonlinearSolve = "8913a72c-1f9b-4ce2-8d82-65094dcecaec"
 
 [extensions]
-PrISMNonlinearSolveExt = "NonlinearSolve"
+PrISMChainRulesCoreExt = "ChainRulesCore"
+PrISMForwardDiffExt = ["ChainRulesCore", "ForwardDiff", "ForwardDiffChainRules"]
 PrISMOptimizationExt = ["Optimization", "OptimizationOptimJL"]
+PrISMNonlinearSolveExt = "NonlinearSolve"
 
 [compat]
+ChainRulesCore = "1.26.1"
 DataInterpolations = "8.8.0"
 DifferentiationInterface = "0.7.12"
 Distributions = "0.25.122"
 FiniteDiff = "2.31.0"
+ForwardDiff = "1.3"
+ForwardDiffChainRules = "0.3"
 InteractiveUtils = "1.11.0"
 LinearAlgebra = "1.11.0"
 LinearSolve = "3.48.1"
