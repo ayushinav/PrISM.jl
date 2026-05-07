@@ -15,7 +15,7 @@ We can solve the inverse problem using a [suite of solvers](https://docs.sciml.a
 ## Demo
 
 !!! warning
-    
+
     Owing to the non-uniqueness of the geophysical methods, it might take considerable effort to obtain a model that converges and/or fits the data.
 
 We demonstrate using Levenberg-Marquadt on a couple of geophysical models below:
@@ -55,11 +55,7 @@ C_d = diagm(inv.(err_resp.c)) .^ 2
 nothing # hide
 ```
 
-The final result will be stored in the same variable `m_occam`. All we need to do now is specify using Occam and then calling `inverse!`.
-
-!!! note
-    
-    Using Occam, you also have the option to perform a smoothing step. Once the model has achieved the threshold misfit, it is smoothened until it fits the data just about the threshold misfit.
+The final result will be stored in the same variable `m_lm`. All we need to do now is define the algorithm cache and call `inverse!`.
 
 ```@example nl_demo
 alg_cache = NonlinearAlg(; alg=LevenbergMarquardt(; autodiff=AutoFiniteDiff()), μ=100.0)
@@ -80,7 +76,7 @@ fig = Figure()
 ax_m = Axis(fig[1, 1]; xlabel="Vs (km/s)", ylabel="depth (m)")
 
 plot_model!(ax_m, m; label="true", color=:steelblue3)
-plot_model!(ax_m, m_lm; label="occam", color=:tomato)
+plot_model!(ax_m, m_lm; label="LM", color=:tomato)
 fig
 
 ax1 = Axis(fig[1, 2]; xscale=log10)

@@ -156,11 +156,13 @@ function var(p, q, ra, rb, wvno, xka, xkb, dpth)
     y *= fac
     z *= fac
     return w, cosp, a0, cpcq, cpy, cpz, cqw, cqx, xy, xz, wy, wz
-
-
 end
 
-function dltar(c, ω, model::LWModel, e, ee, C)
+function dltar(c, ω, model::LWModel) #, e, ee, C)
+    T = promote_type(typeof(c), eltype(model.m), eltype(model.h), eltype(model.ρ))
+    e = MMatrix{1, 5}(zeros(T, 1, 5)) # can be preallocated
+    ee = MMatrix{1, 5}(zeros(T, 1, 5)) # can be preallocated
+    C = MMatrix{5, 5}(zeros(T, 5, 5)) # can be preallocated
     vs = model.m
     h = model.h
     ρ = model.ρ
@@ -206,7 +208,12 @@ function dltar(c, ω, model::LWModel, e, ee, C)
     return e1
 end
 
-function dltar(k, ω, model::RWModel, e, ee, C)
+function dltar(k, ω, model::RWModel) #, e, ee, C)
+    T = promote_type(
+        typeof(k), eltype(model.m), eltype(model.h), eltype(model.ρ), eltype(model.vp))
+    e = MMatrix{1, 5}(zeros(T, 1, 5)) # can be preallocated
+    ee = MMatrix{1, 5}(zeros(T, 1, 5)) # can be preallocated
+    C = MMatrix{5, 5}(zeros(T, 5, 5)) # can be preallocated
     vp = model.vp
     vs = model.m
     ρ = model.ρ
@@ -248,15 +255,10 @@ function dltar(k, ω, model::RWModel, e, ee, C)
         q = rb * dpth
 
         # Evaluate cosP, cosQ...
-        try
         _, _, a0, cpcq, cpy, cpz, cqw, cqx, xy, xz,
         wy, wz = var(p, q, ra, rb, k, xka, xkb, dpth)
-            dnka!(C, k * k, gam, gammk, ρ[m], a0, cpcq, cpy, cpz, cqw, cqx, xy, xz, wy, wz)
-
-        catch
-            @show k
-        end
-            # Evaluate Dunkin's matrix
+        dnka!(C, k * k, gam, gammk, ρ[m], a0, cpcq, cpy, cpz, cqw, cqx, xy, xz, wy, wz)
+        # Evaluate Dunkin's matrix
 
         mul!(ee, e, C)
         # for i in 1:5
@@ -277,15 +279,14 @@ function get_c!(resp_, t, m, mode, dc)
     # c_low = oftype(c_low_global, c_low_global * 0.8)
     c_start = minimum(m.m) * 0.9
 
-    e = MMatrix{1, 5}(zeros(eltype(m.m), 1, 5)) # can be preallocated
-    ee = MMatrix{1, 5}(zeros(eltype(m.m), 1, 5)) # can be preallocated
-    C = MMatrix{5, 5}(zeros(eltype(m.m), 5, 5)) # can be preallocated
+    # e = MMatrix{1, 5}(zeros(eltype(m.m), 1, 5)) # can be preallocated
+    # ee = MMatrix{1, 5}(zeros(eltype(m.m), 1, 5)) # can be preallocated
+    # C = MMatrix{5, 5}(zeros(eltype(m.m), 5, 5)) # can be preallocated
 
     # resp_ = zero(t)
 
-    f(c, p) = dltar(p / c, p, m, e, ee, C)
-    # prob_init = IntervalNonlinearProblem{false}(f, (c_start - 2dc, c_high), 2π *
-    #                                                                         inv(first(t)))
+    f(c, p_omega, p_m) = dltar(p_omega / c, p_omega, p_m) #, e, ee, C)
+    # prob_init = IntervalNonlinearProblem{false}(f, (c_start - 2dc, c_high), 2π *inv(first(t)))
 
     for i in eachindex(t) # this can be parallelized
         flag = true # soln exists
@@ -295,9 +296,9 @@ function get_c!(resp_, t, m, mode, dc)
         c_high_each = c_low
 
         for im in 1:(mode + 1)
-            f_low = f(c_low, ω)
+            f_low = f(c_low, ω, m)
             while c_high_each <= c_high
-                f_high_each = f(c_high_each, ω)
+                f_high_each = f(c_high_each, ω, m)
                 # @show c_high_each, f_high_each
                 if f_high_each * f_low < 0
                     break
@@ -312,7 +313,7 @@ function get_c!(resp_, t, m, mode, dc)
             end
 
             # c = ifelse(flag, find_c(prob_init, c_high_each - dc, c_high_each, ω), c_high_each)
-            c = ifelse(flag, find_c_(f, c_high_each - dc, c_high_each, ω), c_high_each)
+            c = ifelse(flag, find_c_(f, c_high_each - dc, c_high_each, ω, m), c_high_each)
 
             c_low = c + dc
             resp_[i] = c
@@ -321,27 +322,26 @@ function get_c!(resp_, t, m, mode, dc)
     return nothing
 end
 
-function find_c(prob, c1, c2, ω)
-    prob_new = remake(prob; tspan=(c1, c2), p=ω)
-    sol = solve(prob_new)
-    return oftype(c1, sol.u)
-end
+# function find_c(prob, c1, c2, ω)
+#     prob_new = remake(prob; tspan=(c1, c2), p=ω)
+#     sol = solve(prob_new)
+#     return sol.u
+# end
 
-
-function find_c_(f, c1, c2, ω)
+function find_c_(f, c1, c2, ω, m)
 
     # @show c1, c2
-    
-    f1 = f(c1, ω)
-    f2 = f(c2, ω)
+
+    f1 = f(c1, ω, m)
+    f2 = f(c2, ω, m)
     c3 = (c1+c2)/2
     i = 1
     while i <= 30
-        f3 = f(c3, ω)
+        f3 = f(c3, ω, m)
 
-        if abs(f3) < 1f-9
+        if abs(f3) < 1.0f-9
             break
-        elseif f3 * f1 <0
+        elseif f3 * f1 < 0
             c2 = c3
             f2 = f3
         else
@@ -349,15 +349,13 @@ function find_c_(f, c1, c2, ω)
             f1 = f3
         end
 
-        if abs(c2-c1) < 1f-9
-
+        if abs(c2-c1) < 1.0f-9
             break
         end
         c3 = (c1+c2)/2
         i+=1
-        
     end
-    
+
     # @show i
     # @show c3, 2π/ω
 

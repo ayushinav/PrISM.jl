@@ -4,7 +4,7 @@
 
 *Add compat dependency for PyCall*
 
-We provide a walktthrough to help get things started and get to the point to use this package. We begin by importing different packages.
+We provide a walkthrough to help get things started and get to the point to use this package. We begin by importing different packages.
 
 ```julia
 using LinearAlgebra
@@ -116,8 +116,8 @@ anim = @animate for i in 1:n_stations
     yx_resp = MTResponse(ρₐ_all[i][:, 2, 1], ϕ_all[i][:, 2, 1])
     yx_err_resp = MTResponse(ρₐerr[i][:, 2, 1], ϕerr[i][:, 2, 1])
 
-    plt = prepare_plot(xy_resp, 2π .* f_arr[i], xy_err_resp;
-        label="XY", markershape=:circle, maerkersize=3)
+    plt = prepare_plot(
+        xy_resp, 2π .* f_arr[i], xy_err_resp; label="XY", markershape=:circle, markersize=3)
     prepare_plot!(plt, yx_resp, 2π .* f_arr[i], yx_err_resp;
         label="YX", markershape=:circle, markersize=3)
     plot!(plt[1]; ylim=(1, 1e5))

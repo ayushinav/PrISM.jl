@@ -1,23 +1,9 @@
-"""
-`nl_cache`: specifies the inverse algorithm while having a cache.
-"""
-mutable struct opt_cache{T1, T2}
-    alg::T1
-    μ::T2
-end
-"""
-    OptAlg(; alg = LBFGS, μ = 1.0, kwargs...)
+module PrISMOptimizationExt
 
-returns `opt_cache` that specifies which `Optimization.jl` solver to use for the inverse problem
+using PrISM, Optimization, OptimizationOptimJL
+import PrISM: inverse!, return_code
+using UnPack, LinearAlgebra, DifferentiationInterface
 
-## Keyword Arguments
-
-  - `alg`: `Optimization`[@ref] algorithm to be used, defaults to LBFGS
-  - `μ` : regularization weight
-"""
-function OptAlg(; alg=LBFGS, μ=1.0)
-    return opt_cache(alg, μ)
-end
 # ======================== using Optimization.jl ===============================
 
 function inverse!(mₖ::model1,
@@ -32,7 +18,7 @@ function inverse!(mₖ::model1,
         response_fields=propertynames(robs),
         model_trans_utils=sigmoid_tf,
         response_trans_utils=nothing,
-        ad_type=DifferentiationInterface.AutoFiniteDiff(),
+        ad_type=AutoFiniteDiff(),
         mᵣ=nothing,
         reg_term=nothing,
         verbose::Union{Bool, Int}=true) where {
@@ -103,4 +89,6 @@ function construct_cost_function_for_opt(m, p)
     L2 = μ * norm(L * (model.m .- mᵣ.m))
 
     return L1^2 + L2
+end
+
 end

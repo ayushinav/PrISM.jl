@@ -24,7 +24,7 @@ In the following example, we demonstrate MCMC inversion for a 3-layered earth, i
     The most important thing to be noted here is the specification of the prior distribution, done via:
 
     ```julia
-    modelD = MTModelDistribution(
+    modelD = DCModelDistribution(
         Product(
             [Uniform(-1.0, 5.0) for i in eachindex(z)]
         ),
@@ -78,9 +78,10 @@ Put everything together for MCMC
 
 ```@example fixed_mcmc
 n_samples = 1000
-mcache = mcmc_cache(modelD, respD, n_samples, NUTS())
+mcache = mcmc_cache(modelD, respD)
 
-dc_chain = stochastic_inverse(r_obs, err_resp, locs, mcache; progress=false)
+dc_chain = stochastic_inverse(
+    r_obs, err_resp, locs, mcache, NUTS(), n_samples; progress=false)
 ```
 
 The obtained `dc_chain` contains the *a posteriori* distributions that can be saved using [JLD2.jl](https://github.com/JuliaIO/JLD2.jl).
@@ -97,13 +98,15 @@ JLD2.@save "file_path.jld2" dc_chain
 ```@example fixed_mcmc
 fig = Figure()
 ax = Axis(fig[1, 1])
-hm = get_kde_image!(ax, dc_chain, modelD; kde_transformation_fn=log10,
-    colormap=:binary, colorrange=(-3.0, 0.0), trans_utils=(m=no_tf, h=no_tf))
+hm = get_kde_image!(ax, dc_chain, modelD; kde_transformation_fn=log10, colormap=:binary,
+    colorrange=(-3.0, 0.0), trans_utils=(m=no_tf, h=no_tf))
 Colorbar(fig[1, 2], hm; label="log pdf")
 
 mean_kws = (; color=:seagreen3, linewidth=2)
 std_kws = (; color=:red, linewidth=1.5)
-# get_mean_std_image!(ax, dc_chain, modelD; confidence_interval=0.99, trans_utils=(m=no_tf, h=no_tf), mean_kwargs=mean_kws, std_plus_kwargs=std_kws, std_minus_kwargs=std_kws)
+get_mean_std_image!(
+    ax, dc_chain, modelD; confidence_interval=0.99, trans_utils=(m=no_tf, h=no_tf),
+    mean_kwargs=mean_kws, std_plus_kwargs=std_kws, std_minus_kwargs=std_kws)
 
 ylims!(ax, [2500, 0])
 

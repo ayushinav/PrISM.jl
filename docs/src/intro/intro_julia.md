@@ -108,15 +108,15 @@ end
 In the above definition, `a` is called an *optional* argument. It assumes a value if it is not explicitly passed
 
 !!! note
-    
+
     Note that optional arguments are positional. If a function is defined as
-    
+
     ```julia
     function fn(x, y, a=1.0, b=2.0, c=3.0)
         # some operation
     end
     ```
-    
+
     Then the function call `fn(2., 3., 2., 4., 5.)` assumes `a = 2.`, `b = 4.` and `c = 5.`. Similarly, a function call `fn(2., 3., 4.)` assumes `a = 4.` and default values for `b` and `c`.
 
 ```@example fn_demo

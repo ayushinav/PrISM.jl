@@ -1,23 +1,8 @@
-"""
-`nl_cache`: specifies the inverse algorithm while having a cache.
-"""
-mutable struct nl_cache{T1, T2}
-    alg::T1
-    μ::T2
-end
-"""
-    NonlinearAlg(; alg = LevenbergMarquardt, μ = 1.0)
+module PrISMNonlinearSolveExt
 
-returns `nl_cache` that specifies which non linear solver to use for the inverse problem
-
-## Keyword Arguments
-
-  - `alg`: `NonlinearSolve`[@ref] algorithm to be used, defaults to LevenbergMarquardt
-  - `μ` : regularization weight
-"""
-function NonlinearAlg(; alg=LevenbergMarquardt, μ=1.0)
-    return nl_cache(alg, μ)
-end
+using PrISM, NonlinearSolve
+import PrISM: inverse!, return_code
+using UnPack, LinearAlgebra
 
 # ===== NonlinearSolve.jl =========
 
@@ -115,4 +100,6 @@ function construct_cost_function_for_nl_inv(m, p)
     L2 = μ * norm(L * (model.m .- mᵣ.m))
 
     return [L1^2 + L2]
+end
+
 end

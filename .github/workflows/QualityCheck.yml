@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: julia-actions/julia-format@v4
         with :
-          version: '2.2.0'
+          version: '2.3.0'
 
   typos-check:
     name: Spell Check with Typos

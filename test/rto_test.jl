@@ -1,5 +1,5 @@
 @testitem "RTO" tags = [:rto] begin
-    using Distributions, Turing, LinearAlgebra
+    using Distributions, LinearAlgebra
 
     m_test = MTModel(log10.([100.0, 10.0, 1000.0]), [1e3, 1e3])
     f = 10 .^ range(-2; stop=2, length=57)
@@ -29,10 +29,11 @@
     rto_chain = stochastic_inverse(
         r_obs, err_resp, ω, r_cache; model_trans_utils=(; m=no_tf), progress_bar=true)
 
-    mt_chain = Turing.Chains((rto_chain.value.data[:, 1:length(z), :]), [Symbol("ρ[$i]")
-                                                                         for i in
-                                                                             1:length(z)])
+    # mt_chain = Turing.Chains((rto_chain.value.data[:, 1:length(z), :]), [Symbol("ρ[$i]")
+    #                                                                      for i in
+    #                                                                          1:length(z)])
 
+    mt_chain, mu_chain = rto_chain
     model_list = get_model_list(mt_chain, modelD)
 
     m_model = model_list[end]

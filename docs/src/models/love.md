@@ -6,9 +6,9 @@ using PrISM, CairoMakie, InteractiveUtils
 
 ## Model
 
-We assume the following subsurface resistivity distribution with 4 layers:
+We assume the following subsurface velocity and density distribution with 4 layers:
 
-| Layer # | thickness (m) | $V_s \; (km s^{-1}$) | $\rho \; (g cm^{-3}$) |
+| Layer # | thickness (m) | $V_s \; (km s^{-1})$ | $\rho \; (g cm^{-3})$ |
 |:-------:|:-------------:|:--------------------:|:---------------------:|
 | 1       | 8000          | 4                    | 2                     |
 | 2       | 4000          | 3.5                  | 2                     |
@@ -46,7 +46,7 @@ fig # hide
 ```
 
 !!! warn
-    
+
     Always use `Float64` or `Float32` types while defining the vectors for velocities, densities and thickness. Using `Int` will throw an `InexactError`, e.g. : `InexactError: Int64(4193.453970907305)`
 
 ## Response
@@ -86,15 +86,15 @@ fig # hide
 ```
 
 !!! note
-    
+
     By default, the forward response calculates the phase velocity at fundamental mode. This information is passed through params.
-    
+
     ```@example lw_demo
-    default_params(RWModel)
+    default_params(LWModel)
     ```
-    
+
     Various symbols are defined as :
-    
+
       - `mode` : fundamental mode corresponds to 0, higher modes correspond to 1,2,...
       - `dc` : step size used to obtain solution of the propagater matrix
       - `dt` : step size used to obtain the derivative for group velocity, unused for phase velocity

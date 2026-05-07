@@ -1,9 +1,4 @@
-"""
-`occam_cache`: specifies the inverse algorithm while having a cache.
-"""
-mutable struct occam_cache{T}
-    μgrid::Vector{T}
-end
+
 """
 `linsolve!`: Performs `inv(B)*y` using `LinearSolve.jl`
 """

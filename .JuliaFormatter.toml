@@ -1,3 +1,4 @@
+ignore = ["src/models/filters.jl", "test/forward_test.jl"]
 style = "sciml"
 format_markdown = true
 whitespace_in_kwargs = false

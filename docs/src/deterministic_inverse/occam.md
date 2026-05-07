@@ -62,7 +62,7 @@ m_occam = MTModel(ρ_test, h_test);
 The final result will be stored in the same variable `m_occam`. All we need to do now is specify using Occam and then calling `inverse!`.
 
 !!! note
-    
+
     Using Occam, you also have the option to perform a smoothing step. Once the model has achieved the threshold misfit, it is smoothened until it fits the data just about the threshold misfit.
 
 ```@example occam_demo
