@@ -29,7 +29,7 @@ m = DCModel(ρ, h)
 
 ```@example dc_demo
 fig = Figure()
-ax = Axis(fig[1, 1]; xlabel="log ρ (locsm)", ylabel="depth (m)", backgroundcolor=(
+ax = Axis(fig[1, 1]; xlabel="log ρ (log Ωm)", ylabel="depth (m)", backgroundcolor=(
     :magenta, 0.05))
 
 plot_model!(ax, m)
@@ -45,7 +45,7 @@ fig # hide
 ```
 
 !!! warn
-    
+
     Always use `Float64` or `Float32` types while defining the vectors for resistivity and thickness. Using `Int` will throw an `InexactError`, e.g. : `InexactError: Int64(4193.453970907305)`
 
 ## Response
@@ -63,7 +63,7 @@ Here, we demonstrate using the Wenner array for a vertical sounding survey:
 locs = get_wenner_array(100:50:2000)
 ```
 
-and then call the `forward` dispatch as usual to get `MTResponse`:
+and then call the `forward` dispatch as usual to get `DCResponse`:
 
 ```@example dc_demo
 resp = forward(m, locs)
@@ -92,7 +92,7 @@ fig # hide
 
 ### In-place operations
 
-Mutating forward calls are also supported. This leads to no extra allocations while calculating the forward responses. This also speeds up the performance, though the calculations in the well-optimized forward calls are way more expensive than allocations to get a significant boost here. We now call the in-place variant `forward!` and provide an `MTResponse` variable to be overwritten :
+Mutating forward calls are also supported. This leads to no extra allocations while calculating the forward responses. This also speeds up the performance, though the calculations in the well-optimized forward calls are way more expensive than allocations to get a significant boost here. We now call the in-place variant `forward!` and provide a `DCResponse` variable to be overwritten :
 
 ```@example dc_demo
 forward!(resp, m, locs)

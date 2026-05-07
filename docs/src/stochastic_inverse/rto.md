@@ -46,7 +46,7 @@ The algorithm was proposed for $C_m$ constructed with $L'L$, where $L$ is the di
 ```
 
 !!! note
-    
+
       - Usually, the prior of $\mu$ is a uniform distribution and we do not have to compute the corresponding log pdf term
       - Implementing the above from scratch might not be trivial because of ``L'L`` being non-invertible, and we do the optimization in the domain defined by $\xi = \sqrt{\mu}Lm$.
         Such a variable will then have a standard normal distribution $\mathcal{N}(0, I)$ when $m \sim \mathcal{N}(0, \frac{1}{\mu}(L^T L))$
@@ -90,15 +90,9 @@ n_samples = 100
 r_cache = rto_cache(
     m_rto, [1e-2, 1e4], Occam(), n_samples, n_samples, 1.0, [:ρₐ, :ϕ], false)
 
-rto_chain = stochastic_inverse(
+mt_chain,
+μ_chain = stochastic_inverse(
     r_obs, err_resp, ω, r_cache; model_trans_utils=(; m=sigmoid_tf))
-```
-
-Since RTO-TKO also samples the regularization coefficient along with model parameters, we exclude it to obtain another chain as:
-
-```@example rto_tko
-mt_chain = Chains((rto_chain.value.data[:, 1:(end - 1), :]), [Symbol("m[$i]")
-                                                              for i in 1:length(z)])
 ```
 
 Note that the chain contains fewer samples than we had asked for. This is because a few unstable samples were filtered out. The obtained `mt_chain` contains the *a posteriori* distributions that can be saved using [JLD2.jl](https://github.com/JuliaIO/JLD2.jl).
@@ -122,14 +116,15 @@ nothing # hide
 ```@example rto_tko
 fig = Figure()
 ax = Axis(fig[1, 1])
-hm = get_kde_image!(ax, mt_chain, modelD; kde_transformation_fn=log10,
-    colormap=:binary, colorrange=(-3.0, 0.0), trans_utils=(m=no_tf, h=no_tf))
+hm = get_kde_image!(ax, mt_chain, modelD; kde_transformation_fn=log10, colormap=:binary,
+    colorrange=(-3.0, 0.0), trans_utils=(m=no_tf, h=no_tf))
 Colorbar(fig[1, 2], hm; label="log pdf")
 
 mean_kws = (; color=:seagreen3, linewidth=2)
 std_kws = (; color=:red, linewidth=1.5)
-# get_mean_std_image!(ax, mt_chain, modelD; confidence_interval=0.99, trans_utils=(m=no_tf, h=no_tf), mean_kwargs=mean_kws,
-#     std_plus_kwargs=std_kws, std_minus_kwargs=std_kws)
+get_mean_std_image!(
+    ax, mt_chain, modelD; confidence_interval=0.99, trans_utils=(m=no_tf, h=no_tf),
+    mean_kwargs=mean_kws, std_plus_kwargs=std_kws, std_minus_kwargs=std_kws)
 ylims!(ax, [2500, 0])
 
 plot_model!(ax, m_test; color=:black, linestyle=:dash, label="true", linewidth=2)
@@ -173,5 +168,5 @@ fig
 ```
 
 !!! warning
-    
+
     It is recommended that the samples from RTO-TKO can be filtered out to reject the samples that have a poor fit on the data.

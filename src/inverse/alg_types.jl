@@ -17,6 +17,20 @@ mutable struct nl_cache{T1, T2}
     μ::T2
 end
 
+"""
+    NonlinearAlg(; alg = LevenbergMarquardt, μ = 1.0)
+
+returns `nl_cache` that specifies which non linear solver to use for the inverse problem
+
+## Keyword Arguments
+
+  - `alg`: `NonlinearSolve`[@ref] algorithm to be used, defaults to LevenbergMarquardt
+  - `μ` : regularization weight
+"""
+function NonlinearAlg(; alg=LevenbergMarquardt, μ=1.0)
+    return nl_cache(alg, μ)
+end
+
 # ======================== Optimization ========================
 
 """

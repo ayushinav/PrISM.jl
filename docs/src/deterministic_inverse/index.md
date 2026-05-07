@@ -19,12 +19,13 @@ Obviously, there are multiple ways to solve this non-linear equation. We provide
   - Occam1D : [Occam's inversion: a practical algorithm for generating smooth models from electromagnetic sounding data](https://marineemlab.ucsd.edu/steve/bio/Occam1D.pdf): A very robust algorithm to obtain smooth models.
 
   - [Optimisers](https://docs.sciml.ai/NonlinearSolve/stable/native/solvers/) from `NonlinearSolve.jl`. Popular ones in geophysical community include:
-    
+
       + Gauss Newton
       + Levenberg Marquardt
       + Newton Raphson
+
   - [Optimisers](https://docs.sciml.ai/Optimization/stable/optimization_packages/optim/#Methods) from `OptimizationOptim.jl` via `Optimization.jl`. Popular ones in geophysical community include:
-    
+
       + Conjugate Gradient
       + Gradient Descent
       + LBFGS
@@ -34,7 +35,7 @@ Obviously, there are multiple ways to solve this non-linear equation. We provide
 All the inversion capabilities are accessed using `inverse!` function, which we cover in the next pages.
 
 !!! note
-    
+
     Do note that the inversion only takes care of the parameter denoted by `m`, even though there might be other parameters, e.g. for Rayleigh wave models, we invert of shear wave velocity even though the model also requires p-wave velocities and densities.
 
 ## AD backend (TODO)

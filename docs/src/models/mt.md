@@ -45,7 +45,7 @@ fig # hide
 ```
 
 !!! warn
-    
+
     Always use `Float64` or `Float32` types while defining the vectors for resistivity and thickness. Using `Int` will throw an `InexactError`, e.g. : `InexactError: Int64(4193.453970907305)`
 
 ## Response

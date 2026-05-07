@@ -29,7 +29,7 @@ features:
   - icon: ∂
     title: Differentiability
     details: Get derivatives using automatic differntiation
-    link: /tutorials/ad
+    link: /exts/ad
 ---
 ```
 
@@ -55,4 +55,3 @@ Pkg.add("PrISM.jl")
 
   - Rayleigh waves
   - Love waves
-

@@ -57,23 +57,23 @@ respD = MTResponseDistribution(normal_dist, normal_dist)
 ```
 
 !!! note
-    
+
     Both `r_obs` and `err_resp` have the same type, eg. `MTResponse`.
 
 In the above, `MTResponseDistribution` specifies the physics of the system to completely specify the likelihood. Similar `ResponseDistribution`s exist for other type of geophysical models.
 
 ## Inference
 
-We now have all the ingredients to perform inversion, except the sampler. This [page](https://turinglang.org/docs/usage/sampler-visualisation/) provides a brief review of samplers `Turing.jl` provides. The number of posterior points to be sampled `n_samples`, the algorithm `mcmc_alg` and the distributions are brought together by `mcmc_cache`.
+We now have all the ingredients to perform inversion, except the sampler. This [page](https://turinglang.org/docs/usage/sampler-visualisation/) provides a brief review of samplers `Turing.jl` provides. The model and response distributions are brought together by `mcmc_cache`, while the algorithm and number of samples are passed directly to `stochastic_inverse`.
 
 ```julia
 mcmc_alg = NUTS();
 n_samples = 10_000;
-mcache = mcmc_cache(modelD, respD, n_samples, mcmc_alg);
+mcache = mcmc_cache(modelD, respD);
 ```
 
 The posterior samples are then sampled by simply calling:
 
 ```julia
-mcmc_chain = stochastic_inverse(r_obs, err_resp, ω, mcache)
+mcmc_chain = stochastic_inverse(r_obs, err_resp, ω, mcache, mcmc_alg, n_samples)
 ```

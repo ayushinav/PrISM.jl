@@ -1,8 +1,8 @@
 module PrISMOptimizationExt
 
 using PrISM, Optimization, OptimizationOptimJL
-import PrISM: inverse!
-using UnPack
+import PrISM: inverse!, return_code
+using UnPack, LinearAlgebra, DifferentiationInterface
 
 # ======================== using Optimization.jl ===============================
 
@@ -18,7 +18,7 @@ function inverse!(mₖ::model1,
         response_fields=propertynames(robs),
         model_trans_utils=sigmoid_tf,
         response_trans_utils=nothing,
-        ad_type=DifferentiationInterface.AutoFiniteDiff(),
+        ad_type=AutoFiniteDiff(),
         mᵣ=nothing,
         reg_term=nothing,
         verbose::Union{Bool, Int}=true) where {

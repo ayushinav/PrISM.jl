@@ -1,22 +1,8 @@
 module PrISMNonlinearSolveExt
 
 using PrISM, NonlinearSolve
-import PrISM: inverse!
-using UnPack
-
-"""
-    NonlinearAlg(; alg = LevenbergMarquardt, μ = 1.0)
-
-returns `nl_cache` that specifies which non linear solver to use for the inverse problem
-
-## Keyword Arguments
-
-  - `alg`: `NonlinearSolve`[@ref] algorithm to be used, defaults to LevenbergMarquardt
-  - `μ` : regularization weight
-"""
-function NonlinearAlg(; alg=LevenbergMarquardt, μ=1.0)
-    return nl_cache(alg, μ)
-end
+import PrISM: inverse!, return_code
+using UnPack, LinearAlgebra
 
 # ===== NonlinearSolve.jl =========
 
