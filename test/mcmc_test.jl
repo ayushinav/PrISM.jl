@@ -1,5 +1,5 @@
 @testitem "fixed discretization" tags = [:mcmc] begin
-    using Distributions, Turing, LinearAlgebra, Pigeons
+    using Distributions, Turing, LinearAlgebra
 
     model_types = [MTModel, RWModel]
     modelD_types = [MTModelDistribution, RWModelDistribution, LWModelDistribution]
