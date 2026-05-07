@@ -158,7 +158,11 @@ function var(p, q, ra, rb, wvno, xka, xkb, dpth)
     return w, cosp, a0, cpcq, cpy, cpz, cqw, cqx, xy, xz, wy, wz
 end
 
-function dltar(c, ω, model::LWModel, e, ee, C)
+function dltar(c, ω, model::LWModel) #, e, ee, C)
+    T = promote_type(typeof(c), eltype(model.m), eltype(model.h), eltype(model.ρ))
+    e = MMatrix{1, 5}(zeros(T, 1, 5)) # can be preallocated
+    ee = MMatrix{1, 5}(zeros(T, 1, 5)) # can be preallocated
+    C = MMatrix{5, 5}(zeros(T, 5, 5)) # can be preallocated
     vs = model.m
     h = model.h
     ρ = model.ρ
@@ -204,7 +208,11 @@ function dltar(c, ω, model::LWModel, e, ee, C)
     return e1
 end
 
-function dltar(k, ω, model::RWModel, e, ee, C)
+function dltar(k, ω, model::RWModel) #, e, ee, C)
+    T = promote_type(typeof(k), eltype(model.m), eltype(model.h), eltype(model.ρ), eltype(model.vp))
+    e = MMatrix{1, 5}(zeros(T, 1, 5)) # can be preallocated
+    ee = MMatrix{1, 5}(zeros(T, 1, 5)) # can be preallocated
+    C = MMatrix{5, 5}(zeros(T, 5, 5)) # can be preallocated
     vp = model.vp
     vs = model.m
     ρ = model.ρ
@@ -270,13 +278,13 @@ function get_c!(resp_, t, m, mode, dc)
     # c_low = oftype(c_low_global, c_low_global * 0.8)
     c_start = minimum(m.m) * 0.9
 
-    e = MMatrix{1, 5}(zeros(eltype(m.m), 1, 5)) # can be preallocated
-    ee = MMatrix{1, 5}(zeros(eltype(m.m), 1, 5)) # can be preallocated
-    C = MMatrix{5, 5}(zeros(eltype(m.m), 5, 5)) # can be preallocated
+    # e = MMatrix{1, 5}(zeros(eltype(m.m), 1, 5)) # can be preallocated
+    # ee = MMatrix{1, 5}(zeros(eltype(m.m), 1, 5)) # can be preallocated
+    # C = MMatrix{5, 5}(zeros(eltype(m.m), 5, 5)) # can be preallocated
 
     # resp_ = zero(t)
 
-    f(c, p_omega, p_m) = dltar(p_omega / c, p_omega, p_m, e, ee, C)
+    f(c, p_omega, p_m) = dltar(p_omega / c, p_omega, p_m) #, e, ee, C)
     # prob_init = IntervalNonlinearProblem{false}(f, (c_start - 2dc, c_high), 2π *inv(first(t)))
 
     for i in eachindex(t) # this can be parallelized

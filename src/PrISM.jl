@@ -11,6 +11,7 @@ using LinearSolve
 using MCMCChains
 using ProgressMeter
 using PrettyTables
+using SimpleNonlinearSolve
 using StaticArrays
 
 using UnPack # TODO
