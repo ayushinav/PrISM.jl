@@ -209,7 +209,8 @@ function dltar(c, ω, model::LWModel) #, e, ee, C)
 end
 
 function dltar(k, ω, model::RWModel) #, e, ee, C)
-    T = promote_type(typeof(k), eltype(model.m), eltype(model.h), eltype(model.ρ), eltype(model.vp))
+    T = promote_type(
+        typeof(k), eltype(model.m), eltype(model.h), eltype(model.ρ), eltype(model.vp))
     e = MMatrix{1, 5}(zeros(T, 1, 5)) # can be preallocated
     ee = MMatrix{1, 5}(zeros(T, 1, 5)) # can be preallocated
     C = MMatrix{5, 5}(zeros(T, 5, 5)) # can be preallocated

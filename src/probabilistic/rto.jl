@@ -230,7 +230,6 @@ function SubsurfaceCore.stochastic_inverse(
     chains_μ = MCMCChains.Chains(μ_chains[1, idcs], [Symbol("μ")])
 
     return chains_m, chains_μ
-                                                                       
 end
 
 # mutable struct RTO_MTModel <: AbstractGeophyModel

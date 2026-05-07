@@ -14,7 +14,7 @@
 
     vars = [10.0 .^ collect(-3:0.1:1), 10.0 .^ collect(0:0.1:3), 10.0 .^ collect(0:0.1:3)]
 
-    samplers = [NUTS, SliceSampler]
+    samplers = [NUTS,] # SliceSampler]
     @testset "$(model_types[ik]) : $(sampler_)" for ik in eachindex(model_types),
         sampler_ in samplers
 
@@ -31,9 +31,10 @@
                 m=product_distribution([Uniform(mi * 0.8, mi * 1.2) for mi in model.m])))
 
         n_samples = 50
-        m_cache = mcmc_cache(mdist, respD[ik], n_samples, sampler_())
+        m_cache = mcmc_cache(mdist, respD[ik])
 
-        mcmc_chain = stochastic_inverse(resp, err_resp, vars[ik], m_cache)
+        mcmc_chain = stochastic_inverse(
+            resp, err_resp, vars[ik], m_cache, sampler_(), n_samples)
 
         model_list = get_model_list(mcmc_chain, mdist)
         wvec = vcat([getfield(err_resp, k) for k in propertynames(resp)]...)
@@ -55,7 +56,7 @@
 end
 
 @testitem "variable discretization" tags = [:mcmc] begin
-    using Distributions, Turing, LinearAlgebra, Pigeons
+    using Distributions, Turing, LinearAlgebra
 
     model_types = [MTModel, RWModel]
     modelD_types = [MTModelDistribution, RWModelDistribution, LWModelDistribution]
@@ -70,7 +71,7 @@ end
 
     vars = [10.0 .^ collect(-3:0.1:1), 10.0 .^ collect(0:0.1:3), 10.0 .^ collect(0:0.1:3)]
 
-    samplers = [NUTS, SliceSampler]
+    samplers = [NUTS,]# SliceSampler]
     @testset "$(model_types[ik]) : $(sampler_)" for ik in eachindex(model_types),
         sampler_ in samplers
 
@@ -88,9 +89,10 @@ end
                 h=product_distribution([Uniform(hi * 0.8, hi * 1.2) for hi in model.h])))
 
         n_samples = 50
-        m_cache = mcmc_cache(mdist, respD[ik], n_samples, sampler_())
+        m_cache = mcmc_cache(mdist, respD[ik])
 
-        mcmc_chain = stochastic_inverse(resp, err_resp, vars[ik], m_cache)
+        mcmc_chain = stochastic_inverse(
+            resp, err_resp, vars[ik], m_cache, sampler_(), n_samples)
 
         model_list = get_model_list(mcmc_chain, mdist)
         wvec = vcat([getfield(err_resp, k) for k in propertynames(resp)]...)

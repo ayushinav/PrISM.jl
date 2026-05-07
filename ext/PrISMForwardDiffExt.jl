@@ -13,15 +13,16 @@ import PrISM: find_c_
 
 # @ForwardDiff_frule find_c_(f, c1, c2, ω, m::RWModel{ <:AbstractArray, <:AbstractArray, <:AbstractArray, <:AbstractArray{<:ForwardDiff.Dual}})
 
-
-function find_c_(f, c1, c2, ω,
-        m::RWModel{<:AbstractArray{<:ForwardDiff.Dual{T,V,N}},
-                   <:AbstractArray{<:ForwardDiff.Dual{T,V,N}},
-                   <:AbstractArray{<:ForwardDiff.Dual{T,V,N}},
-                   <:AbstractArray{<:ForwardDiff.Dual{T,V,N}}}) where {T,V,N}
-
+function find_c_(f,
+        c1,
+        c2,
+        ω,
+        m::RWModel{<:AbstractArray{<:ForwardDiff.Dual{T, V, N}},
+            <:AbstractArray{<:ForwardDiff.Dual{T, V, N}},
+            <:AbstractArray{<:ForwardDiff.Dual{T, V, N}},
+            <:AbstractArray{<:ForwardDiff.Dual{T, V, N}}}) where {T, V, N}
     m_val = RWModel(ForwardDiff.value.(m.m), ForwardDiff.value.(m.h),
-                    ForwardDiff.value.(m.ρ),  ForwardDiff.value.(m.vp))
+        ForwardDiff.value.(m.ρ), ForwardDiff.value.(m.vp))
     c = find_c_(f, ForwardDiff.value(c1), ForwardDiff.value(c2), ω, m_val)
 
     # @show c
@@ -37,18 +38,18 @@ function find_c_(f, c1, c2, ω,
     # (-fₚ / fₓ).values
 
     # return ForwardDiff.Dual{T,V,N}(c, (-fₚ / fₓ).values...)
-    
-    return ForwardDiff.Dual{T,V,N}(c, -fₚ / fₓ)
 
+    return ForwardDiff.Dual{T, V, N}(c, -fₚ / fₓ)
 end
 
-function find_c_(f, c1, c2, ω,
-        m::LWModel{<:AbstractArray{<:ForwardDiff.Dual{T,V,N}},
-                   <:AbstractArray{<:ForwardDiff.Dual{T,V,N}},
-                   <:AbstractArray{<:ForwardDiff.Dual{T,V,N}}}) where {T,V,N}
-
-    m_val = LWModel(ForwardDiff.value.(m.m), ForwardDiff.value.(m.h),
-                    ForwardDiff.value.(m.ρ))
+function find_c_(f,
+        c1,
+        c2,
+        ω,
+        m::LWModel{<:AbstractArray{<:ForwardDiff.Dual{T, V, N}},
+            <:AbstractArray{<:ForwardDiff.Dual{T, V, N}},
+            <:AbstractArray{<:ForwardDiff.Dual{T, V, N}}}) where {T, V, N}
+    m_val = LWModel(ForwardDiff.value.(m.m), ForwardDiff.value.(m.h), ForwardDiff.value.(m.ρ))
     c = find_c_(f, ForwardDiff.value(c1), ForwardDiff.value(c2), ω, m_val)
 
     # @show c
@@ -64,9 +65,8 @@ function find_c_(f, c1, c2, ω,
     # (-fₚ / fₓ).values
 
     # return ForwardDiff.Dual{T,V,N}(c, (-fₚ / fₓ).values...)
-    
-    return ForwardDiff.Dual{T,V,N}(c, -fₚ / fₓ)
 
+    return ForwardDiff.Dual{T, V, N}(c, -fₚ / fₓ)
 end
 
 end

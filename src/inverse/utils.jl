@@ -53,17 +53,21 @@ mutable struct return_code{T1 <: AbstractModel}
     misfit_achieved::AbstractFloat
 end
 
-import DifferentiationInterface:recursive_similar
-function DifferentiationInterface.recursive_similar(r::Tr, ::Type{T}) where {T, Tr <: AbstractGeophyResponse}
-    return Tr.name.wrapper(map(k -> DifferentiationInterface.recursive_similar(getproperty(r, k), T),propertynames(r))...)
+import DifferentiationInterface: recursive_similar
+function DifferentiationInterface.recursive_similar(r::Tr, ::Type{T}) where {
+        T, Tr <: AbstractGeophyResponse}
+    return Tr.name.wrapper(map(
+        k -> DifferentiationInterface.recursive_similar(getproperty(r, k), T), propertynames(r))...)
 end
 
-function DifferentiationInterface.recursive_similar(m::Tm, ::Type{T}) where {T, Tm <: AbstractGeophyModel}
-    return Tm.name.wrapper(map(k -> DifferentiationInterface.recursive_similar(getproperty(m, k), T),propertynames(m))...)
+function DifferentiationInterface.recursive_similar(m::Tm, ::Type{T}) where {
+        T, Tm <: AbstractGeophyModel}
+    return Tm.name.wrapper(map(
+        k -> DifferentiationInterface.recursive_similar(getproperty(m, k), T), propertynames(m))...)
 end
 
-function wrapper_DI!(r_vec, m_vec, m, m_const, resp_cache, vars,
-        response_fields, model_type, model_trans_utils, response_trans_utils, params)
+function wrapper_DI!(r_vec, m_vec, m, m_const, resp_cache, vars, response_fields,
+        model_type, model_trans_utils, response_trans_utils, params)
     for k in propertynames(m_const)
         copyto!(getproperty(m, k), getproperty(m_const, k))
     end
