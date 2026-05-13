@@ -274,63 +274,55 @@ function dltar(k, ω, model::RWModel) #, e, ee, C)
 end
 
 function get_c!(resp_, t, m, mode, dc)
-    c_low_global = minimum(m.m)
-    c_high = oftype(c_low_global, 10) # should not really go this far
-    # c_low = oftype(c_low_global, c_low_global * 0.8)
-    c_start = minimum(m.m) * 0.9
+    
+    c_start = minimum(m.m) * 0.9f0
+    c_high = oftype(c_start, 10) # should not really go this far
 
     # e = MMatrix{1, 5}(zeros(eltype(m.m), 1, 5)) # can be preallocated
     # ee = MMatrix{1, 5}(zeros(eltype(m.m), 1, 5)) # can be preallocated
     # C = MMatrix{5, 5}(zeros(eltype(m.m), 5, 5)) # can be preallocated
 
-    # resp_ = zero(t)
-
     f(c, p_omega, p_m) = dltar(p_omega / c, p_omega, p_m) #, e, ee, C)
-    # prob_init = IntervalNonlinearProblem{false}(f, (c_start - 2dc, c_high), 2π *inv(first(t)))
 
     for i in eachindex(t) # this can be parallelized
-        flag = true # soln exists
         ω = 2π / t[i]
 
-        c_low = copy(c_start)
-        c_high_each = c_low
+        # c_low = copy(c_start)
+        c_high_each = copy(c_start)
 
         for im in 1:(mode + 1)
-            f_low = f(c_low, ω, m)
-            while c_high_each <= c_high
-                f_high_each = f(c_high_each, ω, m)
-                # @show c_high_each, f_high_each
-                if f_high_each * f_low < 0
-                    break
-                else
-                    c_high_each += dc
-                end
-
-                if c_high_each > c_high
-                    flag = false # soln doesn't exist
-                    break
-                end
-            end
-
-            # c = ifelse(flag, find_c(prob_init, c_high_each - dc, c_high_each, ω), c_high_each)
-            c = ifelse(flag, find_c_(f, c_high_each - dc, c_high_each, ω, m), c_high_each)
-
-            c_low = c + dc
+            c = find_c(f, c_high_each, c_high, ω, dc, m)
+            c_high_each = c + dc
             resp_[i] = c
         end
     end
     return nothing
 end
 
-# function find_c(prob, c1, c2, ω)
-#     prob_new = remake(prob; tspan=(c1, c2), p=ω)
-#     sol = solve(prob_new)
-#     return sol.u
-# end
+function find_c(f, c1, c2, ω, dc, m)
+    flag = true
+    f_lo = f(c1, ω, m)
+    c1 += dc
 
-function find_c_(f, c1, c2, ω, m)
+    while true
+        if c1 > c2
+            flag = false # soln doesn't exist
+            break
+        end
 
-    # @show c1, c2
+        f1 = f(c1, ω, m)
+        if f1 * f_lo < 0
+            break
+        else
+            c1 += dc
+        end
+    end
+
+    c = ifelse(flag, find_c_bisection(f, c1 - dc, c1, ω, m), c1-dc)
+    return c
+end
+
+function find_c_bisection(f, c1, c2, ω, m)
 
     f1 = f(c1, ω, m)
     f2 = f(c2, ω, m)
@@ -355,9 +347,6 @@ function find_c_(f, c1, c2, ω, m)
         c3 = (c1+c2)/2
         i+=1
     end
-
-    # @show i
-    # @show c3, 2π/ω
 
     return c3
 end
