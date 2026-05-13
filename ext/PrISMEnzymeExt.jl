@@ -3,10 +3,9 @@ module PrISMEnzymeExt
 using PrISM, Enzyme
 import .EnzymeRules: forward, reverse, augmented_primal
 using .EnzymeRules
-import PrISM: find_c_
+import PrISM: find_c
 
 function _ift_find_c_enzyme(f_func, c, ω_val, m_val, m_dval)
-    @show typeof(c), typeof(ω_val), typeof(m_val), typeof(m_dval)
     # @show "rev"
 
     # c1 = one(c)
@@ -26,8 +25,8 @@ function _ift_find_c_enzyme(f_func, c, ω_val, m_val, m_dval)
     m_pert1 = deepcopy(m_val)
     m_pert2 = deepcopy(m_val)
 
-    m_pert1.m .= m_val.m .+ ε .* _dval.m
-    m_pert1.h .= m_val.h .+ ε .* _dval.h
+    m_pert1.m .= m_val.m .+ ε .* m_dval.m
+    m_pert1.h .= m_val.h .+ ε .* m_dval.h
     m_pert1.ρ .= m_val.ρ .+ ε .* m_dval.ρ
     m_pert1.vp .= m_val.vp .+ ε .* m_dval.vp
 
@@ -38,45 +37,44 @@ function _ift_find_c_enzyme(f_func, c, ω_val, m_val, m_dval)
 
     fₚ = (f_func(c, ω_val, m_pert1) - f_func(c, ω_val, m_pert2)) / (2ε)
     -fₚ / fₓ
-    # return 1.
 end
 
-function _ift_find_c_enzyme2(f_func, c, ω_val, m)
-    @show typeof(c), typeof(ω_val), typeof(m)
+# function _ift_find_c_enzyme2(f_func, c, ω_val, m)
+#     @show typeof(c), typeof(ω_val), typeof(m)
 
-    c1 = one(c)
-    f1(c_) = f_func(c_, ω_val, m.val)
-    fₓ = first(Enzyme.autodiff(Enzyme.Forward, Const(f1), Enzyme.Duplicated(c, c1)))
-    fₚ = first(Enzyme.autodiff(Enzyme.Forward, m_ -> f_func(c, ω_val, m_), m))
-    return -fₚ / fₓ
-    # return fₓ
-    # return 1.
-end
+#     c1 = one(c)
+#     f1(c_) = f_func(c_, ω_val, m.val)
+#     fₓ = first(Enzyme.autodiff(Enzyme.Forward, Const(f1), Enzyme.Duplicated(c, c1)))
+#     fₚ = first(Enzyme.autodiff(Enzyme.Forward, m_ -> f_func(c, ω_val, m_), m))
+#     return -fₚ / fₓ
+#     # return fₓ
+#     # return 1.
+# end
 
 # RWModel
 
-function EnzymeRules.forward(::FwdConfigWidth, ::Const{typeof(find_c_)},
-        ::Type{<:Duplicated}, f::Const, c1::T1, c2::T2, ω::Enzyme.Const,
+function EnzymeRules.forward(::FwdConfigWidth, ::Const{typeof(find_c)},
+        ::Type{<:Duplicated}, f::Const, c1::T1, c2::T2, ω::Enzyme.Const, dc::Enzyme.Const,
         m::Duplicated{<:RWModel}) where {T1 <: Enzyme.Annotation, T2 <: Enzyme.Annotation}
     println("Using custom rule! : Duplicated")
 
-    c = find_c_(f.val, c1.val, c2.val, ω.val, m.val)
-    dc = _ift_find_c_enzyme(f.val, c, ω.val, m.val, m.dval)
+    c = find_c(f.val, c1.val, c2.val, ω.val, dc.val, m.val)
+    d_c = _ift_find_c_enzyme(f.val, c, ω.val, m.val, m.dval)
     # dc = _ift_find_c_enzyme2(f.val, c, ω.val, m)
 
-    return Duplicated(c, dc)
+    return Duplicated(c, d_c)
 end
 
-function EnzymeRules.forward(::FwdConfigWidth, ::Const{typeof(find_c_)},
-        ::Type{<:DuplicatedNoNeed}, f::Const, c1::T1, c2::T2, ω::Enzyme.Const,
+function EnzymeRules.forward(::FwdConfigWidth, ::Const{typeof(find_c)},
+        ::Type{<:DuplicatedNoNeed}, f::Const, c1::T1, c2::T2, ω::Enzyme.Const, dc::Enzyme.Const,
         m::Duplicated{<:RWModel}) where {T1 <: Enzyme.Annotation, T2 <: Enzyme.Annotation}
     println("Using custom rule! : DuplicatedNoNeed")
 
-    c = find_c_(f.val, c1.val, c2.val, ω.val, m.val)
-    dc = _ift_find_c_enzyme(f.val, c, ω.val, m.val, m.dval)
+    c = find_c(f.val, c1.val, c2.val, ω.val, dc.val, m.val)
+    d_c = _ift_find_c_enzyme(f.val, c, ω.val, m.val, m.dval)
     # dc = _ift_find_c_enzyme2(f.val, c, ω.val, m.val)
 
-    return dc
+    return d_c
 end
 
 # batch: fₓ computed once, fₚ per direction
@@ -110,31 +108,31 @@ function _ift_find_c_enzyme_batch(f_func, c, ω_val, m_val, m_dvals::NTuple{N}) 
 end
 
 function EnzymeRules.forward(::FwdConfigWidth,
-        ::Const{typeof(find_c_)},
+        ::Const{typeof(find_c)},
         ::Type{<:BatchDuplicated},
         f::Const,
         c1::T1,
         c2::T2,
-        ω::Enzyme.Const,
+        ω::Enzyme.Const, dc::Enzyme.Const,
         m::BatchDuplicated{<:RWModel, N}) where {
         T1 <: Enzyme.Annotation, T2 <: Enzyme.Annotation, N}
     # println("Using custom rule! : BatchDuplicated 2")
-    c = find_c_(f.val, c1.val, c2.val, ω.val, m.val)
+    c = find_c(f.val, c1.val, c2.val, ω.val, dc.val, m.val)
     dcs = _ift_find_c_enzyme_batch(f.val, c, ω.val, m.val, m.dval)
     return BatchDuplicated(c, dcs)
 end
 
 function EnzymeRules.forward(::FwdConfigWidth,
-        ::Const{typeof(find_c_)},
+        ::Const{typeof(find_c)},
         ::Type{<:BatchDuplicatedNoNeed},
         f::Const,
         c1::T1,
         c2::T2,
-        ω::Enzyme.Const,
+        ω::Enzyme.Const, dc::Enzyme.Const,
         m::BatchDuplicated{<:RWModel, N}) where {
         T1 <: Enzyme.Annotation, T2 <: Enzyme.Annotation, N}
     println("Using custom rule! : BatchDuplicatedNoNeed")
-    c = find_c_(f.val, c1.val, c2.val, ω.val, m.val)
+    c = find_c(f.val, c1.val, c2.val, ω.val, dc.val, m.val)
     dcs = _ift_find_c_enzyme_batch(f.val, c, ω.val, m.val, m.dval)
     return dcs
 end
@@ -160,8 +158,8 @@ function _ift_find_c_enzyme(f_func, c, ω_val, m_val::LWModel, m_dval)
     m_pert1 = deepcopy(m_val)
     m_pert2 = deepcopy(m_val)
 
-    m_pert1.m .= m_val.m .+ ε .* _dval.m
-    m_pert1.h .= m_val.h .+ ε .* _dval.h
+    m_pert1.m .= m_val.m .+ ε .* m_dval.m
+    m_pert1.h .= m_val.h .+ ε .* m_dval.h
     m_pert1.ρ .= m_val.ρ .+ ε .* m_dval.ρ
 
     m_pert2.m .= m_val.m .- ε .* _dval.m
@@ -175,28 +173,28 @@ end
 
 #LWModel
 
-function EnzymeRules.forward(::FwdConfigWidth, ::Const{typeof(find_c_)},
-        ::Type{<:Duplicated}, f::Const, c1::T1, c2::T2, ω::Enzyme.Const,
+function EnzymeRules.forward(::FwdConfigWidth, ::Const{typeof(find_c)},
+        ::Type{<:Duplicated}, f::Const, c1::T1, c2::T2, ω::Enzyme.Const, dc::Enzyme.Const,
         m::Duplicated{<:LWModel}) where {T1 <: Enzyme.Annotation, T2 <: Enzyme.Annotation}
     # println("Using custom rule! : Duplicated")
 
-    c = find_c_(f.val, c1.val, c2.val, ω.val, m.val)
-    dc = _ift_find_c_enzyme(f.val, c, ω.val, m.val, m.dval)
+    c = find_c(f.val, c1.val, c2.val, ω.val, dc.val, m.val)
+    d_c = _ift_find_c_enzyme(f.val, c, ω.val, m.val, m.dval)
     # dc = _ift_find_c_enzyme2(f.val, c, ω.val, m)
 
-    return Duplicated(c, dc)
+    return Duplicated(c, d_c)
 end
 
-function EnzymeRules.forward(::FwdConfigWidth, ::Const{typeof(find_c_)},
-        ::Type{<:DuplicatedNoNeed}, f::Const, c1::T1, c2::T2, ω::Enzyme.Const,
+function EnzymeRules.forward(::FwdConfigWidth, ::Const{typeof(find_c)},
+        ::Type{<:DuplicatedNoNeed}, f::Const, c1::T1, c2::T2, ω::Enzyme.Const, dc::Enzyme.Const,
         m::Duplicated{<:LWModel}) where {T1 <: Enzyme.Annotation, T2 <: Enzyme.Annotation}
     # println("Using custom rule! : DuplicatedNoNeed")
 
-    c = find_c_(f.val, c1.val, c2.val, ω.val, m.val)
-    dc = _ift_find_c_enzyme(f.val, c, ω.val, m.val, m.dval)
+    c = find_c(f.val, c1.val, c2.val, ω.val, dc.val, m.val)
+    d_c = _ift_find_c_enzyme(f.val, c, ω.val, m.val, m.dval)
     # dc = _ift_find_c_enzyme2(f.val, c, ω.val, m.val)
 
-    return dc
+    return d_c
 end
 
 # batch: fₓ computed once, fₚ per direction
@@ -229,30 +227,30 @@ function _ift_find_c_enzyme_batch(
 end
 
 function EnzymeRules.forward(::FwdConfigWidth,
-        ::Const{typeof(find_c_)},
+        ::Const{typeof(find_c)},
         ::Type{<:BatchDuplicated},
         f::Const,
         c1::T1,
         c2::T2,
-        ω::Enzyme.Const,
+        ω::Enzyme.Const, dc::Enzyme.Const,
         m::BatchDuplicated{<:LWModel, N}) where {
         T1 <: Enzyme.Annotation, T2 <: Enzyme.Annotation, N}
     # println("Using custom rule! : BatchDuplicated 2")
-    c = find_c_(f.val, c1.val, c2.val, ω.val, m.val)
+    c = find_c(f.val, c1.val, c2.val, ω.val, dc.val, m.val)
     dcs = _ift_find_c_enzyme_batch(f.val, c, ω.val, m.val, m.dval)
     return BatchDuplicated(c, dcs)
 end
 
 function EnzymeRules.forward(::FwdConfigWidth,
-        ::Const{typeof(find_c_)},
+        ::Const{typeof(find_c)},
         ::Type{<:BatchDuplicatedNoNeed},
         f::Const,
         c1::T1,
         c2::T2,
-        ω::Enzyme.Const,
+        ω::Enzyme.Const, dc::Enzyme.Const,
         m::BatchDuplicated{<:LWModel, N}) where {
         T1 <: Enzyme.Annotation, T2 <: Enzyme.Annotation, N}
-    c = find_c_(f.val, c1.val, c2.val, ω.val, m.val)
+    c = find_c(f.val, c1.val, c2.val, ω.val, dc.val, m.val)
     dcs = _ift_find_c_enzyme_batch(f.val, c, ω.val, m.val, m.dval)
     return dcs
 end
