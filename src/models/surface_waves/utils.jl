@@ -272,26 +272,38 @@ function dltar(k, ω, model::RWModel) #, e, ee, C)
     end
     return e[1]
 end
+# struct _DltarFunctor end
+# (::_DltarFunctor)(c, ω, m) = dltar(ω / c, ω, m)
+# const _dltar_f = _DltarFunctor()
 
-function get_c!(resp_, t, m, mode, dc)
+# struct funct2{T}
+#     f::T
+# end
+
+_dltar_c(c, ω, m) = dltar(ω / c, ω, m)
+
+# const _dlatr_f2 = funct2(_dltar_c)
+# _dlatr_f3 = funct2(_dltar_c)
+
+function get_c!(resp_, t, m, mode, dc, c_start, c_high)
     
-    c_start = minimum(m.m) * 0.9f0
-    c_high = oftype(c_start, 10) # should not really go this far
+    # c_start =
+    # c_high = oftype(c_start, 10) # should not really go this far
 
     # e = MMatrix{1, 5}(zeros(eltype(m.m), 1, 5)) # can be preallocated
     # ee = MMatrix{1, 5}(zeros(eltype(m.m), 1, 5)) # can be preallocated
     # C = MMatrix{5, 5}(zeros(eltype(m.m), 5, 5)) # can be preallocated
 
-    f(c, p_omega, p_m) = dltar(p_omega / c, p_omega, p_m) #, e, ee, C)
+    # f(c, p_omega, p_m) = dltar(p_omega / c, p_omega, p_m) #, e, ee, C)
 
     for i in eachindex(t) # this can be parallelized
         ω = 2π / t[i]
 
         # c_low = copy(c_start)
-        c_high_each = copy(c_start)
+        c_high_each = c_start
 
         for im in 1:(mode + 1)
-            c = find_c(f, c_high_each, c_high, ω, dc, m)
+            c = find_c(_dltar_c, c_high_each, c_high, ω, dc, m)
             c_high_each = c + dc
             resp_[i] = c
         end
