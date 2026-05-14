@@ -1,20 +1,20 @@
 const default_surf_tf_fns = (; c=no_tf)
 
-function surf96!(c, t, m, mode, dc, dt, ::Val{:phase})
+function surf96!(c, t, m, mode, dc, dt, ::Val{:phase}, c_low, c_high)
     rmul!(m.h, inv(eltype(m.h)(1000)))
-    get_c!(c, t, m, mode, dc)
+    get_c!(c, t, m, mode, dc, c_low, c_high)
     rmul!(m.h, eltype(m.h)(1000))
     return nothing
 end
 
-function surf96!(c, t, m, mode, dc, dt, ::Val{:group}) # TODO
+function surf96!(c, t, m, mode, dc, dt, ::Val{:group}, c_low, c_high) # TODO
     rmul!(m.h, inv(eltype(m.h)(1000)))
     @. t = t * inv(1 + dt)
     c_plus = zero(c)
-    get_c!(c_plus, t, m, mode, dc)
+    get_c!(c_plus, t, m, mode, dc, c_low, c_high)
 
     @. t = t * inv(1 - dt)
-    get_c!(c, t, m, mode, dc) # c_minus 
+    get_c!(c, t, m, mode, dc, c_low, c_high) # c_minus 
 
     @. c = 2dt * inv(t) * ((1 + dt) * inv(t * c_plus) - (1 - dt) * inv(t * c))
     rmul!(m.h, eltype(m.h)(1000))
@@ -44,7 +44,7 @@ returns `LWResponse` for the given `LWModel m` at the periods defined by `t`
 function SubsurfaceCore.forward(m::Tm, t::T3, params=default_params_surface_waves) where {
         Tm <: LWModel, T3}
     c = zeros(eltype(m.m), length(t))
-    surf96!(c, t, m, params.mode, params.dc, params.dt, params.type)
+    surf96!(c, t, m, params.mode, params.dc, params.dt, params.type, params.c_low, params.c_high)
     SurfaceWaveResponse(c)
 end
 
@@ -71,7 +71,7 @@ returns `RWResponse` for the given `RWModel m` at the periods defined by `t`
 function SubsurfaceCore.forward(m::Tm, t::T3, params=default_params_surface_waves) where {
         Tm <: RWModel, T3}
     c = zeros(eltype(m.m), length(t))
-    surf96!(c, t, m, params.mode, params.dc, params.dt, params.type)
+    surf96!(c, t, m, params.mode, params.dc, params.dt, params.type, params.c_low, params.c_high)
     SurfaceWaveResponse(c)
 end
 
@@ -101,7 +101,7 @@ function forward!(resp::Tr,
         t::T3,
         params=default_params_surface_waves) where {
         Tm <: LWModel, T3, Tr <: SurfaceWaveResponse}
-    surf96!(resp.c, t, m, params.mode, params.dc, params.dt, params.type)
+    surf96!(resp.c, t, m, params.mode, params.dc, params.dt, params.type, params.c_low, params.c_high)
     return nothing
 end
 
@@ -131,6 +131,6 @@ function forward!(resp::Tr,
         t::T3,
         params=default_params_surface_waves) where {
         Tm <: RWModel, T3, Tr <: SurfaceWaveResponse}
-    surf96!(resp.c, t, m, params.mode, params.dc, params.dt, params.type)
+    surf96!(resp.c, t, m, params.mode, params.dc, params.dt, params.type, params.c_low, params.c_high)
     return nothing
 end
