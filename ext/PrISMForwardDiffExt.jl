@@ -49,6 +49,7 @@ function find_c(f,
         m::RWModel{<:AbstractArray{<:ForwardDiff.Dual{T, V, N}},
             <:AbstractArray, <:AbstractArray, <:AbstractArray}) where {T, V, N}
     m_val = RWModel(ForwardDiff.value.(m.m), m.h, m.ρ, m.vp)
+    # @show "custom forward_diff"
     _ift_find_c(f, ForwardDiff.value(c1), ForwardDiff.value(c2),
         ω, dc, m_val, m, ForwardDiff.Dual{T, V, N})
 end
