@@ -105,7 +105,7 @@ function var(p, q, ra, rb, wvno, xka, xkb, dpth)
         cosp = zero(p) + 1
         w = dpth
         x = zero(ra)
-    elseif (wvno > xka)
+    else
         pex = p
         fac = exp(-2p) #ifelse(p < 16, exp(-2p), 0)
         cosp = (1 + fac) * oftype(fac, 0.5)
@@ -128,7 +128,7 @@ function var(p, q, ra, rb, wvno, xka, xkb, dpth)
         cosq = zero(q) + 1
         y = dpth
         z = zero(ra)
-    elseif (wvno > xkb)
+    else
         sex = q
         fac = exp(-2q) #ifelse(q < 16, exp(-2q), 0)
         cosq = (1 + fac) * oftype(fac, 0.5)
@@ -286,15 +286,10 @@ _dltar_c(c, ω, m) = dltar(ω / c, ω, m)
 # _dlatr_f3 = funct2(_dltar_c)
 
 function get_c!(resp_, t, m, mode, dc, c_start, c_high)
-    
-    # c_start =
-    # c_high = oftype(c_start, 10) # should not really go this far
 
     # e = MMatrix{1, 5}(zeros(eltype(m.m), 1, 5)) # can be preallocated
     # ee = MMatrix{1, 5}(zeros(eltype(m.m), 1, 5)) # can be preallocated
     # C = MMatrix{5, 5}(zeros(eltype(m.m), 5, 5)) # can be preallocated
-
-    # f(c, p_omega, p_m) = dltar(p_omega / c, p_omega, p_m) #, e, ee, C)
 
     for i in eachindex(t) # this can be parallelized
         ω = 2π / t[i]
@@ -311,7 +306,7 @@ function get_c!(resp_, t, m, mode, dc, c_start, c_high)
     return nothing
 end
 
-function find_c(f, c1, c2, ω, dc, m)
+function find_c(f::F, c1, c2, ω, dc, m) where {F}
     flag = true
     f_lo = f(c1, ω, m)
     c1 += dc
@@ -334,7 +329,7 @@ function find_c(f, c1, c2, ω, dc, m)
     return c
 end
 
-function find_c_bisection(f, c1, c2, ω, m)
+function find_c_bisection(f::F, c1, c2, ω, m) where {F}
 
     f1 = f(c1, ω, m)
     f2 = f(c2, ω, m)
