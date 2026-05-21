@@ -330,7 +330,6 @@ function find_c(f::F, c1, c2, ω, dc, m) where {F}
 end
 
 function find_c_bisection(f::F, c1, c2, ω, m) where {F}
-
     f1 = f(c1, ω, m)
     f2 = f(c2, ω, m)
     c3 = (c1+c2)/2
