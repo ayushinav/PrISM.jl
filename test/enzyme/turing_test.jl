@@ -1,8 +1,8 @@
-@testitem "Enzyme AD compatibility" tags=[:enzyme] begin
-    using Distributions, Turing, Enzyme, LinearAlgebra
-    using DynamicPPL.TestUtils.AD: run_ad, ADResult
-    using DifferentiationInterface: AutoEnzyme
+using Distributions, Turing, Enzyme, LinearAlgebra, Test
+using DynamicPPL.TestUtils.AD: run_ad, ADResult
+using DifferentiationInterface: AutoEnzyme
 
+@testitem "Enzyme AD compatibility" tags=[:enzyme] begin
     model_types = [MTModel, RWModel, LWModel]
     modelD_types = [MTModelDistribution, RWModelDistribution, LWModelDistribution]
     respD = [MTResponseDistribution(normal_dist, normal_dist),

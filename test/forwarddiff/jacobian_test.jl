@@ -1,5 +1,6 @@
+using DifferentiationInterface, LinearAlgebra, Test
+
 @testitem "ForwardDiff Jacobian accuracy" tags=[:forwarddiff] begin
-    using DifferentiationInterface, LinearAlgebra
     Cache_DI = DifferentiationInterface.Cache
     Constant_DI = DifferentiationInterface.Constant
 

@@ -51,13 +51,15 @@ jobs:
         if: ${{ matrix.group == 'forwarddiff' }}
         run: |
           julia --project=test/forwarddiff --color=yes -e 'using Pkg; Pkg.instantiate()'
-          julia --project=test/forwarddiff --color=yes --code-coverage=user -e 'using ReTestItems, PrISM; ReTestItems.runtests(PrISM; tags=[:forwarddiff], testitem_timeout=3600)'
+          julia --project=test/forwarddiff --color=yes --code-coverage=user test/forwarddiff/jacobian_tests.jl'
+          julia --project=test/forwarddiff --color=yes --code-coverage=user test/forwarddiff/turing_tests.jl'
 
       - name: "Run extension tests : Enzyme"
         if: ${{ matrix.group == 'enzyme' }}
         run: |
           julia --project=test/enzyme --color=yes -e 'using Pkg; Pkg.instantiate()'
-          julia --project=test/enzyme --color=yes --code-coverage=user -e 'using ReTestItems, PrISM; ReTestItems.runtests(PrISM; tags=[:enzyme], testitem_timeout=3600)'
+          julia --project=test/enzyme --color=yes --code-coverage=user test/enzyme/jacobian_tests.jl'
+          julia --project=test/enzyme --color=yes --code-coverage=user test/enzyme/turing_tests.jl'
 
       - uses: julia-actions/julia-processcoverage@v1
         with:
