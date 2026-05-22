@@ -9,8 +9,6 @@ function EnzymeRules.forward(::FwdConfigWidth{N}, func::Const{typeof(get_c!)},
         ::Type{RT}, resp::Enzyme.Annotation, t::Enzyme.Annotation,
         m::Enzyme.Annotation{Tm}, mode::Enzyme.Annotation, dc::Enzyme.Annotation,
         c1::Enzyme.Annotation, c2::Enzyme.Annotation) where {RT, Tm, N}
-
-
     func.val(resp.val, t.val, m.val, mode.val, dc.val, c1.val, c2.val)
 
     ε = sqrt(eps(first(resp.val)))

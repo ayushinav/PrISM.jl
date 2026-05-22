@@ -1,6 +1,5 @@
-using DifferentiationInterface, Enzyme, LinearAlgebra, Test
-
 @testitem "Enzyme Jacobian accuracy" tags=[:enzyme] begin
+    using PrISM, DifferentiationInterface, Enzyme, LinearAlgebra, Test
     Cache_DI = DifferentiationInterface.Cache
     Constant_DI = DifferentiationInterface.Constant
 

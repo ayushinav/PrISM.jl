@@ -1,6 +1,5 @@
-using DifferentiationInterface, LinearAlgebra, Test
-
 @testitem "ForwardDiff Jacobian accuracy" tags=[:forwarddiff] begin
+    using PrISM, DifferentiationInterface, LinearAlgebra, Test
     Cache_DI = DifferentiationInterface.Cache
     Constant_DI = DifferentiationInterface.Constant
 
@@ -17,14 +16,11 @@ using DifferentiationInterface, LinearAlgebra, Test
 
     @testset "$(model_types[ik])" for ik in eachindex(model_types)
         model_ref = from_nt(model_types[ik], true_models[ik])
-        model_cache = deepcopy(model_ref)
         m = deepcopy(model_ref.m)
         vars_ = vars[ik]
 
         resp = PrISM.forward(model_ref, vars_)
-        resp_cache_ = deepcopy(resp)
         response_fields_ = propertynames(resp)
-
         kk = ntuple(i -> no_tf, length(propertynames(resp)))
         response_trans_utils_ = (; zip(propertynames(resp), kk)...)
         model_type_ = model_types[ik]

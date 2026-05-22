@@ -1,8 +1,7 @@
-using Distributions, Turing, ForwardDiff, LinearAlgebra, Test
-using DynamicPPL.TestUtils.AD: run_ad, ADResult
-using DifferentiationInterface: AutoForwardDiff
-
 @testitem "ForwardDiff AD compatibility" tags=[:forwarddiff] begin
+    using PrISM, Distributions, Turing, ForwardDiff, LinearAlgebra, Test
+    using DynamicPPL.TestUtils.AD: run_ad, ADResult
+    using DifferentiationInterface: AutoForwardDiff
     model_types = [MTModel, RWModel, LWModel]
     modelD_types = [MTModelDistribution, RWModelDistribution, LWModelDistribution]
     respD = [MTResponseDistribution(normal_dist, normal_dist),
