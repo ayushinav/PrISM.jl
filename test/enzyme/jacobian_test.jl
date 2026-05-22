@@ -1,4 +1,4 @@
-using DifferentiationInterface, Enzyme, LinearAlgebra, Test
+using PrISM, DifferentiationInterface, Enzyme, LinearAlgebra, Test
 using DifferentiationInterface: AutoEnzyme
 Cache_DI = DifferentiationInterface.Cache
 Constant_DI = DifferentiationInterface.Constant

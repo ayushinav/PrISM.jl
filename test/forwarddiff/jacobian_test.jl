@@ -1,4 +1,4 @@
-using DifferentiationInterface, LinearAlgebra, Test
+using PrISM, DifferentiationInterface, LinearAlgebra, Test
 using DifferentiationInterface: AutoForwardDiff
 
 Cache_DI = DifferentiationInterface.Cache
