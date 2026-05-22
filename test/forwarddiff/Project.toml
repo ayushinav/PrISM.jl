@@ -6,7 +6,6 @@ FiniteDiff = "6a86dc24-6348-571c-b903-95158fe2bd41"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 PrISM = "fde4c310-c20a-4a4a-8ff2-565b2b89066a"
-ReTestItems = "817f1d60-ba6b-4fd5-9520-3cf149f6a823"
 Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
 
 [sources.PrISM]

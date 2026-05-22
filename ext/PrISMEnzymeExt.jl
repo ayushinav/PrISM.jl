@@ -44,8 +44,6 @@ function EnzymeRules.augmented_primal(config::RevConfigWidth, func::Const{typeof
         ::Type{RT}, resp::Enzyme.Annotation, t::Enzyme.Annotation,
         m::Enzyme.Annotation{Tm}, mode::Enzyme.Annotation, dc::Enzyme.Annotation,
         c1::Enzyme.Annotation, c2::Enzyme.Annotation) where {RT, Tm}
-    # println("Agumented primal")
-
     func.val(resp.val, t.val, m.val, mode.val, dc.val, c1.val, c2.val)
     primal = nothing
     tape = deepcopy(m.val) #overwritten(config)[4] ? deepcopy(m.val) : nothing
