@@ -11,7 +11,7 @@ function EnzymeRules.forward(::FwdConfigWidth{N}, func::Const{typeof(get_c!)},
         c1::Enzyme.Annotation, c2::Enzyme.Annotation) where {RT, Tm, N}
     func.val(resp.val, t.val, m.val, mode.val, dc.val, c1.val, c2.val)
 
-    ε = sqrt(eps(first(resp.val)))
+    ε = cbrt(eps(first(resp.val)))
 
     m1 = deepcopy(m.val)
     m2 = deepcopy(m.val)
@@ -20,7 +20,9 @@ function EnzymeRules.forward(::FwdConfigWidth{N}, func::Const{typeof(get_c!)},
         ω = 2π / t.val[i]
         fₓ = (_dltar_c(resp.val[i] + ε, ω, m.val) - _dltar_c(resp.val[i] - ε, ω, m.val)) /
              (2ε)
-
+        for n in 1:N
+            resp.dval[n][i] = 0
+        end
         for k in fieldnames(Tm)
             for j in eachindex(getfield(m.val, k))
                 for n in 1:N
@@ -46,8 +48,7 @@ function EnzymeRules.augmented_primal(config::RevConfigWidth, func::Const{typeof
         c1::Enzyme.Annotation, c2::Enzyme.Annotation) where {RT, Tm}
     func.val(resp.val, t.val, m.val, mode.val, dc.val, c1.val, c2.val)
     primal = nothing
-    tape = deepcopy(m.val) #overwritten(config)[4] ? deepcopy(m.val) : nothing
-    # println("h[1] in augmented_primal: ", m.val.h[1])  # should be ~0.1 (km), not ~100 (m)
+    tape = overwritten(config)[4] ? deepcopy(m.val) : nothing
     return AugmentedReturn(primal, nothing, tape)
 end
 
@@ -57,8 +58,7 @@ function EnzymeRules.reverse(config::RevConfigWidth{1}, func::Const{typeof(get_c
         c1::Enzyme.Annotation, c2::Enzyme.Annotation) where {RT, Tm}
     m_val = overwritten(config)[4] ? tape : m.val
 
-    # @show m_val.h
-    ε = sqrt(eps(first(resp.val)))
+    ε = cbrt(eps(first(resp.val)))
 
     m1 = deepcopy(m_val)
     m2 = deepcopy(m_val)
@@ -80,6 +80,7 @@ function EnzymeRules.reverse(config::RevConfigWidth{1}, func::Const{typeof(get_c
                 getfield(m2, k)[j] += ε
             end
         end
+        resp.dval[i] = 0
         # end
     end
 
@@ -119,6 +120,9 @@ function EnzymeRules.reverse(config::RevConfigWidth{N}, func::Const{typeof(get_c
                     k_dval[j] += resp.dval[n][i] * (-fₚⱼ / fₓ)
                 end
             end
+        end
+        for n in 1:N
+            resp.dval[n][i] = 0
         end
     end
 

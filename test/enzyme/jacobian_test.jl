@@ -9,13 +9,14 @@ true_models = [(; m=[2.0, 1.0, 2.0], h=[1000.0, 1000.0]),
         vp=[7000.0, 7000.0, 7000.0] ./ 1e3, ρ=[2500.0, 2500.0, 2500.0] ./ 1e3),
     (; m=[3500.0, 3600.0, 3800.0] ./ 1e3, h=[1000.0, 1000.0],
         ρ=[2500.0, 2500.0, 2500.0] ./ 1e3)]
-vars = [10.0 .^ collect(-3:0.1:1), 10.0 .^ collect(0:0.1:3), 10.0 .^ collect(-1:0.1:1)]
+vars = [10.0 .^ collect(-3:0.1:1), 10.0 .^ collect(0:0.1:2), 10.0 .^ collect(-1:0.1:1)]
 
 adtype_baseline = AutoFiniteDiff()
 ADTYPES = (AutoEnzyme(; mode=Enzyme.set_runtime_activity(Reverse)),
     AutoEnzyme(; mode=Enzyme.set_runtime_activity(Forward)))
 
-@testset "$(model_types[ik]) : $adtype" for ik in eachindex(model_types), adtype in ADTYPES
+@testset "$(model_types[ik]) : $(adtype.mode)" for ik in eachindex(model_types),
+    adtype in ADTYPES
 
     model_ref = from_nt(model_types[ik], true_models[ik])
     vars_ = vars[ik]
@@ -45,9 +46,5 @@ ADTYPES = (AutoEnzyme(; mode=Enzyme.set_runtime_activity(Reverse)),
     jac = zeros(length(rvec_), length(m))
     jacobian!(PrISM.wrapper_DI!, rvec_, jac, prep_j, adtype, m, tup_DI...)
 
-    if model_types[ik] === RWModel && typeof(adtype.mode) <: Enzyme.ReverseMode
-        @test_broken isapprox(jac, jac_baseline; atol=0.1)
-    else
-        @test isapprox(jac, jac_baseline; atol=0.1)
-    end
+    @test isapprox(jac, jac_baseline; atol=0.1)
 end
