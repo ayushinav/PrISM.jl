@@ -7,6 +7,7 @@ using PrISM
 using ForwardDiff
 using PrettyTables
 using BenchmarkTools
+using Printf
 ```
 
 ## Optimization
@@ -122,7 +123,7 @@ for ik in eachindex(model_types), i_ad in eachindex(ADTYPES)
             Constant_DI(model_type_), Constant_DI(model_trans_utils_),
             Constant_DI(response_trans_utils_), Constant_DI(params))
 
-        flag_acc[ik, i_ad] = all(isapprox.(jacobian_, jac_baseline[ik]; rtol=0.1))
+        flag_acc[ik, i_ad] = isapprox(jacobian_, jac_baseline[ik]; rtol=0.1)
 
         time_ = @belapsed begin
             DifferentiationInterface.jacobian!(
@@ -139,7 +140,7 @@ for ik in eachindex(model_types), i_ad in eachindex(ADTYPES)
 end
 
 adtypes_string = split("FiniteDiff ForwardDiff Enzyme:Reverse Enzyme:Forward", " ")
-bm_times[!flag_acc] .= "✔"
+bm_times[.!flag_acc] .= "✔"
 nothing # hide
 ```
 
@@ -170,7 +171,7 @@ respD_t = [MTResponseDistribution(normal_dist, normal_dist),
     SurfaceWaveResponseDistribution(normal_dist), DCResponseDistribution(normal_dist)]
 
 sigmoid_lw(x) = SubsurfaceCore.sigmoid(x, 3.0, 5.0)
-true_models = ((; m=randn(50) .* 1.0 .+ 3, h=fill(100.0, 49)),
+true_models_t = ((; m=randn(50) .* 1.0 .+ 3, h=fill(100.0, 49)),
     (; m=rand(50) .* 20e-1 .+ 3.0, h=fill(100.0, 49), vp=fill(7.5, 50), ρ=fill(2.5, 50)),
     (; m=sigmoid_lw.(cumsum(rand(50))), h=fill(100.0, 49), ρ=fill(2.5, 50)),
     (; m=randn(50) .* 0.01 .+ 2, h=fill(100.0, 49)))
