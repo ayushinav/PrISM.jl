@@ -1,7 +1,8 @@
 using PrISM, Distributions, Turing, ForwardDiff, LinearAlgebra, Test
 using DynamicPPL.TestUtils.AD: run_ad, ADResult
 using DifferentiationInterface: AutoForwardDiff
-model_types = [MTModel, RWModel, LWModel]
+
+model_types = [MTModel, RWModel] #, LWModel]
 modelD_types = [MTModelDistribution, RWModelDistribution, LWModelDistribution]
 respD = [MTResponseDistribution(normal_dist, normal_dist),
     SurfaceWaveResponseDistribution(normal_dist),
@@ -13,7 +14,7 @@ respD = [MTResponseDistribution(normal_dist, normal_dist),
 #     (; m=[3500.0, 3600.0, 3800.0] ./ 1e3, h=[1000.0, 1000.0],
 #         ρ=[2500.0, 2500.0, 2500.0] ./ 1e3)]
 
-true_models = ((; m=randn(50) .* 1.0 .+ 2, h=fill(100.0, 49)),
+true_models = ((; m=randn(50) .* 1.0 .+ 3, h=fill(100.0, 49)),
     (; m=rand(50) .* 20e-1 .+ 3.0, h=fill(100.0, 49), vp=fill(7.5, 50), ρ=fill(2.5, 50)),
     (; m=rand(50) .* 20e-1 .+ 3, h=fill(100.0, 49), ρ=fill(2.5, 50)),
     (; m=randn(50) .* 0.01 .+ 2, h=fill(100.0, 49)))

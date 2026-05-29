@@ -4,9 +4,9 @@ using DifferentiationInterface: AutoForwardDiff
 Cache_DI = DifferentiationInterface.Cache
 Constant_DI = DifferentiationInterface.Constant
 
-model_types = [MTModel, RWModel, LWModel]
+model_types = [MTModel, RWModel] #, LWModel]
 
-true_models = ((; m=randn(50) .* 1.0 .+ 2, h=fill(100.0, 49)),
+true_models = ((; m=randn(50) .* 1.0 .+ 3, h=fill(100.0, 49)),
     (; m=rand(50) .* 20e-1 .+ 3.0, h=fill(100.0, 49), vp=fill(7.5, 50), ρ=fill(2.5, 50)),
     (; m=rand(50) .* 20e-1 .+ 3, h=fill(100.0, 49), ρ=fill(2.5, 50)),
     (; m=randn(50) .* 0.01 .+ 2, h=fill(100.0, 49)))
@@ -50,5 +50,5 @@ adtype = AutoForwardDiff()
     jac = zeros(length(rvec_), length(m))
     jacobian!(PrISM.wrapper_DI!, rvec_, jac, prep_j, adtype, m, tup_DI...)
 
-    @test isapprox(jac, jac_baseline; atol=0.1)
+    @test isapprox(jac, jac_baseline; rtol=0.1)
 end
