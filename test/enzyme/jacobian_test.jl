@@ -3,11 +3,12 @@ using DifferentiationInterface: AutoEnzyme
 Cache_DI = DifferentiationInterface.Cache
 Constant_DI = DifferentiationInterface.Constant
 
-model_types = [MTModel, RWModel] #, LWModel]
+model_types = [MTModel, RWModel, LWModel]
 
+sigmoid_lw(x) = SubsurfaceCore.sigmoid(x, 3.0, 5.0)
 true_models = ((; m=randn(50) .* 1.0 .+ 3, h=fill(100.0, 49)),
     (; m=rand(50) .* 20e-1 .+ 3.0, h=fill(100.0, 49), vp=fill(7.5, 50), ρ=fill(2.5, 50)),
-    (; m=rand(50) .* 20e-1 .+ 3, h=fill(100.0, 49), ρ=fill(2.5, 50)),
+    (; m=sigmoid_lw.(cumsum(rand(50))), h=fill(100.0, 49), ρ=fill(2.5, 50)),
     (; m=randn(50) .* 0.01 .+ 2, h=fill(100.0, 49)))
 
 vars = [10.0 .^ collect(-3:0.1:1), 10.0 .^ collect(0:0.1:2), 10.0 .^ collect(-1:0.1:1)]
