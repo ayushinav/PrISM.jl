@@ -154,7 +154,7 @@ pretty_table(bm_times; row_labels=[string.(model_types)...], header=adtypes_stri
 
 ## Turing AD compatibility
 
-Compatibility with using AD inside samplers such as Hamiltonian MCMC and No U-Turn (NUTS) can be summarized in the following table. We also report runtimes whenever the models execute without errors.
+Compatibility with using AD inside samplers such as Hamiltonian MCMC and No U-Turn (NUTS) can be summarized in the following table. We also report runtimes for 50 layered model whenever the models execute without errors.
 
 ```@raw html
 <details closed><summary>Code for the table</summary>
@@ -224,6 +224,13 @@ end
 pretty_table(turing_results; row_labels=[string.(model_types)...], header=adtypes_turing_string) # hide
 ```
 
-!!! warn
+!!! compat
 
     Gradients and jacobians for `LWModels` are correct only when the shear wave velocities increase with depth.
+
+### Reproducibility
+
+```@example ad_compats
+println("The above benchmarks were obtained on $(Sys.cpu_info()[1].model)") # hide
+# println(versionfo()) # hide
+```
