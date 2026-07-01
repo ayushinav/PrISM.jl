@@ -12,7 +12,7 @@ using Printf
 
 ## Optimization
 
-AD compatibility for optimization can be summarized in the following table. This affects deterministic inversion and RTO-TKO. We also show the runtimes for a 50-layered model in all the cases when jacobians are correct :
+AD compatibility for optimization can be summarized in the following table. This affects deterministic inversion and RTO-TKO. Runtimes for 50-layered models in all the cases are :
 
 ```@raw html
 <details closed><summary>Code for the tables</summary>
@@ -140,7 +140,7 @@ for ik in eachindex(model_types), i_ad in eachindex(ADTYPES)
 end
 
 adtypes_string = split("FiniteDiff ForwardDiff Enzyme:Reverse Enzyme:Forward", " ")
-bm_times[.!flag_acc] .= "✔"
+# bm_times[.!flag_acc] .= "✔"
 nothing # hide
 ```
 
@@ -154,7 +154,7 @@ pretty_table(bm_times; row_labels=[string.(model_types)...], header=adtypes_stri
 
 ## Turing AD compatibility
 
-Compatibility with using AD inside samplers such as Hamiltonian MCMC and No U-Turn (NUTS) can be summarized in the following table. We also report runtimes for 50 layered model whenever the models execute without errors.
+Compatibility with using AD inside samplers such as Hamiltonian MCMC and No U-Turn (NUTS) can be summarized in the following table. Runtimes for 50 layered model are :
 
 ```@raw html
 <details closed><summary>Code for the table</summary>
@@ -172,7 +172,7 @@ respD_t = [MTResponseDistribution(normal_dist, normal_dist),
 
 sigmoid_lw(x) = SubsurfaceCore.sigmoid(x, 3.0, 5.0)
 true_models_t = ((; m=randn(50) .* 1.0 .+ 3, h=fill(100.0, 49)),
-    (; m=rand(50) .* 20e-1 .+ 3.0, h=fill(100.0, 49), vp=fill(7.5, 50), ρ=fill(2.5, 50)),
+    (; m=rand(50) .* 2 .+ 3.0, h=fill(100.0, 49), vp=fill(7.5, 50), ρ=fill(2.5, 50)),
     (; m=sigmoid_lw.(cumsum(rand(50))), h=fill(100.0, 49), ρ=fill(2.5, 50)),
     (; m=randn(50) .* 0.01 .+ 2, h=fill(100.0, 49)))
 vars_t = [10.0 .^ collect(-3:0.1:1), 10.0 .^ collect(0:0.1:2), 10.0 .^ collect(-1:0.1:1)]
