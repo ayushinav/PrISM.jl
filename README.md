@@ -7,7 +7,7 @@
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://ayushinav.github.io/PrISM.jl/stable/)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://ayushinav.github.io/PrISM.jl/dev/)
 [![SciML Code Style](https://img.shields.io/static/v1?label=code%20style&message=SciML&color=9558b2&labelColor=389826)](https://github.com/SciML/SciMLStyle)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/ayushinav/PrISM.jl/Tests.yml)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/ayushinav/PrISM.jl/CI.yml)
 [![codecov](https://codecov.io/gh/ayushinav/PrISM.jl/graph/badge.svg?token=VQM6W3DUI4)](https://codecov.io/gh/ayushinav/PrISM.jl)
 [![DOI](https://zenodo.org/badge/1030654501.svg)](https://doi.org/10.5281/zenodo.19382782)
 

@@ -1,72 +1,37 @@
 module PrISMForwardDiffExt
 
 using PrISM, ForwardDiff
-import PrISM: find_c_
+import PrISM: find_c, get_c!, _dltar_c
 
-# const _DA = AbstractArray{<:ForwardDiff.Dual}
-
-# @ForwardDiff_frule find_c_(f, c1, c2, ω, m::RWModel{<:AbstractArray{<:ForwardDiff.Dual}, <:AbstractArray, <:AbstractArray, <:AbstractArray})
-
-# @ForwardDiff_frule find_c_(f, c1, c2, ω, m::RWModel{ <:AbstractArray, <:AbstractArray{<:ForwardDiff.Dual}, <:AbstractArray, <:AbstractArray})
-
-# @ForwardDiff_frule find_c_(f, c1, c2, ω, m::RWModel{ <:AbstractArray, <:AbstractArray, <:AbstractArray{<:ForwardDiff.Dual}, <:AbstractArray})
-
-# @ForwardDiff_frule find_c_(f, c1, c2, ω, m::RWModel{ <:AbstractArray, <:AbstractArray, <:AbstractArray, <:AbstractArray{<:ForwardDiff.Dual}})
-
-function find_c_(f,
-        c1,
-        c2,
-        ω,
-        m::RWModel{<:AbstractArray{<:ForwardDiff.Dual{T, V, N}},
-            <:AbstractArray{<:ForwardDiff.Dual{T, V, N}},
-            <:AbstractArray{<:ForwardDiff.Dual{T, V, N}},
-            <:AbstractArray{<:ForwardDiff.Dual{T, V, N}}}) where {T, V, N}
-    m_val = RWModel(ForwardDiff.value.(m.m), ForwardDiff.value.(m.h),
+function get_val_model(m::RWModel)
+    RWModel(ForwardDiff.value.(m.m), ForwardDiff.value.(m.h),
         ForwardDiff.value.(m.ρ), ForwardDiff.value.(m.vp))
-    c = find_c_(f, ForwardDiff.value(c1), ForwardDiff.value(c2), ω, m_val)
-
-    # @show c
-    # @show typeof(m_val)
-    # @show m_val
-
-    fₓ = ForwardDiff.value(ForwardDiff.derivative(c_ -> f(c_, ω, m_val), c))  # ∂f/∂c
-    fₚ = ForwardDiff.partials(f(c, ω, m))                   # ∂f/∂m · Δm, free from one eval
-
-    # @show "CUSTOM AD"
-    # @show fₚ
-    # @show fₓ
-    # (-fₚ / fₓ).values
-
-    # return ForwardDiff.Dual{T,V,N}(c, (-fₚ / fₓ).values...)
-
-    return ForwardDiff.Dual{T, V, N}(c, -fₚ / fₓ)
 end
 
-function find_c_(f,
-        c1,
-        c2,
-        ω,
-        m::LWModel{<:AbstractArray{<:ForwardDiff.Dual{T, V, N}},
-            <:AbstractArray{<:ForwardDiff.Dual{T, V, N}},
-            <:AbstractArray{<:ForwardDiff.Dual{T, V, N}}}) where {T, V, N}
-    m_val = LWModel(ForwardDiff.value.(m.m), ForwardDiff.value.(m.h), ForwardDiff.value.(m.ρ))
-    c = find_c_(f, ForwardDiff.value(c1), ForwardDiff.value(c2), ω, m_val)
+function get_val_model(m::LWModel)
+    LWModel(ForwardDiff.value.(m.m), ForwardDiff.value.(m.h), ForwardDiff.value.(m.ρ))
+end
 
-    # @show c
-    # @show typeof(m_val)
-    # @show m_val
+function get_c!(resp_::AbstractArray{<:ForwardDiff.Dual{T, V, N}},
+        t, m, mode, dc, c_start, c_high) where {T, V, N}
+    m_val = get_val_model(m)
+    for i in eachindex(t) # this can be parallelized
+        ω = 2π / t[i]
 
-    fₓ = ForwardDiff.value(ForwardDiff.derivative(c_ -> f(c_, ω, m_val), c))  # ∂f/∂c
-    fₚ = ForwardDiff.partials(f(c, ω, m))                   # ∂f/∂m · Δm, free from one eval
+        # c_low = copy(c_start)
+        c_high_each = c_start
 
-    # @show "CUSTOM AD"
-    # @show fₚ
-    # @show fₓ
-    # (-fₚ / fₓ).values
-
-    # return ForwardDiff.Dual{T,V,N}(c, (-fₚ / fₓ).values...)
-
-    return ForwardDiff.Dual{T, V, N}(c, -fₚ / fₓ)
+        for im in 1:(mode + 1)
+            c = find_c(_dltar_c, ForwardDiff.value(c_high_each),
+                ForwardDiff.value(c_high), ω, dc, m_val)
+            c_high_each = ForwardDiff.value(c) + dc
+        end
+        c = c_high_each - dc
+        fₓ = ForwardDiff.value(ForwardDiff.derivative(c_ -> _dltar_c(c_, ω, m_val), c))
+        fₚ = ForwardDiff.partials(_dltar_c(c, ω, m))
+        resp_[i] = ForwardDiff.Dual{T, V, N}(c, -fₚ / fₓ)
+    end
+    nothing
 end
 
 end

@@ -1,0 +1,12 @@
+[deps]
+DifferentiationInterface = "a0c0ee7d-e4b9-4e03-894e-1c5f64a51d63"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+DynamicPPL = "366bfd00-2699-11ea-058f-f148b4cae6d8"
+Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
+FiniteDiff = "6a86dc24-6348-571c-b903-95158fe2bd41"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+PrISM = "fde4c310-c20a-4a4a-8ff2-565b2b89066a"
+Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
+
+[sources.PrISM]
+path = "../.."

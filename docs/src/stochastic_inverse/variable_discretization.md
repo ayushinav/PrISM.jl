@@ -89,10 +89,10 @@ nothing # hide
 Put everything together for MCMC
 
 ```@example variable_mcmc
-n_samples = 10_000
+n_samples = 1000
 mcache = mcmc_cache(modelD, respD)
 
-rw_chain = stochastic_inverse(r_obs, err_resp, T, mcache, MH(), n_samples; progress=true)
+rw_chain = stochastic_inverse(r_obs, err_resp, T, mcache, NUTS(), n_samples; progress=true)
 ```
 
 The obtained `rw_chain` contains the *a posteriori* distributions that can be saved using [JLD2.jl](https://github.com/JuliaIO/JLD2.jl).

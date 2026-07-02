@@ -72,12 +72,11 @@ export RWModelDistribution, SurfaceWaveResponseDistribution
 export LWModelDistribution
 export DCModelDistribution, DCResponseDistribution
 
-# TODO
 function SubsurfaceCore.forward_helper(
         m::Type{T}, m0, vars, response_trans_utils, params) where {T <: AbstractGeophyModel}
     model = from_nt(m, m0)
     resp_nt = to_resp_nt(forward(model, vars, params))
-    for k in propertynames(resp_nt)
+    for k in propertynames(response_trans_utils)
         broadcast!(response_trans_utils[k].tf, resp_nt[k], resp_nt[k])
     end
     return resp_nt
